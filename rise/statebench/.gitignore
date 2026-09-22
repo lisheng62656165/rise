@@ -5,6 +5,7 @@ scores/
 __pycache__/
 *.py[cod]
 .venv/
+.release-venv/
 .pytest_cache/
 reports/
 .env
