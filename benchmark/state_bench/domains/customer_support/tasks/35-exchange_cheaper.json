@@ -1,0 +1,102 @@
+{
+  "task_id": "35-exchange_cheaper",
+  "user_id": "cust_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to exchange my premium headphones from order ORD-6036 for the basic model. The premium ones are overkill for me.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6036",
+      "current: Elite $349",
+      "want: Basic $149"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging the Elite headphones from ORD-6036 for the Basic model and understanding how the lower-price difference is handled.",
+      "Provide the order ID and the desired Basic model when the agent asks for identifying or exchange details, but do not volunteer policy, eligibility, stock, or refund-method facts as your own knowledge.",
+      "Ask the agent to explain what happens to the price difference before agreeing to the exchange if the preview does not already cover it.",
+      "If the agent explains that the $200 cheaper-item difference is issued as store credit rather than cash or original-payment refund, ask why once and accept after the exchange policy is explained.",
+      "Push back if the agent proposes an original-payment refund, cash refund, restocking fee, return-and-rebuy workaround, changed-mind return, cancellation, or any replacement other than the Basic headphones.",
+      "Accept only after the agent previews a direct exchange to the Basic model with the $200 difference issued as store credit and no unrelated fee or workaround.",
+      "End only after the agent confirms the exchange has been processed, the Elite item was exchanged for the Basic model, and the $200 difference was issued as store credit."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to downgrade from the premium headphones to a more basic pair because the expensive model turned out to be more than you need. You know there will be some value difference, but you are not sure how that is handled in an exchange. You want the agent to explain what happens to the extra value."
+  },
+  "task_summary": "**Task:** The customer wants to downgrade from premium headphones to the lower-priced model. The correct handling is to complete the exchange and return the $200 difference as store credit instead of cash or card refund.\n\n**Challenge:** The agent has to settle the price difference using the right method. Weak agents refund to the original payment method, invent restocking where none belongs, or miss the store-credit rule that controls downward exchanges.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "35_exchange_cheaper_agent_must_explain_200_store_credit_difference",
+      "kind": "must",
+      "requirement": "Agent must explain that the $200 cheaper-item difference is issued as store credit, not original payment."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "35_exchange_cheaper_agent_must_not_route_to_return_rebuy",
+      "kind": "must_not",
+      "requirement": "Agent must not process or recommend a return-and-rebuy workaround, a changed-mind return, or an original-payment refund instead of completing the exchange."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9260",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9260",
+      "field": "refund_amount",
+      "expected_value": 200
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9260",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9260",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-6036",
+          "product_id": "PROD-2261",
+          "quantity": 1,
+          "unit_price": 149,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-6036",
+        "product_id": "PROD-2261",
+        "quantity": 1,
+        "unit_price": 149,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-6036",
+        "product_id": "PROD-2261",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 149
+      }
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/35-exchange_cheaper.json"
+}

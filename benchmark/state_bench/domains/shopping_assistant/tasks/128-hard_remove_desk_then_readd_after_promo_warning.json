@@ -1,0 +1,88 @@
+{
+  "task_id": "128-hard_remove_desk_then_readd_after_promo_warning",
+  "user_id": "shop_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Remove the ErgoLift Standing Desk, but if that would drop OFFICE20 and make the lamp-only total worse than keeping both items, warn me before changing anything.",
+  "user_simulator": {
+    "user_sim_context": "Your cart has an ErgoLift Standing Desk and LumaDesk Task Lamp with OFFICE20 applied. You asked to be warned before changing anything if removing the desk affects the promo.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask to remove the desk, but require a warning before changes if OFFICE20 would drop.",
+      "If the agent explains before writing that removing the desk makes OFFICE20 invalid and SAVE10 would be the remaining valid promo, consent to remove the desk and use SAVE10.",
+      "Do not include [TASK_DONE] in the consent message; wait for the agent to perform the change.",
+      "If the agent removes the desk or changes promos before warning you, object once, then accept their final state and end with [TASK_DONE]; the agent failed.",
+      "If the agent removes the desk after warning and applies SAVE10, accept and end with [TASK_DONE].",
+      "Do not ask about shipping, gift wrap, loyalty, or other products."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_003 opens with: \"Remove the ErgoLift Standing Desk, but if that would drop OFFICE20 and make the lamp-only total worse than keeping both items, warn me before changing anything.\" Relevant catalog/policy surface: Seeded cart has ErgoLift Standing Desk (SP-H120), LumaDesk Task Lamp (SP-H122), OFFICE20 applied, and SAVE10 available.. Correct final state after consent: desk removed, lamp remains, OFFICE20 gone, SAVE10 applied, total $63.\n\n**Challenge:** The user requires a pre-write warning because the removal changes promo eligibility. Primary pitfall: Performs the cart/promo mutation before surfacing the promo impact. Correct behavior: Check, warn, get consent, remove desk, apply SAVE10. Novelty: Consent gate on promo-impacting cart edit. Family: promotions_discounts.",
+  "task_requirements": [
+    {
+      "id": "checked_cart_and_promo_before_write",
+      "kind": "must",
+      "requirement": "Agent checked the current cart and OFFICE20 eligibility before removing the desk.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "warned_before_removal",
+      "kind": "must",
+      "requirement": "Agent warned that removing the desk would leave only the lamp, making OFFICE20 invalid, before performing the removal.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "got_explicit_remove_consent",
+      "kind": "must",
+      "requirement": "Agent got explicit consent after the promo warning before removing the desk.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "removed_desk_and_used_save10",
+      "kind": "must",
+      "requirement": "After consent, agent removed SP-H120 and applied SAVE10 as the valid fallback promo.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "applied_promo_codes",
+      "expected_value": [
+        "SAVE10"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "discount_amount",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0002"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "subtotal",
+      "expected_value": 69
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "total",
+      "expected_value": 63
+    }
+  ],
+  "task_type": "promotions_discounts",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/128-hard_remove_desk_then_readd_after_promo_warning.json"
+}

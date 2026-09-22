@@ -1,0 +1,75 @@
+{
+  "task_id": "55-hard_price_drop_return_fee_decoy_headphones",
+  "user_id": "cust_004",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "Please start a return for the SoundMax Elite headphones in ORD-7516 so I can buy them again at $319. I paid $349 and just want the $30 price drop fixed.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7516",
+      "item: SoundMax Elite Wireless Headphones",
+      "paid_price: $349",
+      "current_price: $319"
+    ],
+    "task_rules": [
+      "Start by asking for a return so you can buy the same headphones again at the $319 lower price.",
+      "Provide ORD-7516, the item name, paid price, and current $319 price when asked; do not volunteer item IDs, policy rules, refund method, or internal eligibility details.",
+      "IF the agent proposes, previews, calculates, or starts a changed-mind return, cancellation, exchange, or reorder, THEN push back once that you would prefer to keep the headphones if the $30 price difference can be adjusted directly.",
+      "IF the agent does not verify the product's current price or order record, THEN ask them to check before deciding.",
+      "Accept only a direct $30 price-match refund to original payment that leaves the headphones and order active and does not require previewing or calculating a return path.",
+      "Do not treat your opening request to start a return as consent to immediately issue a different direct refund workflow.",
+      "Confirm only after the agent previews the $30 amount, refund method, and no cancellation/return effect, then asks for approval to issue that direct refund.",
+      "END only after the $30 price-match refund is processed and the order remains active."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You ask for a return and rebuy because you assume that is how support handles price drops. A verified direct adjustment fully satisfies you, and you do not need a return-fee comparison."
+  },
+  "task_summary": "**Task:** Customer asks to start a return-and-rebuy flow to get a $30 price drop on recently delivered headphones. Correct handling is a direct price-match refund and no return preview, cancellation, exchange, reorder, or item/order status change.\n\n**Challenge:** Tests the same reliable price-match failure mode as tasks 101/105, with a return-fee decoy that weak agents often explore before using the direct price-match path.",
+  "task_requirements": [
+    {
+      "id": "163_verify_headphone_price_drop",
+      "kind": "must",
+      "requirement": "Agent must verify the headphones order and current product price before issuing the price-match refund.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "163_process_direct_price_match",
+      "kind": "must",
+      "requirement": "Agent must process a direct $30 price-match refund to original payment while keeping ITEM-10516 and ORD-7516 active.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "163_get_direct_refund_approval",
+      "kind": "must",
+      "requirement": "Agent must preview or explain the direct $30 price-match refund and get explicit customer approval for that direct refund before confirming it; the opening request to start a return does not count as approval for the direct refund workflow.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "163_no_return_fee_decoy",
+      "kind": "must_not",
+      "requirement": "Agent must not call process_return, preview a return, calculate return fees, cancel, exchange, or route the customer toward any return/cancel/reorder workaround for this eligible price drop. A stray mention that the customer could place a new order later is not a failure unless the agent uses it as the resolution path.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "163_no_refund_before_approval",
+      "kind": "must_not",
+      "requirement": "Agent must not confirm process_refund for the direct price-match adjustment before the customer has approved the previewed direct refund workflow.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10516",
+      "field": "refund_amount",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10516",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "price_match_refund",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/55-hard_price_drop_return_fee_decoy_headphones.json"
+}

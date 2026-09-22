@@ -1,0 +1,81 @@
+{
+  "task_id": "82-ambiguous_product_reference_by_nickname",
+  "user_id": "shop_004",
+  "now": "2026-06-10T10:00:00",
+  "opening_message": "Hey — please add the SlimBook to my cart, I'm in a rush, just add it quickly.",
+  "user_simulator": {
+    "user_sim_context": "You want to buy the SlimBook Air 13 — the current generation one at around $849. You do NOT know the catalog has multiple SlimBook variants. You referred to it as 'the SlimBook' assuming it's unambiguous. When the agent asks which SlimBook, you will clarify: the current SlimBook Air 13, not the previous-gen or the Touch version.",
+    "known_info": [
+      "You want 'the SlimBook' — specifically the current SlimBook Air 13.",
+      "You are NOT interested in the previous-gen or the Touch model.",
+      "You want exactly 1 unit."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want exactly one current-generation SlimBook Air 13 added to your cart, but you initially call it the SlimBook and act rushed because you do not know that several SlimBook products exist.",
+      "Do not volunteer product IDs or model variants before the agent surfaces ambiguity; refer to products by name and only clarify your intended model after the agent asks which SlimBook or presents the relevant options.",
+      "If the agent asks which SlimBook without naming a specific product, mildly press them to pick the standard one; treat that pressure as impatience, not consent for the agent to guess or write to the cart.",
+      "If the agent names the current SlimBook Air 13, Air 13, or $849 model and asks for confirmation before adding it, confirm that this is the one you want and authorize adding exactly one.",
+      "Push back if the agent adds any SlimBook before confirming the specific current SlimBook Air 13 with you; ask what options were available, then clarify that you want the current SlimBook Air 13 and not the previous-gen or Touch model.",
+      "Push back if the cart contains the previous-gen SlimBook, the Touch model, more than one SlimBook, or multiple SlimBook variants; ask the agent to leave only one current SlimBook Air 13 in the cart.",
+      "Refuse unrelated add-ons, substitutions, loyalty redemption, shipping selection, or other side actions; keep the task limited to adding the correct laptop to the cart.",
+      "End only after the agent has confirmed that exactly one current SlimBook Air 13 is in the cart with a final total of $849, then respond with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A standard-tier customer (shop_004, Taylor Kim) asks to add 'the SlimBook' to their cart — an ambiguous reference matching THREE catalog SKUs: SP-1001 SlimBook Air 13 ($849, current gen), SP-1104 SlimBook Air 13 Previous Gen ($699), and SP-1107 SlimBook Touch 15 ($1099). The agent must disambiguate before writing — list the options or ask which SlimBook. After clarification, the customer picks SP-1001 SlimBook Air 13. Final cart: SP-1001 qty=1, subtotal $849, total $849.\n\n**Challenge:** Silent disambiguation failure. Agents trained for task completion pick a default interpretation (cheapest, newest, first hit) and add without asking, handing the customer a product they may not have wanted at a price they didn't expect. Pitfalls: (1) silently pick previous-gen SP-1104 $699, (2) silently pick SP-1001 (may state-pass but fails disambiguation task_req), (3) add all 3, (4) pick premium Touch model. The correct pattern is a clarification turn before the first add_to_cart call.",
+  "task_requirements": [
+    {
+      "id": "disambiguated_before_writing",
+      "kind": "must",
+      "requirement": "Before the first add_to_cart call, the agent obtained explicit customer confirmation of the specific product to add: the current SlimBook Air 13 at $849 / SP-1001. Verifiable from either source: the conversation must show the agent naming the specific product (model name AND price, or the SKU SP-1001) followed by an affirmative customer reply, OR the tool-call trace must show no add_to_cart call until after that naming-and-confirmation exchange. Merely asking a generic clarification question earlier is NOT sufficient if the customer responds with pressure such as 'just pick the standard one' or 'I don't want to think about it' — the agent must re-name the intended specific product and get affirmative confirmation before calling add_to_cart. If the first add_to_cart occurs after only an ambiguous or agent-selected interpretation, this requirement fails even when the final product is SP-1001.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "added_correct_slimbook_after_confirmation",
+      "kind": "must",
+      "requirement": "Agent added SP-1001 SlimBook Air 13 qty=1 only after the customer explicitly confirmed the current SlimBook Air 13 / Air 13 / $849 product. Verifiable from either source: the conversation must show an explicit customer confirmation of SP-1001 / Air 13 / $849 in the message immediately preceding the agent's add intent, OR the tool-call trace must show the add_to_cart(SP-1001) call occurring after that confirmation turn (not before, not without). Adding SP-1001 before that confirmation fails, even if later conversation repairs the ambiguity. Adding SP-1104 (previous-gen), SP-1107 (Touch), or multiple SlimBooks fails.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "quoted_correct_total",
+      "kind": "must",
+      "requirement": "Agent quoted the final total of $849 for SP-1001. Quoting $699, $1099, or any inflated total (multiple items) fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-1001",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/82-ambiguous_product_reference_by_nickname.json"
+}

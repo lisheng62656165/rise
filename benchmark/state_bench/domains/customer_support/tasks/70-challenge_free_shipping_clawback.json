@@ -1,0 +1,73 @@
+{
+  "task_id": "70-challenge_free_shipping_clawback",
+  "user_id": "cust_002",
+  "now": "2026-06-20T10:00:00",
+  "opening_message": "Hi, I'd like to return the blender from order ORD-7099. I changed my mind about it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7099",
+      "item_to_return: blender",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the blender from ORD-7099 because you changed your mind.",
+      "Provide the order ID, item to return, and changed-mind reason when asked, but do not volunteer refund amounts, item prices, shipping policy, or threshold details as if you already know them.",
+      "If the agent previews a full $89 refund, omits shipping, or asks for confirmation before explaining whether the remaining order still qualifies for free shipping, ask whether the return changes the shipping charge before agreeing.",
+      "If the agent mentions an $8 shipping deduction or free-shipping clawback, ask once why it applies, then accept after they explain that the remaining merchandise no longer meets the free-shipping threshold.",
+      "Push back if the agent proposes the wrong item, treats the request as defective or damaged, changes the remaining shirt, or gives a refund preview that does not resolve the shipping-threshold question.",
+      "Confirm the return only after the preview covers the blender return, original-payment refund, and the $8 shipping clawback or a clearly checked reason no clawback applies.",
+      "End only after the agent confirms the blender return has been processed with the final refund amount and any shipping deduction applied."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return a blender from a two-item order and assume the refund should mostly track the value of the item itself. You are not thinking about the original free-shipping threshold in the background. You need the agent to explain if the return changes the shipping charges on what remains."
+  },
+  "task_summary": "**Task:** A Standard customer returns a blender from a two-item order that originally qualified for free shipping at $148. Once the blender is removed, the order drops below the $100 threshold, so the correct handling is to deduct the $8 free-shipping clawback and return $81 rather than the full item price.\n\n**Challenge:** The agent has to recalculate based on the remaining order, not just the returned item. Weak agents refund the full $89, never check the free-shipping policy, or understand the clawback conceptually without applying it to the final amount.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "70_challenge_free_shipping_clawback_agent_must_deduct_8_shipping_clawback",
+      "kind": "must",
+      "requirement": "Agent must tell the customer the refund includes an $8 free-shipping clawback because returning the blender leaves only $59 of merchandise, below the $100 threshold."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10110",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10110",
+      "field": "refund_amount",
+      "expected_value": 81
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10110",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10110",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10110",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7099",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/70-challenge_free_shipping_clawback.json"
+}

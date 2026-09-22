@@ -1,0 +1,120 @@
+{
+  "task_id": "58-challenge_sunk_cost_change_fee",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I already changed my flight BK-1000 once and paid a $100 fee for it. But the new time is terrible — a red-eye! I need to fix this. What are my options? I don't want to waste the $100 I already spent. My user ID is user_001.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: JFK→LHR red-eye, already changed once with a $100 change fee paid.",
+      "Wants the cheapest reasonable June 21 replacement; total cost matters more than airline or morning timing.",
+      "Doesn't want to waste the $100 already spent."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want help fixing BK-1000 by comparing changing again versus canceling and rebooking for a reasonable June 21 replacement; start emotionally anchored to the already-paid $100, but make total cost the deciding factor once the comparison is clear.",
+      "If the agent asks for booking or account details, provide BK-1000 and user_001; do not introduce new destination, date, airline, cabin, or timing requirements beyond needing a reasonable June 21 replacement.",
+      "If asked about preferences among replacement flights, say cost matters more than airline or morning timing, economy is fine, and the option must stay within your budget.",
+      "If the agent only discusses changing again, recommends a pricier change, or treats the prior $100 fee as a reason to avoid cancellation, ask whether canceling and rebooking a different June 21 flight could be cheaper overall.",
+      "If the agent says canceling and rebooking is cheaper but does not explain how the already-paid $100 affects the decision, push back once that losing that fee feels wasteful and ask whether it changes the current comparison.",
+      "Accept the cancel-and-rebook path only after the agent explains that the prior $100 is sunk in both paths and provides a side-by-side comparison showing canceling and rebooking is cheaper than changing again.",
+      "Before approving cancellation and replacement booking, require the cancellation fee, refund amount, replacement flight price, cabin, and total current cost to be clear; push back if any preview is missing, over budget, or points to the pricier change path.",
+      "For the replacement booking, use your profile booking preferences if asked and reject optional upgrades, add-ons, or timing constraints that make the cheaper reasonable option more expensive.",
+      "End only after the existing booking is canceled, the cheaper replacement booking is confirmed, and the final refund, cancellation fee, booking price, and expected booking preferences are clear.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You already paid once to change this trip and now feel trapped by that earlier decision. You are emotionally anchored to the money already spent and do not want to make things worse. What you need from the agent is a clear-eyed comparison of the realistic options from here."
+  },
+  "task_summary": "**Task:** A traveler is anchored on a previously paid $100 change fee and wants help choosing between changing again or canceling and rebooking. Correct resolution: The previously paid $100 change fee is a sunk cost and should not drive the current decision.\n\n**Challenge:** The agent treats the earlier fee as sunk, compares the live options correctly, and does not recommend the more expensive path just to protect sunk cost.",
+  "task_requirements": [
+    {
+      "id": "explain_sunk_cost",
+      "kind": "must",
+      "requirement": "Agent must explain that the previously paid $100 change fee is a sunk cost and should not drive the current decision.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "compare_change_vs_cancel_rebook",
+      "kind": "must",
+      "requirement": "Agent must compare changing again versus canceling and rebooking, and conclude that canceling and rebooking is cheaper overall.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "must_not_recommend_pricier_change",
+      "kind": "must_not",
+      "requirement": "Agent must not recommend the more expensive change-again path just to avoid wasting the prior $100 fee.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 180
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 720
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "DL100",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 750,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 750,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL100",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 750,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/58-challenge_sunk_cost_change_fee.json"
+}

@@ -1,0 +1,67 @@
+{
+  "task_id": "42-red_eye_hotel_arrival_night",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I land in Boston just after midnight on booking BK-181. Please add a hotel room for the night I land so I can sleep immediately after the red-eye. My user ID is user_002.",
+  "user_simulator": {
+    "personality": "Tired red-eye traveler who wants a practical room immediately after landing.",
+    "user_sim_context": "You land just after midnight and need a room to sleep in right away, not later that afternoon.",
+    "known_info": [
+      "Booking BK-181 lands in Boston just after midnight.",
+      "You need the room immediately after landing."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Open by asking the agent to add a Boston hotel room for the night you land from BK-181, so you can sleep immediately after the red-eye. The agent already has your opening message.",
+      "If the agent offers a hotel starting 2026-07-11, reject it and say that would not let you sleep right after landing just after midnight.",
+      "Do not ask for cars or flight changes.",
+      "End only after the correct arrival-night hotel is booked; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "User has booking BK-181 arriving in Boston just after midnight at 00:35 on 2026-07-11. They need a hotel room they can sleep in immediately after landing. Common-sense hotel booking requires the night that began on 2026-07-10, not a 2026-07-11 afternoon check-in. Correct end state: book HOTEL-BOS-ARRIVAL-NIGHT for user_002.",
+  "task_requirements": [
+    {
+      "id": "interpret_red_eye_hotel_night",
+      "kind": "must",
+      "requirement": "Agent must recognize that a 00:35 arrival on 2026-07-11 requires booking the hotel night starting 2026-07-10 so the traveler can sleep immediately after landing.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "book_arrival_night_hotel",
+      "kind": "must",
+      "requirement": "Agent must book HOTEL-BOS-ARRIVAL-NIGHT for user_002.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "hotels",
+      "match_fields": {
+        "user_id": "user_002",
+        "hotel_id": "HOTEL-BOS-ARRIVAL-NIGHT",
+        "check_in": "2026-07-10",
+        "check_out": "2026-07-11",
+        "status": "confirmed",
+        "room_type": "standard"
+      },
+      "expected_fields": {
+        "booked_at": "2026-06-15T10:00:00",
+        "cancellation_fee": null,
+        "check_in": "2026-07-10",
+        "check_out": "2026-07-11",
+        "city": "BOS",
+        "hotel_id": "HOTEL-BOS-ARRIVAL-NIGHT",
+        "hotel_name": "Boston Logan Overnight",
+        "nightly_rate": 210,
+        "refund_amount": null,
+        "reservation_id": "HR-0001",
+        "room_type": "standard",
+        "status": "confirmed",
+        "total_price": 210,
+        "user_id": "user_002"
+      }
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/42-red_eye_hotel_arrival_night.json"
+}

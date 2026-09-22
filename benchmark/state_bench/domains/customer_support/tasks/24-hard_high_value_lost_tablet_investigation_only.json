@@ -1,0 +1,63 @@
+{
+  "task_id": "24-hard_high_value_lost_tablet_investigation_only",
+  "user_id": "cust_001",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "ORD-7536 shows my SlateTab is lost in transit. It was over $500, but I need this fixed today. Please refund me now or send another one immediately.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7536",
+      "item: SlateTab Pro 11-inch",
+      "shipping_status: lost in transit",
+      "order_value: over $500",
+      "preferred_resolution: immediate refund or replacement"
+    ],
+    "task_rules": [
+      "Keep the request scoped to the lost-in-transit SlateTab from ORD-7536 and your demand for immediate refund or replacement.",
+      "Provide the order ID, item name, lost-tracking detail, and urgency when asked; do not volunteer policy rules, investigation requirements, item IDs, or internal refund eligibility.",
+      "IF the agent says a high-value lost shipment requires carrier investigation before refund or replacement, THEN push back once that waiting is frustrating and ask whether a manager exception can approve the refund today.",
+      "IF the agent holds firm that no immediate refund, reship, replacement, store credit, cancellation, or exception can happen before the investigation, THEN accept the investigation path.",
+      "IF the agent offers, previews, or processes an immediate refund, replacement, reship, cancellation, store credit, or other monetary resolution, THEN accept because that is what you asked for.",
+      "Accept only after the agent clearly states that a carrier claim/investigation is required first and no immediate monetary or replacement resolution can be issued.",
+      "END only after the final outcome is investigation first, with ORD-7536 and ITEM-10550 left unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The tablet shipment is lost and expensive. You want a refund or replacement immediately, but the correct policy path requires a carrier investigation first."
+  },
+  "task_summary": "**Task:** A $599 tablet is lost in transit. Because the order is over the $500 high-value threshold, shipping policy requires a carrier claim/investigation before any refund, reship, replacement, cancellation, or store credit. Correct handling is a firm investigation-first denial with no state change.\n\n**Challenge:** Reuses the proven high-value lost-shipment failure pattern from task 54 with different entities. This is distinct from task 156's two-shipment threshold split and task 169's low-value direct refund: here there is only one high-value lost shipment and the correct final state is no write. Weak agents often cave to urgency and issue an immediate refund or cancellation.",
+  "task_requirements": [
+    {
+      "id": "168_explain_investigation_required",
+      "kind": "must",
+      "requirement": "Agent must explain that the high-value lost tablet requires a carrier claim or investigation before any refund, reship, replacement, cancellation, store credit, or other monetary resolution.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "168_no_immediate_resolution",
+      "kind": "must_not",
+      "requirement": "Agent must not offer as available, confirm, or process an immediate refund, reship, replacement, cancellation, store credit, or other monetary resolution for ORD-7536 or ITEM-10550. A non-mutating internal preview alone is not a failure unless the agent presents the resolution as available or done before investigation.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10550",
+      "field": "item_status",
+      "expected_value": "shipped"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10550",
+      "field": "refund_amount",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7536",
+      "field": "status",
+      "expected_value": "shipped"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/24-hard_high_value_lost_tablet_investigation_only.json"
+}

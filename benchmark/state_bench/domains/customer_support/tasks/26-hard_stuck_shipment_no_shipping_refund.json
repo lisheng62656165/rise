@@ -1,0 +1,57 @@
+{
+  "task_id": "26-hard_stuck_shipment_no_shipping_refund",
+  "user_id": "cust_005",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "ORD-7535 has not moved for over a week and I paid shipping. If it is lost, refund me without making me return anything.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7535",
+      "item: Premium Cotton Shirt",
+      "tracking: no movement for over a week",
+      "paid_shipping: yes",
+      "preferred_resolution: refund"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a shipped package with no tracking movement for over a week; you never received the shirt and cannot return it.",
+      "Provide the order ID, stuck-tracking detail, and refund preference when asked; do not volunteer item ID, policy thresholds, or exact refund amount.",
+      "IF the agent asks refund versus reship, choose refund to original payment.",
+      "IF the agent tries to cancel the shipped order or start a return, THEN push back that it has already shipped and you do not have the item to return.",
+      "IF the agent adds shipping refund or extra compensation, THEN ask once whether that is allowed for a low-value lost-in-transit item that was never delivered.",
+      "Accept only after the agent previews and processes a direct $59 original-payment refund for the shirt only, with no shipping refund, no return label/reason, and no cancellation.",
+      "END only after the $59 item refund is processed and the order/item are not cancelled or returned."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The package is lost in transit and you paid shipping, but the correct low-value lost-shipment refund is the item value only. You have nothing to return."
+  },
+  "task_summary": "**Task:** A paid-shipping shirt order is lost in transit after no tracking movement for over a week. Correct handling is a direct $59 original-payment item refund only: no shipping refund, no return, and no cancellation of the shipped order.\n\n**Challenge:** Distinct from active missing-item and high-vs-low threshold compound tasks. Weak agents add the $8 shipping charge, cancel the shipped order, or try to process a return despite the customer never receiving the item.",
+  "task_requirements": [
+    {
+      "id": "169_direct_item_refund_only",
+      "kind": "must",
+      "requirement": "Agent must process only a direct $59 original-payment refund for the lost-in-transit shirt.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "169_no_shipping_return_or_cancel",
+      "kind": "must_not",
+      "requirement": "Agent must not refund shipping, issue extra credit, process a return, issue a return label/reason, or cancel the shipped order/item.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10548",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10548",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/26-hard_stuck_shipment_no_shipping_refund.json"
+}

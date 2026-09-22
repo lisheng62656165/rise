@@ -1,0 +1,116 @@
+{
+  "task_id": "111-change_domestic_military_zero_fee",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Military orders mean I need to move booking BK-1000 to June 25, but do not change anything yet. First compare all June 25 Delta options from ATL to DFW and tell me exactly what the military waiver does and does not cover. Also, before I commit, I want to know whether any option both arrives by 2 PM and keeps my total extra cost at $95 or less.",
+  "user_simulator": {
+    "user_sim_context": "You are changing a domestic trip because of military orders and expect the military exemption to remove the fee. At the same time, you want the agent to compare at least two real June 25 Delta options, keep the waiver limited to the change fee rather than the fare difference, proactively notice that no option satisfies both of your initial hard constraints at once, and still wait for an explicit final go-ahead after you later relax the arrival-time requirement and ask for a recap.",
+    "known_info": [
+      "Booking BK-1000: ATL to DFW on 2026-06-20; requested new date is 2026-06-25.",
+      "Reason: military.",
+      "Initial hard constraints: arrive by 2 PM and keep total extra cost at $95 or less.",
+      "If no option satisfies both hard constraints, you may relax arrival time but not the $95 cap.",
+      "Do not change anything until explicitly finalizing a specific option."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to change only booking BK-1000 to a June 25 Delta ATL-to-DFW economy option because of military orders, but only after comparing the available options and explicitly approving one.",
+      "If the agent asks for the booking, new date, route, airline, reason, or constraints, provide BK-1000, June 25, ATL to DFW, Delta, military orders, arrival by 2 PM, and no more than $95 extra in total; do not volunteer policy details, prices, or flight IDs.",
+      "If the agent discusses only one June 25 Delta option, ask them to compare all concrete June 25 Delta ATL-to-DFW options and give the total extra amount for each before any change is made.",
+      "Push back if the agent treats the military waiver as covering the fare difference, quotes a non-zero change fee after accepting the military reason, or fails to separate the waived fee from each option's fare difference.",
+      "Do not approve any change until the agent has compared at least two options and clearly explained whether any option both arrives by 2 PM and stays at or below $95 extra in total.",
+      "When the agent correctly explains that no option satisfies both initial constraints because the earlier option exceeds the $95 cap and the cheaper later option misses the arrival cutoff, relax only the arrival-time requirement and ask for the best valid option under the $95 cap.",
+      "Approve only after the agent recommends the later under-cap Delta option, gives a final recap with the $0 change fee, $70 fare difference or extra total, and preserved existing booking preferences, and then asks whether to finalize that specific option.",
+      "End only after the agent confirms BK-1000 has actually been changed to the approved June 25 Delta option with a $0 change fee, $70 more due to the fare difference, the updated paid amount, and preserved booking preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "Traveler needs to move a domestic economy booking for a military reason. Correct resolution: the change fee is $0 and the requested replacement changes the total by $70 more.\n\nChallenge: The agent must compare two real June 25 Delta options, keep the military waiver limited to the change fee, explicitly recognize that no option satisfies the user's initial arrival-plus-budget constraints, then adapt only after the user relaxes one constraint and still wait for an explicit finalize instruction after a recap.",
+  "task_requirements": [
+    {
+      "id": "change_domestic_military_zero_fee_fee_quote",
+      "kind": "must",
+      "requirement": "Agent must explain that the correct change fee for this request is $0.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_delta_quote",
+      "kind": "must",
+      "requirement": "Agent must explain that moving to the requested flight changes the booking total by $70 more, based on the replacement fare and the applicable change fee.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_must_not_invent_fee",
+      "kind": "must_not",
+      "requirement": "Agent must not invent a non-zero change fee once the qualifying exemption is established.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_compare_two_options_before_action",
+      "kind": "must",
+      "requirement": "Agent must compare at least two concrete June 25 Delta options and give the user the total extra amount for each before executing any booking change.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_military_scope_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain that the military waiver removes the change fee but does not waive the fare difference.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_no_initial_valid_option_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain that no June 25 Delta option satisfies both initial hard constraints at once, because the earlier option satisfies the arrival cutoff but exceeds the $95 cap, while the cheaper later flight stays under the cap but misses the arrival cutoff.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_relaxed_constraint_recommendation",
+      "kind": "must",
+      "requirement": "After the user relaxes the arrival-time requirement but keeps the $95 cap, agent must recommend the later DL116 option as the valid under-cap choice at $70 extra.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_military_zero_fee_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not update the booking before the user explicitly says to finalize a specific compared option after the recap step.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 70
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "DL116"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 360
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/111-change_domestic_military_zero_fee.json"
+}

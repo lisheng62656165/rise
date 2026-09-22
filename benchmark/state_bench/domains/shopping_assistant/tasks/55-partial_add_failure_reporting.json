@@ -1,0 +1,99 @@
+{
+  "task_id": "55-partial_add_failure_reporting",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi — can you add three things to my cart? The ProBook 13 laptop, the SlimBook Air 13 Previous Gen, and the SoundMax Wireless Headphones.",
+  "user_simulator": {
+    "user_sim_context": "You want 3 specific items added to your cart in one request. You DON'T know that the SlimBook Air 13 Previous Gen (SP-1104) is out of stock. You expect the agent to tell you clearly which items made it into the cart and which didn't.",
+    "known_info": [
+      "You want ProBook 13, SlimBook Air Previous Gen, SoundMax Headphones.",
+      "You are a Standard-tier returning customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want exactly three specific items added in one batch: the ProBook 13, the SlimBook Air 13 Previous Gen, and the SoundMax Wireless Headphones; do not ask for promos, gift wrap, loyalty, shipping, or unrelated add-ons.",
+      "Do not volunteer that the SlimBook Air 13 Previous Gen may be out of stock or available for backorder; you do not know that until the agent reports it.",
+      "If the agent reports that the SlimBook Air 13 Previous Gen or SP-1104 is out of stock, confirms the ProBook 13 and SoundMax Wireless Headphones were added, and mentions backorder availability, accept skipping the out-of-stock item and continuing with the two added items.",
+      "If the agent reports that the SlimBook Air 13 Previous Gen or SP-1104 is out of stock but does not say anything about whether you can still get it (no backorder, restock, or notify-me option mentioned), do NOT silently accept yet: ask once whether there is any way to still get the Previous Gen — backorder, a restock, or anything like that. Do not name backorder as the answer yourself; let the agent explain the options. If the agent then explains the backorder option for it, accept skipping it for now and continue with the two available items. If the agent still gives you no way to get it and no explanation of why, accept skipping it and continue, but you remain unsatisfied that nothing was offered for the unavailable item.",
+      "If the agent only mentions two added items or gives an incomplete batch result, ask once whether all three requested items made it into the cart and which item, if any, did not.",
+      "If the agent claims all three items were added, ask once for the cart to be verified; continue if the agent corrects the result, and otherwise accept the verified or repeated answer without further debate.",
+      "Push back if the agent says the ProBook 13 or SoundMax Wireless Headphones failed instead of the SlimBook Air 13 Previous Gen, and ask the agent to identify which requested item actually failed.",
+      "If the agent adds the current-generation SlimBook Air 13 or SP-1001 without asking, object that you requested the Previous Gen specifically and ask the agent to remove the current-generation substitute.",
+      "If the agent proposes the current-generation SlimBook Air 13 or SP-1001 as a substitute before adding it, decline and ask to skip the unavailable Previous Gen instead.",
+      "Keep replies short and conversational, usually one or two sentences.",
+      "End only after the final cart is confirmed as containing the ProBook 13 and SoundMax Wireless Headphones, with the SlimBook Air 13 Previous Gen skipped or unavailable; then reply only with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) requests 3 items in a single turn: SP-1002 ProBook 13 ($999), SP-1104 SlimBook Air 13 Previous Gen (OOS, backorder_available=True), SP-2003 SoundMax Wireless Headphones ($149). Agent must report which items succeeded and which failed, mention backorder for the OOS one, and not silently substitute. Final cart: SP-1002 + SP-2003 = $1148.\n\n**Challenge:** Partial-add failure reporting. Pitfall 1: agent claims all 3 added when only 2 succeeded. Pitfall 2: agent silently drops the failed item. Pitfall 3: names the wrong item as failed. Pitfall 4: misses backorder offer on SP-1104 (policy requires offering). Pitfall 5: silent substitute of SP-1001 current-gen. Tests whether the agent treats a multi-item batch as atomic-all-or-nothing in its reporting, or correctly reports per-item outcomes.",
+  "task_requirements": [
+    {
+      "id": "surfaced_oos_item_specifically",
+      "kind": "must",
+      "requirement": "Agent explicitly told the customer that SP-1104 SlimBook Air 13 Previous Gen is out of stock — naming it specifically (by name or SKU). Saying 'one item was unavailable' without naming which fails. Claiming all 3 were added fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "mentioned_backorder",
+      "kind": "must",
+      "requirement": "Agent mentioned that SP-1104 is available for backorder (per policy — backorder_available=True). Failing to offer backorder when the policy requires it fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "did_not_silently_substitute",
+      "kind": "must",
+      "requirement": "Agent did NOT silently add SP-1001 SlimBook Air 13 (current-gen) in place of SP-1104. If the agent PROPOSED the substitution with consent request, that's acceptable — but calling add_to_cart for SP-1001 without explicit customer approval fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "accurate_final_cart_report",
+      "kind": "must",
+      "requirement": "Agent's final summary accurately stated that the cart contains SP-1002 ProBook and SP-2003 Headphones (but NOT SP-1104 SlimBook Previous Gen). Saying the cart has all 3, or naming the wrong items, fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 1148
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 1148
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-1002",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-2003",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "cart_management",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/55-partial_add_failure_reporting.json"
+}

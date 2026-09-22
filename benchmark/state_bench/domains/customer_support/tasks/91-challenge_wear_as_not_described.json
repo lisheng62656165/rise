@@ -1,0 +1,80 @@
+{
+  "task_id": "91-challenge_wear_as_not_described",
+  "user_id": "cust_002",
+  "now": "2026-06-25T10:00:00",
+  "opening_message": "The cotton shirt I got from order ORD-7124 is not as described. The fabric feels completely different from what was shown on the website.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7124",
+      "item: cotton shirt",
+      "actual_issue: wore and washed, disappointed"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the cotton shirt from ORD-7124 because it felt different from what you expected after wearing and washing it.",
+      "Provide the order ID and item when asked, but do not volunteer policy, refund, or eligibility facts; ask the agent to check those records.",
+      "When the agent asks about the issue, explain that the fabric felt rougher than expected and that the texture changed after washing.",
+      "If the agent asks whether the shirt was worn or washed, say that you wore it a few times and washed it once.",
+      "If the agent explains that the worn and washed condition makes this a changed_mind return rather than a not-as-described or product-fault claim, accept that classification even if you are disappointed.",
+      "Push back if the agent offers a defective or not-as-described return without first asking about usage, and ask them to account for the fact that it was worn and washed.",
+      "Accept only after the agent previews a changed_mind return with the refund method, refund amount, and any fees or deductions.",
+      "End only after the changed_mind return has been processed and the final refund details are confirmed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You say the shirt was not as described because it did not feel like what you expected after wearing and washing it. From your side that still feels like a mismatch between the promise and the product. You want the agent to tell you what kind of return it really qualifies for and what result you can expect."
+  },
+  "task_summary": "**Task:** The customer claims a shirt was not as described, but also reveals that it has already been worn and washed, which points away from a genuine listing mismatch and toward buyer's remorse. The correct handling is to classify the case as a changed-mind return rather than a product-fault claim.\n\n**Challenge:** The agent has to probe beyond the customer's label and use the fuller context. Weak agents accept 'not as described' at face value, skip the usage clarification, or grant a fault-based resolution that the underlying facts do not support.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "91_challenge_wear_as_not_described_agent_must_process_as_changed_mind",
+      "kind": "must",
+      "requirement": "Agent must explain that because the shirt was worn and washed, the return is treated as changed_mind rather than a product-fault or not-as-described return."
+    },
+    {
+      "evidence": "conversation",
+      "id": "91_challenge_wear_as_not_described_agent_must_ask_about_item_usage",
+      "kind": "must",
+      "requirement": "Agent must ask about item usage to determine correct classification."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10159",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10159",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10159",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10159",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10159",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7124",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/91-challenge_wear_as_not_described.json"
+}

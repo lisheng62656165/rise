@@ -1,0 +1,111 @@
+{
+  "task_id": "42-build_a_setup_running_total",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to set up a home office. My total budget is $1200, and I'll tell you what I need piece by piece.",
+  "user_simulator": {
+    "user_sim_context": "You are setting up a home office. Your total budget across EVERYTHING is $1200. You will reveal item needs ONE PER TURN in this order: (1) chair, (2) desk, (3) monitor, (4) headphones for calls. You are NOT tracking the running cost yourself — you expect the agent to warn you BEFORE any item pushes the total over $1200. The trap: the first three items sum to $1057, and headphones at $149 would push to $1206 ($6 overage). If the agent warns before adding headphones, you'll skip them.",
+    "known_info": [
+      "Your total budget is $1200.",
+      "You want chair, desk, monitor, headphones in that order (one per turn).",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to build a home-office setup from this store within a $1200 total budget, revealing one needed item at a time and relying on the agent to track the running total.",
+      "Reveal the needed items in order only after the prior item has been handled: first a chair, then a basic ErgoDesk desk, then a 27-inch monitor, then headphones for calls.",
+      "Do not volunteer the running total, product prices, promo questions, loyalty questions, shipping preferences, or the later item needs before their turn.",
+      "If the agent cannot find a store item or suggests buying elsewhere, ask them to look again because you want everything from one place.",
+      "If the agent does not find the ErgoDesk Standing Desk SP-3003 for the desk step, ask once for a brand search and do not move on to the monitor until that desk is added or clearly selected for the cart.",
+      "If the agent asks what has already been added, repeat the item list so far without adding your own math or criticism.",
+      "If the agent quotes a wrong running total or budget remaining, do not correct the math; continue with the next item or requested confirmation.",
+      "When the headphones step arrives, skip the headphones only if the agent warns before adding them that the $149 headphones would take the current cart over the $1200 budget and gives you a choice.",
+      "If the agent adds headphones without a prior over-budget warning, accept the completed add briefly and end after the agent confirms the over-budget cart state.",
+      "If the agent asks for confirmation to add the chair, desk, or monitor, consent but do not include [TASK_DONE] until the action is completed and the resulting cart is confirmed.",
+      "If the agent adds gift wrap or any other extra without asking, ask them to remove it and return to the setup items only.",
+      "End only after the final cart is confirmed with the chair, desk, and monitor, no headphones, no gift wrap, and a $1057 total, or after the silent headphone-add branch has been confirmed; then reply with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) wants to build a home-office setup within a $1200 total budget, revealing one item need per turn: chair ($329) → desk ($449) → monitor ($279) → headphones ($149). The first three items sum to $1057; adding $149 headphones would push to $1206 ($6 overage). Agent must maintain a running total across turns and warn BEFORE adding the headphones.\n\n**Challenge:** Multi-turn cumulative-cost tracking. Pitfall: agent adds each item on its own without tracking the running total, and ends with a $1206 cart silently over budget. Or agent tracks but forgets by turn 5 and asks customer to re-list. Correct: track cumulative after each add, warn at turn 5 BEFORE adding headphones, let customer choose. Tests state retention over 5+ turns + proactive budget math. Distinct from T9 (single-item over-budget) — T42 is multi-item accumulation where no single item is over budget but the sum is.",
+  "task_requirements": [
+    {
+      "id": "tracked_running_total",
+      "kind": "must",
+      "requirement": "Agent explicitly stated or implied a running total after at least 2 of the first 3 adds (e.g. 'you're at $778 with chair+desk' or 'running total: $1057'). Silent adds with no cumulative-cost commentary fail. Asking the customer to repeat what's in the cart fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "flagged_budget_overage_before_headphones",
+      "kind": "must",
+      "requirement": "BEFORE adding any headphone to the cart, agent explicitly warned that adding $149 headphones would push the total over the $1200 budget (cited the running total, the headphone price, and the overage). Adding headphones silently and flagging after fails. Adding without flagging at all fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "headphones_not_added",
+      "kind": "must",
+      "requirement": "No headphone (SP-2003 or any other headphone) was added to the cart, because the customer chose to skip after the overage warning.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "correct_three_items_added",
+      "kind": "must",
+      "requirement": "Agent added exactly these 3 items: SP-3004 ErgoDesk Mesh Chair, SP-3003 ErgoDesk Standing Desk, SP-4001 ErgoDesk 27-inch Monitor. Each qty=1, gift_wrap=False. Final cart subtotal $1057.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 1057
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 1057
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-3004",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-3003",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-4001",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "cart_management",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/42-build_a_setup_running_total.json"
+}

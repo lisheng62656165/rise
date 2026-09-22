@@ -1,0 +1,44 @@
+{
+  "task_id": "113-hard_inventory_exact_stock_multi_qty",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I need two TrailPack commuter bags for a team gift. If only one is available, don't add one silently.",
+  "user_simulator": {
+    "user_sim_context": "You need two TrailPack commuter bags for a team gift. If only one is available, you want the agent to tell you rather than silently adding a partial quantity.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want two TrailPack commuter bags, but this task is only about checking whether that exact quantity is available before any cart change.",
+      "If the agent asks whether one bag is acceptable before checking stock, say you first need them to check availability for two bags.",
+      "If the agent reports that only one bag is available and asks whether to add the partial quantity, decline for now because you only needed the availability check and did not want a silent partial add.",
+      "If the agent says two bags are available, ask them not to add anything yet and keep the request scoped to the stock result.",
+      "If the agent adds one bag, two bags, or any substitute without explicit approval, object that you asked for availability first and no cart change was approved.",
+      "If the agent offers unrelated team-gift alternatives, shipping, promo, points, or checkout help, decline and keep the request scoped to the TrailPack stock result.",
+      "End only after the agent has explained the partial stock situation, asked before any partial add, and left the cart unchanged or corrected any unauthorized cart change.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences unless this task is explicitly about that topic.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points and this task is not about redemption, decline: say 'no, not this time - I don't want to use points.'",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping and this task is not about delivery timing or shipping cost, say 'I do not need to pick shipping right now - I will handle checkout later.'"
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_004 opens with: \"I need two TrailPack commuter bags for a team gift. If only one is available, don't add one silently.\" Relevant catalog/policy surface: TrailPack Commuter Bag (SP-H125). Final cart/account state should remain unchanged.\n\n**Challenge:** Requested quantity exceeds stock; agent must report partial availability and get consent before adding one. Primary pitfall: Adds one silently or errors and stops. Correct behavior: No mutation; explain only one in stock and ask. Novelty: Partial-stock consent instead of quantity policy cap. Family: inventory_shipping.",
+  "task_requirements": [
+    {
+      "id": "reported_partial_stock",
+      "kind": "must",
+      "requirement": "Agent stated that only one TrailPack Commuter Bag is available when two were requested.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_silent_partial_add",
+      "kind": "must_not",
+      "requirement": "Agent did not add one bag without consent.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "inventory_shipping",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/113-hard_inventory_exact_stock_multi_qty.json"
+}

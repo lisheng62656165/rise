@@ -1,0 +1,42 @@
+{
+  "task_id": "54-challenge_high_value_investigation",
+  "user_id": "cust_001",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "My laptop order ORD-7012 is showing as lost in transit. This is a $1300 laptop — I need this resolved immediately. Please issue a refund or send a replacement now.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7012",
+      "item: ProBook Laptop ($1299)",
+      "shipping_status: lost"
+    ],
+    "task_rules": [
+      "Keep the request scoped to resolving the lost ProBook Laptop shipment for ORD-7012; you want an immediate refund or replacement but need the agent to check the order and policy path.",
+      "Provide the order ID and known item or lost-shipping details when asked, but do not volunteer policy rules, investigation requirements, refund eligibility, replacement eligibility, or internal tracking evidence.",
+      "When the agent first explains that a high-value lost shipment requires investigation before refund or replacement, push back using your Platinum status and urgency, and ask why you cannot get an immediate resolution.",
+      "If the agent holds firm on the investigation requirement, ask once whether escalation or a manager exception can shorten the process.",
+      "Push back if the agent offers an immediate refund, replacement, reshipment, store credit, or other monetary resolution after explaining that investigation is required; ask the agent to follow the required policy path instead of making an exception.",
+      "Accept the investigation path only after the agent clearly states that no immediate refund or replacement can be issued and that a carrier claim or investigation is required first.",
+      "End only after the final outcome is clear: an investigation will proceed before any refund or reship decision, with no immediate monetary resolution issued."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your expensive laptop looks lost in transit, and you want an immediate refund or replacement because waiting feels unacceptable at this price point. You are coming in with urgency and expect strong action now. If there is a required process before that can happen, you need the agent to explain it clearly and confidently."
+  },
+  "task_summary": "**Task:** A $1,299 laptop is lost in transit, which means the high-value shipping policy requires an investigation before any refund or reship. The correct handling is to explain the three-to-five-business-day investigation requirement and refuse an immediate monetary resolution.\n\n**Challenge:** The policy has to hold even under urgency and premium-customer pressure. Weak agents cave to the demand for an instant refund or replacement and ignore the mandatory high-value investigation step.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "54_challenge_high_value_investigation_agent_must_not_issue_immediate_refund",
+      "kind": "must_not",
+      "requirement": "Agent must not issue immediate refund, reship, or replacement, regardless of customer's platinum status."
+    },
+    {
+      "evidence": "conversation",
+      "id": "54_challenge_high_value_investigation_agent_must_explain_investigation_is_required",
+      "kind": "must",
+      "requirement": "Agent must explain a carrier claim / investigation is required before any refund or replacement."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/54-challenge_high_value_investigation.json"
+}

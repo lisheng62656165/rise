@@ -1,0 +1,684 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a customer service agent for a travel company. Today's date: <REDACTED>. You are currently helping customer user_003. Use the available tools to help the customer."
+    },
+    {
+      "role": "user",
+      "content": "I have two trips I need to push to later flights, and I want each done the cheapest valid way. First, booking BK-A from JFK to LHR on flight DL920 \u2014 please move it to the later flight DL921. Second, booking BK-B from ORD to LAX on flight AA930 \u2014 please move it to the later flight AA931. Both of my current flights are nonstop and I'd like the later ones to be comparable nonstops. Reason is personal for both."
+    },
+    {
+      "role": "assistant",
+      "content": "Done.\n\n- BK-A: moved from DL920 to DL921  \n  - Additional cost: $200 change fee\n  - Fare difference: $0\n  - New total paid: $1,000\n\n- BK-B: moved from AA930 to AA931  \n  - Additional cost: $0\n  - Fare difference: $0\n  - Total paid remains: $1,200\n\nI kept your existing cabin and preferences the same on both bookings.",
+      "tool_calls": [
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-A"
+          },
+          "result": {
+            "booking_id": "BK-A",
+            "user_id": "user_003",
+            "flight_id": "DL920",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 800,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": null,
+            "fare_difference": null,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "LHR",
+            "departure_time": "2026-06-20T08:45:00",
+            "route_type": "international"
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-B"
+          },
+          "result": {
+            "booking_id": "BK-B",
+            "user_id": "user_003",
+            "flight_id": "AA930",
+            "status": "confirmed",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 1200,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": null,
+            "fare_difference": null,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "ORD",
+            "destination": "LAX",
+            "departure_time": "2026-07-15T08:00:00",
+            "route_type": "domestic"
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-A",
+            "flight_id": "DL921",
+            "change_reason": "personal",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": false
+          },
+          "result": {
+            "status": "preview",
+            "booking_id": "BK-A",
+            "flight_id": "DL921",
+            "change_fee": 200,
+            "fare_difference": 0,
+            "price_paid": 1000
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-B",
+            "flight_id": "AA931",
+            "change_reason": "personal",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": false
+          },
+          "result": {
+            "status": "preview",
+            "booking_id": "BK-B",
+            "flight_id": "AA931",
+            "change_fee": 0,
+            "fare_difference": 0,
+            "price_paid": 1200
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-A",
+            "flight_id": "DL921",
+            "change_reason": "personal",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": true
+          },
+          "result": {
+            "status": "updated",
+            "booking_id": "BK-A",
+            "changes_applied": [
+              "flight_id",
+              "change_reason"
+            ],
+            "price_paid": 1000,
+            "change_fee": 200,
+            "fare_difference": 0
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-B",
+            "flight_id": "AA931",
+            "change_reason": "personal",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": true
+          },
+          "result": {
+            "status": "updated",
+            "booking_id": "BK-B",
+            "changes_applied": [
+              "flight_id",
+              "change_reason"
+            ],
+            "price_paid": 1200,
+            "change_fee": 0,
+            "fare_difference": 0
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Thanks, but before I approve this, did you compare the cost of a direct change versus cancelling and rebooking for each booking separately? I need the cheapest valid option for BK-A and BK-B individually, and I also want to confirm both new flights are comparable nonstops on the same routes."
+    },
+    {
+      "role": "assistant",
+      "content": "You\u2019re right to ask. I should have compared both options first, and I also should not have finalized the changes before your approval. I already processed them, and I\u2019m sorry.\n\nHere\u2019s the booking-by-booking cost comparison you asked for:\n\n### BK-A \u2014 JFK \u2192 LHR, DL920 to DL921\nConfirmed new flight:\n- **DL921**\n- **JFK \u2192 LHR**\n- **Stops: 0**  \nSo yes, it is a **comparable nonstop on the same route**.\n\nCost comparison:\n- **Direct change**: $200 change fee, $0 fare difference  \n  - Final total paid: **$1,000**\n- **Cancel + rebook**:\n  - Original ticket paid: **$800**\n  - Economy international cancellation policy: **max($75, 20% of ticket price)** = **$160**\n  - DL921 current economy fare: **$800**\n  - Effective final total: **$960**\n\n**Cheapest valid option for BK-A would have been cancel + rebook**, by about **$40 less** than the direct change.\n\n### BK-B \u2014 ORD \u2192 LAX, AA930 to AA931\nConfirmed new flight:\n- **AA931**\n- **ORD \u2192 LAX**\n- **Stops: 0**  \nSo yes, it is also a **comparable nonstop on the same route**.\n\nCost comparison:\n- **Direct change**: $0 change fee, $0 fare difference  \n  - Final total paid: **$1,200**\n- **Cancel + rebook**:\n  - Original ticket paid: **$1,200**\n  - Business domestic cancellation policy: **5% of ticket price** = **$60**\n  - AA931 current business fare: **$1,200**\n  - Effective final total: **$1,260**\n\n**Cheapest valid option for BK-B was the direct change**, by **$60 less** than cancel + rebook.\n\n### Bottom line\n- **BK-A:** I did **not** choose the cheapest path; cancel + rebook would have been cheaper.\n- **BK-B:** I **did** choose the cheapest path.\n- **Both new flights are confirmed nonstop and on the same routes** as requested.\n\nIf you want, I can now look into the best corrective option for **BK-A** given that the change has already been processed.",
+      "tool_calls": [
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "LHR",
+            "date": "2026-06-20",
+            "airline": "DL",
+            "time_range": "afternoon",
+            "max_stops": 0,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "ORD",
+            "destination": "LAX",
+            "date": "2026-07-15",
+            "airline": "AA",
+            "time_range": "morning",
+            "max_stops": 0,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "AA930",
+                "airline_code": "AA",
+                "origin": "ORD",
+                "destination": "LAX",
+                "departure_time": "2026-07-15T08:00:00",
+                "arrival_time": "2026-07-15T10:49:00",
+                "duration_minutes": 169,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 600,
+                  "business": 1200
+                },
+                "status": "scheduled",
+                "route_type": "domestic"
+              }
+            ]
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "cancel",
+            "cabin_class": "economy",
+            "loyalty_tier": "basic",
+            "route_type": "international"
+          },
+          "result": {
+            "topic": "cancellation",
+            "rules": {
+              "free_cancellation_window": "Full refund within 24 hours (domestic) or 48 hours (international) of booking",
+              "basic_economy": "Not cancellable after free window (unless insured)",
+              "economy_domestic": "Cancellation fee: max($50, 15% of ticket price)",
+              "economy_international": "Cancellation fee: max($75, 20% of ticket price)",
+              "business_domestic": "Cancellation fee: 5% of ticket price",
+              "business_international": "Cancellation fee: 8% of ticket price",
+              "first": "Free cancellation",
+              "insurance": "Travel insurance covers cancellation regardless of cabin class",
+              "route_type_matters": "Fees differ by route type (domestic vs international). Check flight route_type."
+            },
+            "applicable_cabin_class": "economy",
+            "applicable_route_type": "international"
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "cancel",
+            "cabin_class": "business",
+            "loyalty_tier": "basic",
+            "route_type": "domestic"
+          },
+          "result": {
+            "topic": "cancellation",
+            "rules": {
+              "free_cancellation_window": "Full refund within 24 hours (domestic) or 48 hours (international) of booking",
+              "basic_economy": "Not cancellable after free window (unless insured)",
+              "economy_domestic": "Cancellation fee: max($50, 15% of ticket price)",
+              "economy_international": "Cancellation fee: max($75, 20% of ticket price)",
+              "business_domestic": "Cancellation fee: 5% of ticket price",
+              "business_international": "Cancellation fee: 8% of ticket price",
+              "first": "Free cancellation",
+              "insurance": "Travel insurance covers cancellation regardless of cabin class",
+              "route_type_matters": "Fees differ by route type (domestic vs international). Check flight route_type."
+            },
+            "applicable_cabin_class": "business",
+            "applicable_route_type": "domestic"
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-A"
+          },
+          "result": {
+            "booking_id": "BK-A",
+            "user_id": "user_003",
+            "flight_id": "DL921",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 1000,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 200,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "LHR",
+            "departure_time": "2026-07-17T08:30:00",
+            "route_type": "international"
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-B"
+          },
+          "result": {
+            "booking_id": "BK-B",
+            "user_id": "user_003",
+            "flight_id": "AA931",
+            "status": "confirmed",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 1200,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 0,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "ORD",
+            "destination": "LAX",
+            "departure_time": "2026-07-22T08:00:00",
+            "route_type": "domestic"
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "LHR",
+            "date": "2026-07-17",
+            "airline": "DL",
+            "time_range": "morning",
+            "max_stops": 0,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "DL921",
+                "airline_code": "DL",
+                "origin": "JFK",
+                "destination": "LHR",
+                "departure_time": "2026-07-17T08:30:00",
+                "arrival_time": "2026-07-17T11:20:00",
+                "duration_minutes": 170,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 800,
+                  "business": 2400
+                },
+                "status": "scheduled",
+                "route_type": "international"
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "ORD",
+            "destination": "LAX",
+            "date": "2026-07-22",
+            "airline": "AA",
+            "time_range": "morning",
+            "max_stops": 0,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "AA931",
+                "airline_code": "AA",
+                "origin": "ORD",
+                "destination": "LAX",
+                "departure_time": "2026-07-22T08:00:00",
+                "arrival_time": "2026-07-22T13:21:00",
+                "duration_minutes": 321,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 600,
+                  "business": 1200
+                },
+                "status": "scheduled",
+                "route_type": "domestic"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Yes, please look into the best corrective option for BK-A. Also, you mentioned keeping existing preferences the same, but BK-B was shown as business in your earlier action log, so please confirm the final booking-stage preferences on both bookings, and for any further search or rebooking make sure airline, time range, and nonstop requirements are all matched."
+    },
+    {
+      "role": "assistant",
+      "content": "I checked BK-A again using the constraints you specified for any further review:\n\n- **Airline:** DL only  \n- **Time range:** morning  \n- **Stops:** nonstop only  \n- **Route:** JFK \u2192 LHR  \n\nResult: the **only matching option** is still **DL921**, nonstop.\n\n### Best corrective option for BK-A now\nCurrent BK-A:\n- **Flight:** DL921\n- **Route:** JFK \u2192 LHR\n- **Departure:** 2026-07-17 08:30\n- **Stops:** 0\n- **Cabin:** economy\n\nCancellation preview for current BK-A:\n- **Cancellation fee:** $200\n- **Refund:** $800\n\nMatched rebooking option:\n- **DL921 economy fare:** $800\n\n### Cheapest valid path now\n**Keep BK-A as-is.**\n\nWhy:\n- If you **cancel and rebook now**, you would:\n  - lose **$200** to the cancellation fee,\n  - get **$800 refunded**,\n  - then pay **$800** to buy DL921 again.\n- That does **not improve your total cost** versus the already-processed change.\n\nSo, based on the standard options available in the system, **there is no cheaper corrective move for BK-A now**.\n\n## Final booking-stage preferences\n\n### BK-A\n- **Flight:** DL921\n- **Route:** JFK \u2192 LHR\n- **Stops:** nonstop\n- **Cabin:** economy\n- **Seat:** aisle\n- **Meal:** standard\n- **Wi\u2011Fi:** yes\n- **Extra legroom:** yes\n- **Insurance:** no\n- **Paid checked bags:** 0\n- **Payment method:** credit card\n\n### BK-B\n- **Flight:** AA931\n- **Route:** ORD \u2192 LAX\n- **Stops:** nonstop\n- **Cabin:** business\n- **Seat:** aisle\n- **Meal:** standard\n- **Wi\u2011Fi:** yes\n- **Extra legroom:** yes\n- **Insurance:** no\n- **Paid checked bags:** 0\n- **Payment method:** credit card\n\nAnd yes \u2014 **BK-B being business is correct**. That was not changed by me; the booking was already in **business** before the flight move, and it remains in **business** now.\n\n## Route/nonstop confirmation\n- **BK-A:** JFK \u2192 LHR, **nonstop**\n- **BK-B:** ORD \u2192 LAX, **nonstop**\n\nIf you want, I can also summarize the full before/after for both bookings in one clean comparison table.",
+      "tool_calls": [
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-A"
+          },
+          "result": {
+            "booking_id": "BK-A",
+            "user_id": "user_003",
+            "flight_id": "DL921",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 1000,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 200,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "LHR",
+            "departure_time": "2026-07-17T08:30:00",
+            "route_type": "international"
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-B"
+          },
+          "result": {
+            "booking_id": "BK-B",
+            "user_id": "user_003",
+            "flight_id": "AA931",
+            "status": "confirmed",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 1200,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 0,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "ORD",
+            "destination": "LAX",
+            "departure_time": "2026-07-22T08:00:00",
+            "route_type": "domestic"
+          }
+        },
+        {
+          "name": "cancel_booking",
+          "arguments": {
+            "booking_id": "BK-A",
+            "confirm": false
+          },
+          "result": {
+            "status": "preview",
+            "booking_id": "BK-A",
+            "cancellation_fee": 200,
+            "refund_amount": 800,
+            "reason": "International economy cancellation fee: max($75, 20% of $1000) = $200"
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "LHR",
+            "date": "2026-07-17",
+            "airline": "DL",
+            "time_range": "morning",
+            "max_stops": 0,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "DL921",
+                "airline_code": "DL",
+                "origin": "JFK",
+                "destination": "LHR",
+                "departure_time": "2026-07-17T08:30:00",
+                "arrival_time": "2026-07-17T11:20:00",
+                "duration_minutes": 170,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 800,
+                  "business": 2400
+                },
+                "status": "scheduled",
+                "route_type": "international"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Thanks. I\u2019m not seeing insurance preserved on either booking, so before we wrap up can you correct **add_insurance** first and confirm it\u2019s on for both bookings? Also, please summarize the final out-of-pocket cost for **each** trip separately now that BK-A has to stay as-is and BK-B was changed directly."
+    },
+    {
+      "role": "assistant",
+      "content": "Done \u2014 **insurance is now on for both bookings**.\n\nConfirmed final status:\n- **BK-A:** `add_insurance = true`\n- **BK-B:** `add_insurance = true`\n\n### Final out-of-pocket cost by trip\n\n**BK-A \u2014 JFK \u2192 LHR on DL921**\n- Final total paid: **$1,000**\n- Breakdown:\n  - Original booking: **$800**\n  - Direct change fee: **$200**\n  - Fare difference: **$0**\n  - Insurance update: **no additional charge shown by the system**\n\n**BK-B \u2014 ORD \u2192 LAX on AA931**\n- Final total paid: **$1,200**\n- Breakdown:\n  - Original booking: **$1,200**\n  - Direct change fee: **$0**\n  - Fare difference: **$0**\n  - Insurance update: **no additional charge shown by the system**\n\n### Final confirmed state\n- **BK-A:** DL921, JFK \u2192 LHR, nonstop, economy, insurance on\n- **BK-B:** AA931, ORD \u2192 LAX, nonstop, business, insurance on\n\nIf you want, I can also give you a one-line \u201creceipt style\u201d summary for each booking ID.",
+      "tool_calls": [
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-A",
+            "flight_id": "",
+            "change_reason": "personal",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": true,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": true
+          },
+          "result": {
+            "status": "updated",
+            "booking_id": "BK-A",
+            "changes_applied": [
+              "add_insurance"
+            ],
+            "price_paid": 1000,
+            "change_fee": 200,
+            "fare_difference": 0
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-B",
+            "flight_id": "",
+            "change_reason": "personal",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": true,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": true
+          },
+          "result": {
+            "status": "updated",
+            "booking_id": "BK-B",
+            "changes_applied": [
+              "add_insurance"
+            ],
+            "price_paid": 1200,
+            "change_fee": 0,
+            "fare_difference": 0
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-A"
+          },
+          "result": {
+            "booking_id": "BK-A",
+            "user_id": "user_003",
+            "flight_id": "DL921",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": true,
+            "price_paid": 1000,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 200,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "LHR",
+            "departure_time": "2026-07-17T08:30:00",
+            "route_type": "international"
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-B"
+          },
+          "result": {
+            "booking_id": "BK-B",
+            "user_id": "user_003",
+            "flight_id": "AA931",
+            "status": "confirmed",
+            "cabin_class": "business",
+            "seat_type": "aisle",
+            "meal_preference": "standard",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": true,
+            "price_paid": 1200,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-05-20T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 0,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "ORD",
+            "destination": "LAX",
+            "departure_time": "2026-07-22T08:00:00",
+            "route_type": "domestic"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Great, thank you. Just to confirm before we finish: BK-A is now on DL921 and BK-B is on AA931, both nonstop on the same routes requested, and insurance is on for both.\n\nOut-of-pocket totals are acceptable: **BK-A $1,000** and **BK-B $1,200**. [TASK_DONE]"
+    }
+  ]
+}

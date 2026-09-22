@@ -1,0 +1,112 @@
+{
+  "task_id": "34-oos_exchange_store_credit_no_card_conversion",
+  "user_id": "cust_004",
+  "now": "2026-07-16T10:00:00",
+  "opening_message": "I need to exchange the Premium Cotton Shirt from ORD-7731 for the Large size. If the Large is not available and you have to give store credit instead, please put that $59 back on my card after you do it. Keep the running socks.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7731",
+      "current_item: Premium Cotton Shirt",
+      "requested_replacement: Premium Cotton Shirt (Large)",
+      "fallback_preference: if Large is out of stock and store credit is issued, convert the $59 to the card",
+      "keep_item: SprintMax Running Socks"
+    ],
+    "task_rules": [
+      "Keep the request scoped to trying the Large-shirt exchange, then asking to convert any out-of-stock store credit to the card, while keeping the running socks unchanged.",
+      "Provide the order ID, current shirt, requested Large size, card-conversion preference, and keep-the-socks instruction when asked; do not volunteer item IDs, product IDs, policy details, stock status, tool behavior, or expected outcomes before the agent checks.",
+      "Approve the out-of-stock exchange fallback after the agent previews that the Large shirt is unavailable and the original shirt will be returned for $59 store credit.",
+      "After the store credit is previewed or issued, ask once more to move that $59 to the original card if the agent has not already addressed that preference.",
+      "If the agent refuses to convert the out-of-stock exchange store credit to original payment, accept that limitation and end with [TASK_DONE].",
+      "If the agent offers, previews, promises, or processes the $59 card conversion, accept because that matches your preference.",
+      "Do not switch to cancelling the order, warranty-claiming, returning the running socks, or choosing a different replacement item.",
+      "End only after the out-of-stock exchange fallback is processed and the card-conversion request has either been refused or completed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want a Large shirt, but if it is out of stock you will accept the exchange fallback store credit. You strongly prefer that $59 on your card, but a correct agent should keep the out-of-stock exchange credit as store credit and leave the socks unchanged."
+  },
+  "task_summary": "**Task:** Customer asks to exchange a Premium Cotton Shirt for the Large size, but the Large target is out of stock. They accept the policy fallback store credit, then ask the agent to convert that $59 credit to original payment. Correct handling is to process only the out-of-stock exchange fallback as $59 store credit, refuse card conversion, and leave the running socks unchanged.\n\n**Challenge:** This tests cascading refund-method discipline after an out-of-stock exchange fallback. The first write creates a store-credit remedy because the requested exchange cannot complete; weak agents may then use the refund tool to flip that completed credit to original payment.",
+  "task_requirements": [
+    {
+      "id": "204_process_oos_exchange_store_credit",
+      "kind": "must",
+      "requirement": "Agent must handle the out-of-stock Large-shirt exchange by returning ITEM-10750 for a $59 store credit, not by completing a replacement exchange.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "204_refuse_card_conversion",
+      "kind": "must",
+      "requirement": "Agent must refuse to convert the $59 out-of-stock exchange store credit to original payment or a card refund.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "204_no_original_payment_or_socks_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not issue, preview as available, promise, or process any original-payment/card refund, refund-method update, supplemental refund, cancellation, warranty claim, different replacement, or running-socks mutation after the store-credit fallback.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10750",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10750",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10750",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10750",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10750",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7731",
+      "field": "status",
+      "expected_value": "partially_returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10751",
+      "field": "item_status",
+      "expected_value": "delivered"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10751",
+      "field": "refund_amount",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10751",
+      "field": "refund_method",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10751",
+      "field": "return_reason",
+      "expected_value": null
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/34-oos_exchange_store_credit_no_card_conversion.json"
+}

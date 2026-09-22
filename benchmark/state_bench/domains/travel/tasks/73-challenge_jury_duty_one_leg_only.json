@@ -1,0 +1,105 @@
+{
+  "task_id": "73-challenge_jury_duty_one_leg_only",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I got called for jury duty starting June 23, so I need to push my outbound flight BK-1000 to Miami to June 26. And I will need to move my return BK-1001 to June 30 to match. My user ID is user_004.",
+  "user_simulator": {
+    "known_info": [
+      "Outbound booking BK-1000: ORD to MIA on June 19; jury duty is the reason for changing it.",
+      "Return booking BK-1001: MIA to ORD on June 23; rescheduling only to match the new outbound.",
+      "Jury duty starts June 23."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to move outbound booking BK-1000 to Miami on June 26 because of jury duty, and move return booking BK-1001 to June 30 only so the round trip still lines up.",
+      "Do not volunteer that the return change is a personal rescheduling step or that it should have a separate fee unless the agent asks why the return also needs to move or explains that distinction first.",
+      "If the agent asks for booking details or reasons, provide that BK-1000 is the outbound ORD-to-MIA flight affected by jury duty and BK-1001 is the MIA-to-ORD return being moved to match the new outbound timing.",
+      "If the agent offers a valid June 26 outbound change and a valid June 30 return change, stay focused on those dates and do not drift to alternate airports or later dates unless no June 30 return option is available after the agent checks same-day options.",
+      "If the agent finds the June 30 American return AA103, accept that return option; if only an unusable morning return is offered, ask once whether there is any workable June 30 return option before changing dates or airports.",
+      "For this task, do not reject valid June 26 or June 30 options only because their face-value ticket prices exceed your profile budget; focus on the required date changes and the additional change costs.",
+      "Before approving the changes, require a preview that identifies both selected flights, the outbound jury-duty fee treatment, the return's separate personal-rescheduling fee treatment, any fare differences, and the total additional cost.",
+      "If the agent treats both bookings as free under jury duty, do not correct the fee issue yourself, but do not introduce that claim later; continue only after the agent asks for confirmation or completes the proposed changes.",
+      "If the agent charges a return fee and explains that jury duty applies only to the outbound leg, accept that distinction once the selected return flight and added cost are clear.",
+      "For these existing booking changes, ask to keep the existing booking preferences and correct any changed final preference one at a time before ending.",
+      "End only after both bookings have been changed to the expected June 26 outbound and June 30 return flights, the final cost treatment is clear, and the preserved preferences are confirmed.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "Jury duty forces you to move one part of a round trip, and then the rest of the itinerary has to shift to stay coherent. You think of the trip as one whole plan, but the underlying reason does not apply equally to every leg. You need the agent to keep that distinction straight while still helping you rebuild the trip."
+  },
+  "task_summary": "**Task:** User has a round trip affected by jury duty on only one leg, with the return being moved only to match the outbound adjustment. Correct resolution: Jury duty is the reason for the outbound change only and that the return change is a separate personal rescheduling step.\n\n**Challenge:** The agent applies the jury-duty exemption only to the outbound leg, keeps the return on the ordinary personal path, and does not spread the free exemption across both bookings.",
+  "task_requirements": [
+    {
+      "id": "jury_duty_only_one_leg",
+      "kind": "must",
+      "requirement": "Agent must make clear that jury duty is the reason for the outbound change only and that the return change is a separate personal rescheduling step.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "must_not_zero_both_legs",
+      "kind": "must_not",
+      "requirement": "Agent must not apply a blanket free jury-duty exemption to both legs of the round trip.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "AA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 380
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "fare_difference",
+      "expected_value": 20
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "flight_id",
+      "expected_value": "AA103"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "price_paid",
+      "expected_value": 415
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/73-challenge_jury_duty_one_leg_only.json"
+}

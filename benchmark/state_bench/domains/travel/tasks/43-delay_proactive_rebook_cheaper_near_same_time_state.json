@@ -1,0 +1,73 @@
+{
+  "task_id": "43-delay_proactive_rebook_cheaper_near_same_time_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My flight BK-1 (JFK to LHR on BA200) is delayed about 200 minutes — I need to get to London as soon as possible. What are my options? My user ID is user_004; put anything owed or refunded on my credit card.",
+  "user_simulator": {
+    "personality": "Traveler stuck with a badly delayed flight; cooperative and a little anxious to get moving, but reasonable — wants the agent to sort it out sensibly and is happy to save money if it does not cost him meaningful time.",
+    "user_sim_context": "Your flight to London is delayed about three and a half hours and you want to get there as soon as possible. You want the agent to look at your options and handle it well; you have not decided on any specific action and are relying on the agent to figure out the best option for you. You do not know fares, delay rules, or fees. Handle anything owed or refunded on your card.",
+    "known_info": [
+      "Booking BK-1: JFK to LHR on BA200, delayed about 200 minutes.",
+      "You want to get to London as soon as possible and want the agent to handle the delay sensibly.",
+      "Keep your usual preferences; pay anything owed (or get refunded) on your credit card."
+    ],
+    "unknown_info": [
+      "The arrival times or fares of any flights, what the delay entitles you to, or any fees.",
+      "Whether there is a better option than your current delayed flight."
+    ],
+    "task_rules": [
+      "Open by saying your flight BK-1 (JFK to LHR on BA200) is delayed about 200 minutes and you want to get to London as soon as possible — ask the agent what your options are and to handle it. The agent already has your opening message.",
+      "Do NOT propose a specific action (do not ask to be rebooked, to keep the flight, or to cancel); you do not know the options and are relying on the agent to find the best one. If the agent asks what you want to do, say you want whatever gets you there soonest without overpaying and ask for its recommendation.",
+      "If the agent points out another flight that arrives at about the same time (within a few minutes) and works out cheaper overall, agree to switch to it — a few minutes later is fine if it saves money. Pay anything owed on your credit card.",
+      "If the agent only offers to apply a delay meal voucher and keep you on the current flight without mentioning any cheaper near-same-time alternative, accept it and move on — you do not know another option exists and you trust the agent. Do not ask it to look for cheaper flights.",
+      "If the agent mentions a meal voucher for the delay, acknowledge it; you are happy to have whatever the delay entitles you to.",
+      "Do NOT volunteer anything about fares, delay compensation, or fees; you do not know them.",
+      "If the agent proposes anything unrelated (upgrades, bags, car or hotel), decline and return to getting to London.",
+      "Do not try to verify raw flight_id.",
+      "End once the agent has handled your flight and addressed any delay entitlement; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver) holds BK-1 (JFK to LHR on BA200, economy, $400 paid), delayed 200 minutes, and wants the situation handled so he gets to London as soon as possible. A near-identical alternative BA201 arrives only ~5 minutes later but its fare ($150) is $250 below what was paid; changing to it costs a $200 international same-day change fee, so the traveler nets out at $350 — $50 cheaper overall — for arriving ~5 minutes later. The correct action is to proactively surface and make that change. Correct end state: BK-1 changed onto BA201 (change_fee=200, fare_difference=-250, price_paid=350). (The 200-minute delay also entitles the traveler to a $25 meal voucher, but it is not state-graded — see the module note.)\n\n**Challenge:** The traveler does not name an action; a typical agent treats the delayed booking as \"keep it and apply the meal voucher\" and never hunts for a near-same-time cheaper alternative. To pass, the agent must check BA201's arrival and fare, recognize that the $200 change fee does not erase the $250 fare saving (it nets $50 cheaper), and execute the change rather than leaving the traveler on the costlier original. An agent that keeps BK-1 on BA200 writes a different state and fails the deterministic check, which pins BK-1 on BA201 with change_fee=200 / fare_difference=-250 / price_paid=350.",
+  "task_requirements": [
+    {
+      "id": "proactively_change_to_cheaper_near_same_time_flight",
+      "kind": "must",
+      "requirement": "Agent must identify that BA201 arrives at about the same time as the delayed BA200 (~5 minutes later) but is cheaper overall even after the change fee, and change BK-1 onto BA201 as a personal change (change_fee=200, fare_difference=-250, price_paid=350). The traveler should end up confirmed on BA201, net $50 cheaper than the original.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "must_not_leave_on_costlier_original",
+      "kind": "must_not",
+      "requirement": "Agent must not leave the traveler on the costlier original BA200 when the near-same-time cheaper BA201 is available — i.e. it must not keep BK-1 on BA200, leaving the $50-cheaper option unused.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "change_fee",
+      "expected_value": 200
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "fare_difference",
+      "expected_value": -250
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "flight_id",
+      "expected_value": "BA201"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "price_paid",
+      "expected_value": 350
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/43-delay_proactive_rebook_cheaper_near_same_time_state.json"
+}

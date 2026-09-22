@@ -1,0 +1,98 @@
+{
+  "task_id": "52-challenge_fragile_goodwill_separate",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "My blender from order ORD-7003 arrived completely smashed — the box was torn up and the glass pitcher is broken. I need this resolved.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7003",
+      "item: PowerBlend Pro Blender",
+      "issue: arrived damaged, glass pitcher shattered",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to resolving the damaged PowerBlend Pro Blender from ORD-7003; you want the damaged item refunded and the fragile delivery failure addressed, but do not volunteer internal policy details or amounts.",
+      "Give the order ID when asked, and describe the damage as the glass pitcher being shattered with the package badly torn up.",
+      "Reveal that you want a refund to the original payment method only if the agent asks what resolution you prefer; if the agent proposes a replacement, exchange, store credit, or any non-refund path, decline and ask for the original-payment refund instead.",
+      "If the agent proposes only the item return refund or says the issue is resolved without mentioning fragile-item goodwill, ask once whether there is additional compensation for the inconvenience and request that any credit go back to the original payment method.",
+      "Accept the fragile-item goodwill only if the agent presents it as a separate $10 credit in addition to the item refund; if the agent combines it into one larger item refund or vague lump sum, ask for the goodwill credit to be handled separately.",
+      "Approve action only after the preview covers the item return refund to original payment, no restocking fee, a return label, and the separate $10 fragile-item goodwill credit to original payment.",
+      "End only after the agent confirms both completed actions: the blender return with the $119 original-payment refund and the separate $10 fragile-item goodwill credit."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your blender arrived badly damaged, and you want the issue fully resolved rather than reduced to a bare-minimum refund. The condition of the package makes the shipping failure feel especially obvious to you. You expect the company to take responsibility in a way that reflects both the damaged item and the bad delivery experience. You want your money back to your original payment method, not a replacement and not store credit — but don't volunteer this preference unprompted; let the agent ask."
+  },
+  "task_summary": "**Task:** A fragile blender arrived damaged in transit, and the correct resolution has two distinct pieces: the return refund and a separate $10 fragile-item goodwill credit. The right handling is to preserve those as separate actions rather than burying everything inside one blended refund.\n\n**Challenge:** Action boundaries are what matter here. Weak agents forget the goodwill credit altogether or merge it into the item refund in a way that loses the actual structure of the remedy.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "52_challenge_fragile_goodwill_separate_agent_must_ask_resolution_preference",
+      "kind": "must",
+      "requirement": "Agent must give the customer a say in the resolution before acting — either by asking which resolution they prefer OR by presenting the available resolution options (e.g. refund vs. replacement/exchange) and letting them choose. Proceeding to pick or execute a resolution without offering the customer any choice fails."
+    },
+    {
+      "evidence": "conversation",
+      "id": "52_challenge_fragile_goodwill_separate_agent_must_explain_goodwill_separate",
+      "kind": "must",
+      "requirement": "Agent must tell the customer the $10 fragile-item goodwill credit is separate from the $119 item refund."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "goodwill_credit",
+      "expected_value": 10
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "refund_amount",
+      "expected_value": 119
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10003",
+      "field": "return_reason",
+      "expected_value": "damaged_in_transit"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7003",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/52-challenge_fragile_goodwill_separate.json"
+}

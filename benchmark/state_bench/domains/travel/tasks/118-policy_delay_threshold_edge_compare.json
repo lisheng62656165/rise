@@ -1,0 +1,39 @@
+{
+  "task_id": "118-policy_delay_threshold_edge_compare",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Two of my flights are delayed, BK-EP05A and BK-EP05B, and they are only one minute apart. Can you tell me what compensation each one qualifies for?",
+  "user_simulator": {
+    "user_sim_context": "You have two almost-identical delays and want the threshold explained very literally. Because the delays differ by only one minute, you need the agent to be exact about where compensation begins instead of rounding the two cases together.",
+    "known_info": [
+      "Relevant bookings: BK-EP05A and BK-EP05B."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request informational and focused on comparing the compensation eligibility for BK-EP05A and BK-EP05B only.",
+      "If the agent asks which bookings are relevant, provide BK-EP05A and BK-EP05B; do not introduce other trip changes, preferences, or compensation claims.",
+      "If the agent gives a combined or approximate answer, ask for the eligibility outcome for each booking separately and the exact minute threshold being applied.",
+      "Push back if the agent treats the 119-minute and 120-minute delays as the same tier, says both qualify, or says neither qualifies.",
+      "Do not authorize rebooking, cancellation, upgrades, or any other booking action if the agent offers one.",
+      "End only after the agent clearly explains that BK-EP05A's 119-minute delay does not qualify for compensation and BK-EP05B's 120-minute delay qualifies for the meal-voucher tier."
+    ]
+  },
+  "task_summary": "Traveler wants a threshold-exact comparison between two delays that differ by a single minute. Correct resolution: the agent should keep the 119-minute case below compensation and the 120-minute case in the meal-voucher tier instead of blending them together.\n\nChallenge: This tests whether the agent respects exact threshold semantics rather than approximate intuition around delay rights.",
+  "task_requirements": [
+    {
+      "id": "policy_delay_threshold_edge_compare_1",
+      "kind": "must",
+      "requirement": "Agent must explain that the 119-minute delay does not qualify for compensation.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "policy_delay_threshold_edge_compare_2",
+      "kind": "must",
+      "requirement": "Agent must explain that the 120-minute delay qualifies for the meal-voucher tier.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/118-policy_delay_threshold_edge_compare.json"
+}

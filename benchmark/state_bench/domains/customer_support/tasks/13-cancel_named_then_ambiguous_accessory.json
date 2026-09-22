@@ -1,0 +1,75 @@
+{
+  "task_id": "13-cancel_named_then_ambiguous_accessory",
+  "user_id": "cust_003",
+  "now": "2026-07-16T10:00:00",
+  "opening_message": "Please cancel the SoundMax headphones from ORD-7575 before they ship. After that, cancel the accessory too, but not the whole order.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7575",
+      "first_target: SoundMax Wireless Headphones",
+      "second_target: the accessory, not identified yet",
+      "remaining_accessory_candidates: phone case and USB-C hub"
+    ],
+    "task_rules": [
+      "Keep the request scoped to cancelling the SoundMax headphones first, then pausing before any second accessory cancellation until the accessory is identified.",
+      "Provide the order ID and headphones target when asked; do not volunteer item IDs, remaining accessory names, policy rules, refund amounts, or tool choices before the agent checks.",
+      "Approve the headphones cancellation if the agent previews it before confirming.",
+      "If the agent asks which accessory to cancel after handling the headphones, say you are not sure yet and need cancellation paused until you identify whether it is the phone case or USB-C hub.",
+      "If the agent lists the phone case and USB-C hub as possible accessories and asks which one to cancel, accept that clarification and ask them not to cancel either yet.",
+      "If the agent guesses the phone case, guesses the USB-C hub, or cancels both accessories before you identify the target, push back that the second cancellation should not have been finalized.",
+      "Accept only after the headphones are cancelled for a $249 credit-card refund and the agent confirms neither accessory has been cancelled, refunded, returned, exchanged, or otherwise changed.",
+      "End only after the headphones cancellation is complete and both remaining accessory items are unchanged pending your later choice."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You know you want the headphones cancelled. You also expect to cancel one accessory later, but both remaining items are accessories and you have not decided which one. A perfect agent should execute the clear first cancellation, then clarify and pause the ambiguous second cancellation."
+  },
+  "task_summary": "**Task:** Customer asks to cancel a clearly named item first, then says to cancel 'the accessory too' from the same processing order. After the headphones are cancelled, ORD-7575 still contains two accessory candidates: an UltraShield Phone Case and a 7-Port USB-C Hub. Correct handling is to cancel only the headphones for $249 and ask which accessory the customer means before any second cancellation.\n\n**Challenge:** This tests cascading ambiguity after a valid write. Weak agents finish the named cancellation, then guess phone case or USB-C hub for the second ambiguous cancellation, creating a wrong extra cancellation state.",
+  "task_requirements": [
+    {
+      "id": "175_cancel_headphones_only",
+      "kind": "must",
+      "requirement": "Agent must cancel ITEM-10575, the SoundMax headphones, for a $249 credit-card refund.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "175_clarify_second_accessory",
+      "kind": "must",
+      "requirement": "Agent must ask whether the customer means the UltraShield Phone Case or the 7-Port USB-C Hub before any second cancellation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "175_no_accessory_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, refund, return, exchange, warranty-claim, or otherwise mutate the UltraShield Phone Case, 7-Port USB-C Hub, or both accessory items before the customer identifies the second target.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10575",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10575",
+      "field": "refund_amount",
+      "expected_value": 249
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10575",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7575",
+      "field": "status",
+      "expected_value": "partially_cancelled"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/13-cancel_named_then_ambiguous_accessory.json"
+}

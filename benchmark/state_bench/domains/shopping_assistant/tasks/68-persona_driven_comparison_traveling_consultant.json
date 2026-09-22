@@ -1,0 +1,91 @@
+{
+  "task_id": "68-persona_driven_comparison_traveling_consultant",
+  "user_id": "shop_001",
+  "now": "2026-06-10T10:00:00",
+  "opening_message": "Hey — I'm a consulting partner. I'm on a plane every week, my current laptop's battery dies halfway through a 4-hour client block, and I've already cracked one laptop this year. I'm looking at ProBook 13, SlimBook Air 13, or SlimBook Touch 15 — which should I pick?",
+  "user_simulator": {
+    "user_sim_context": "You are a consulting partner who flies every week, has experienced battery dying during 4-hour client blocks, and has cracked a laptop this year. You want the agent to PICK one of the three — ProBook 13, SlimBook Air 13, SlimBook Touch 15 — and explain WHY in terms of your persona. You do NOT want a spec-sheet dump. You do NOT want the agent to push the decision back to you ('which matters most?'). You trust the agent to synthesize based on what you told them. Your work is slides, spreadsheets, and video calls — NOT video editing or dev. Budget is not a concern up to ~$1500.",
+    "known_info": [
+      "You fly weekly — weight matters for carrying through airports.",
+      "Battery dies during 4-hour client blocks — you need more.",
+      "You've cracked a laptop this year — durability matters.",
+      "Your workload is slides, spreadsheets, calls — not video editing.",
+      "Budget up to ~$1500."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Wait for the agent to pick one of ProBook 13, SlimBook Air 13, or SlimBook Touch 15 based on your traveling-consultant needs, not a generic spec ranking.",
+      "Do not volunteer product specs, weight, battery, RAM, loyalty, shipping, or budget details unless the agent asks; if asked about workload, explain that you mainly use slides, spreadsheets, and video calls, not video editing or development.",
+      "Accept SlimBook Air 13 when the agent ties it to your weekly travel and 4-hour client blocks using specific weight and battery numbers; if the agent asks to add it, agree to one unit with no extras.",
+      "If the agent recommends SlimBook Air 13 without mentioning the 8GB RAM tradeoff against ProBook 13, still accept the recommendation and do not reveal that comparison yourself.",
+      "If the agent recommends ProBook 13 primarily for 16GB RAM, push back once by asking whether RAM matters for your slides, spreadsheets, and calls more than lighter weight and longer battery; if the agent pivots to SlimBook Air 13, proceed with that choice, and if not, accept the final recommendation without further debate.",
+      "If the agent recommends SlimBook Touch 15, push back once based on your travel and 4-hour-block needs because it is heavier and has shorter battery life; if the agent pivots to SlimBook Air 13, proceed with that choice, and if not, accept the final recommendation without further debate.",
+      "If the agent gives a broad spec dump or asks you to choose which of weight, battery, or durability matters most, ask once for a single synthesized recommendation based on what you already described; accept the eventual pick if the agent still does not synthesize.",
+      "Push back on unrelated add-ons, substitutions, loyalty redemption, shipping selection, or any attempt to add a product before you have accepted a recommendation.",
+      "End only after the agreed recommendation path is resolved; for the SlimBook Air 13 path, use [TASK_DONE] only after the cart confirmation shows one SlimBook Air 13 with total $849.",
+      "Keep replies short, natural, and limited to 1-2 sentences.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A Platinum returning customer (shop_001, Alex Rivera) describes a traveling-consultant persona — weekly flights, current laptop's battery dies during 4-hour client blocks, cracked a laptop this year — and asks the agent to pick between SP-1002 ProBook 13 (2.9 lb, 12hr, 16GB), SP-1001 SlimBook Air 13 (2.6 lb, 14hr, 8GB), and SP-1107 SlimBook Touch 15 (4.0 lb, 9hr, 16GB). Correct pick is SP-1001 SlimBook Air 13: LONGEST battery (14hr vs 12hr ProBook, 9hr Touch) AND LIGHTEST weight (2.6 lb vs 2.9 lb ProBook, 4.0 lb Touch) — wins on BOTH persona-critical axes. Final cart: SP-1001 qty=1, total $849.\n\n**Challenge:** Persona-driven synthesis. The agent must extract the 3 persona-relevant criteria (weight, battery, durability) from the narrative and build a comparison AROUND them — not default to a RAM/spec framing. The trap is ProBook 13's 16GB RAM vs SlimBook Air's 8GB: a spec-sheet default would pick ProBook, but the stated persona (slides/spreadsheets/calls, not video editing) makes weight + battery dominate. Agent should recommend SlimBook Air AND flag the 8GB RAM tradeoff so customer can decide with full info. Pitfalls: (1) spec dump without synthesis, (2) ProBook for the 16GB RAM ignoring persona, (3) SlimBook Touch missing BOTH weight and battery, (4) fabricated durability rating, (5) 'which matters most?' deferral, (6) SlimBook Air without flagging the RAM tradeoff.",
+  "task_requirements": [
+    {
+      "id": "extracted_persona_criteria",
+      "kind": "must",
+      "requirement": "Agent explicitly referenced weight, battery life, and durability (or synonyms like 'build quality' / 'travel readiness') as the criteria relevant to this customer's situation. A recommendation framed only around price, CPU, RAM, or generic 'all-rounder' language does not satisfy this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "recommended_slimbook_air_with_persona_reasoning",
+      "kind": "must",
+      "requirement": "Agent recommended SP-1001 SlimBook Air 13 and tied the recommendation to at least TWO of {weight, battery, durability} with specific numbers (e.g., '2.6 lb' and '14 hours battery'). A plain 'SlimBook Air is best' without persona-tied numbers does not satisfy this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "did_not_spec_dump_all_three",
+      "kind": "must_not",
+      "requirement": "Agent did NOT deliver a full-spec dump (CPU, RAM, storage, screen, price, weight, battery, ports) for all three laptops before recommending. A focused persona-relevant comparison across the 3 on 3-4 key dimensions is fine; a wall-of-text is not.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "did_not_recommend_heavier_or_shorter_battery",
+      "kind": "must_not",
+      "requirement": "Agent did NOT end up recommending SP-1107 SlimBook Touch 15 (heaviest at 4.0 lb AND shortest battery at 9hr — worst on both persona-critical axes). If the agent initially proposed it but the customer pushed back and the agent pivoted to SlimBook Air, that's fine — this requirement applies to the FINAL recommendation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_001",
+      "field": "subtotal",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_001",
+      "field": "total",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_001",
+        "product_id": "SP-1001",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/68-persona_driven_comparison_traveling_consultant.json"
+}

@@ -1,0 +1,98 @@
+{
+  "task_id": "21-shipping_damaged_fragile",
+  "user_id": "cust_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "My crystal vase from order ORD-6023 arrived completely shattered! The packaging was crushed.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6023",
+      "item: crystal vase",
+      "condition: shattered",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a damaged-in-transit claim for the crystal vase; do not present this as a changed-mind return and do not volunteer your refund preference unless asked.",
+      "When the agent asks for identifying details or what happened, provide ORD-6023 and explain that the crystal vase arrived shattered with crushed packaging.",
+      "If the agent asks what resolution you want, choose a full refund to your original payment method. If the agent proposes or selects any resolution before asking your preference, say you want to choose the resolution and ask for a refund to your original payment method instead of a replacement, exchange, or store credit.",
+      "If the agent treats this as ordinary buyer's remorse, mentions restocking, or applies return penalties, clarify once that the vase arrived shattered in transit and ask for the damaged-item claim path.",
+      "If the agent previews only the $109 damaged-item refund and does not mention fragile-item goodwill, ask whether fragile-item damage provides a separate goodwill credit and ask for any credit to go to the original payment method.",
+      "Confirm action only after the agent previews the damaged-item claim with an $109 refund to your original payment method, no restocking fee, a return label, and a separate $10 fragile-item goodwill credit to your original payment method.",
+      "End only after the agent confirms that the damaged-item return was processed and the $109 refund, return label, and separate $10 fragile-item goodwill credit were all completed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your fragile vase arrived shattered, and the damaged packaging makes it obvious to you that something went wrong in shipping. You want the company to take responsibility for the condition it arrived in. The agent should treat this like shipping damage, not ordinary buyer's remorse. You want your money back to your original payment method — not a replacement vase and not store credit — but don't volunteer this preference unprompted; let the agent ask."
+  },
+  "task_summary": "**Task:** A fragile crystal vase arrived damaged in transit. The correct handling is to resolve the damaged-item claim, refund the $109 purchase amount, and include the separate $10 fragile-item goodwill credit that applies to this kind of case.\n\n**Challenge:** More than one compensating action is required here. Weak agents forget the fragile goodwill credit, treat the damage like an ordinary changed-mind return, or add penalties that do not belong on a damage-in-transit claim.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "21_shipping_damaged_fragile_agent_must_ask_resolution_preference",
+      "kind": "must",
+      "requirement": "Agent must ask the customer what resolution they want (a refund or a replacement) before proposing or processing one."
+    },
+    {
+      "evidence": "conversation",
+      "id": "21_shipping_damaged_fragile_agent_must_offer_goodwill_credit_for",
+      "kind": "must",
+      "requirement": "Agent must offer goodwill credit for fragile item."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "goodwill_credit",
+      "expected_value": 10
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "refund_amount",
+      "expected_value": 109
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9155",
+      "field": "return_reason",
+      "expected_value": "damaged_in_transit"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-6023",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/21-shipping_damaged_fragile.json"
+}

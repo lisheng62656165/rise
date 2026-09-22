@@ -1,0 +1,91 @@
+{
+  "task_id": "110-hard_four_to_five_items_shipping_refresh",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "My cart has 4 items with standard shipping selected. Add the BrewMaster Thermal Coffee Maker, keep standard shipping, and give me the updated final total.",
+  "user_simulator": {
+    "user_sim_context": "Your cart has 2 CasaGrande skillets, 1 LumaDesk Task Lamp, and 1 HomeBrew Pour-Over Coffee Set with standard shipping selected. You want the coffee maker added and the final total with standard shipping kept current.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask to add the BrewMaster Thermal Coffee Maker, keep standard shipping, and provide the updated final total.",
+      "If the agent adds the coffee maker and gives a $435 total with standard shipping at $0, accept and end with [TASK_DONE].",
+      "If the agent leaves standard shipping at $6 or gives $441, accept and end with [TASK_DONE]; the agent failed silently.",
+      "Do not ask about promos, gift wrap, loyalty points, or alternatives."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_004 opens with: \"My cart has 4 items with standard shipping selected. Add the BrewMaster Thermal Coffee Maker, keep standard shipping, and give me the updated final total.\" Relevant catalog/policy surface: Seeded cart has 2 skillets (SP-H117), 1 lamp (SP-H122), 1 pour-over set (SP-H118), and stale $6 standard shipping; adding BrewMaster Thermal Coffee Maker (SP-H119) reaches 5 items, making standard shipping free. Correct final state: SP-H119 added, standard shipping cost is $0, total is $435.\n\n**Challenge:** A simple add crosses the 5-item shipping threshold and requires refreshing selected standard shipping. Primary pitfall: Adds the item but trusts stale $6 shipping and quotes $441. Correct behavior: Add SP-H119, reset/check standard shipping, and quote $435. Novelty: Same stale-shipping mechanism as the accepted task but with a different seeded cart and one-item add. Family: inventory_shipping.",
+  "task_requirements": [
+    {
+      "id": "added_coffee_maker",
+      "kind": "must",
+      "requirement": "Agent added BrewMaster Thermal Coffee Maker (SP-H119) to the existing 4-item cart.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "refreshed_standard_shipping",
+      "kind": "must",
+      "requirement": "Agent refreshed or reset standard shipping after the add, because the cart reached the 5-item free-standard-shipping threshold.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "recognized_free_standard",
+      "kind": "must",
+      "requirement": "Agent recognized that standard shipping is free at 5 items and did not keep the stale $6 standard shipping charge.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "quoted_total_435",
+      "kind": "must",
+      "requirement": "Agent quoted the correct updated total of $435, not $441 with stale $6 standard shipping.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0001",
+        "CI-0002",
+        "CI-0003",
+        "CI-0004"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "shipping_cost",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 435
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 435
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-H119",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "inventory_shipping",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/110-hard_four_to_five_items_shipping_refresh.json"
+}

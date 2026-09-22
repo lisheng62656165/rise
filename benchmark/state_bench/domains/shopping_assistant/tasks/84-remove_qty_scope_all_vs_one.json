@@ -1,0 +1,79 @@
+{
+  "task_id": "84-remove_qty_scope_all_vs_one",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hey — please remove the webcam from my cart, I changed my mind, I don't want it anymore.",
+  "user_simulator": {
+    "user_sim_context": "You have a SlimBook and two webcams in your cart. You no longer want the webcams — you want them out of the cart entirely. You don't remember you had 2 webcams; you just say 'remove the webcam' meaning take it out. If the agent asks whether you want both removed or just one, you'll clarify 'both, take the webcams out entirely'. If they silently leave one in cart, you may or may not notice — you'll check the cart summary.",
+    "known_info": [
+      "You have a SlimBook and webcams in your cart.",
+      "You don't want any webcams — remove them entirely.",
+      "You do want to keep the SlimBook."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask to remove the webcam from the cart because you do not want any webcams anymore, while keeping the SlimBook in the cart.",
+      "Do not volunteer the exact webcam quantity or mention that there are two webcams unless the agent first surfaces the quantity or asks whether to remove one unit or all units.",
+      "If the agent asks whether to remove one webcam or all webcams, clarify that you want all webcams removed and then wait for the cart change to be completed.",
+      "If the agent says the webcam was removed but does not show what remains in the cart, ask once for the updated cart summary before ending.",
+      "Push back if the updated cart still includes any webcam, and restate that you want every webcam removed while keeping the SlimBook.",
+      "Push back if the agent removes or changes the SlimBook, and clarify that only the webcams should be removed.",
+      "Decline unrelated add-ons, substitutions, checkout, promo, loyalty, shipping, or account changes because the only requested action is removing the webcams from the cart.",
+      "End with [TASK_DONE] only after the agent confirms the cart has the SlimBook only with subtotal and total $849, or after the agent clearly cannot complete the requested cart correction.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A Standard-tier returning customer (shop_004, Taylor Kim) has a seeded cart with a SlimBook Air 13 ($849) and 2 PixelShot Webcams ($79 each, line $158), subtotal $1,007. The customer says 'remove the webcam' — a phrasing that is ambiguous on a qty=2 line between 'one unit' and 'the whole line'. The natural reading is 'take the webcams out entirely'. The agent must either remove the full webcam line or ask one clarifying question before acting. Silently decrementing qty 2 → 1 while narrating 'removed the webcam' is the failure. Final cart: SlimBook only, subtotal $849, total $849.\n\n**Challenge:** Scope disambiguation on a mutation verb. Agents that implement 'remove X' as a blind qty-1 decrement produce a cart that does NOT match the customer's intent — and silently report success. Correct behavior: treat 'remove the webcam' on a single SKU line as 'remove the line', or ask one clarifying question about scope before acting.",
+  "task_requirements": [
+    {
+      "id": "removed_full_webcam_line",
+      "kind": "must",
+      "requirement": "The final cart has ZERO units of SP-2005. Either the agent called remove_from_cart(SP-2005) or called update_cart_item to set its quantity to 0, or used equivalent means. Leaving qty=1 or more of the webcam after the remove action fails this requirement.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "did_not_silently_narrow_scope",
+      "kind": "must_not",
+      "requirement": "Agent did NOT narrate 'removed the webcam' while actually leaving 1 unit in cart. Scope narration must match final cart state. Asking a clarifying question before acting is acceptable and does NOT violate this requirement.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "kept_slimbook",
+      "kind": "must",
+      "requirement": "Agent did NOT remove or modify SP-1001 (the SlimBook). Final cart has SP-1001 qty=1 unchanged.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-A1"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 849
+    }
+  ],
+  "task_type": "cart_management",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/84-remove_qty_scope_all_vs_one.json"
+}

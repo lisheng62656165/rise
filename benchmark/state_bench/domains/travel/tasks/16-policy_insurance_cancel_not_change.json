@@ -1,0 +1,54 @@
+{
+  "task_id": "16-policy_insurance_cancel_not_change",
+  "user_id": "user_003",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi, I need to change my flight BK-PR01 to a later departure. I have travel insurance so that should cover any fees, right?",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-PR01 has travel insurance.",
+      "Wants an afternoon flight on the same route and date.",
+      "Wants to understand options before any cancellation, rebooking, or flight change is executed."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want advice about moving insured booking BK-PR01 to a later departure, but you only want to understand the policy and options before any cancellation, rebooking, or flight change is executed.",
+      "If the agent asks what change you want, say you want an afternoon flight on the same route and date; do not introduce cabin changes, add-ons, or unrelated preferences.",
+      "When the agent explains that insurance does not waive direct change fees, express surprise and ask what realistic options you have instead.",
+      "If the agent suggests canceling and rebooking, ask whether this booking's insurance would fully cover the cancellation even though the reason is a personal schedule change.",
+      "If the agent claims insurance waives the direct change fee or tries to proceed without explaining the policy distinction, ask them to clarify whether insurance covers cancellation rather than the change fee.",
+      "Do not authorize or request execution of a cancellation, rebooking, or flight change; keep the conversation at the policy and advice level only.",
+      "End with [TASK_DONE] only after the agent clearly explains that insurance covers cancellation but not direct change fees, describes cancel-and-rebook as the workaround, and no booking action has been taken."
+    ],
+    "user_sim_context": "You want to change an insured booking and came in assuming the insurance should take care of any fees. You are not asking the agent to act right away; you first want to understand what the policy actually allows. If your assumption is wrong, you want to know what realistic workaround exists."
+  },
+  "task_summary": "**Task:** A traveler wants to change an insured booking and assumes insurance should waive the change fee. Correct resolution: Travel insurance covers cancellation but does not waive the fee for changing the booking.\n\n**Challenge:** The agent explains insurance covers cancellation but not change fees, describes the cancel-and-rebook workaround, and does not execute any booking action in this policy-only task.",
+  "task_requirements": [
+    {
+      "id": "state_insurance_not_change_fee",
+      "kind": "must",
+      "requirement": "Agent must explain that under the benchmark policy travel insurance fully covers cancellation of this booking, but does not waive the fee for directly changing it.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_cancel_rebook_workaround",
+      "kind": "must",
+      "requirement": "Agent must explain that a workable alternative under the benchmark policy is to cancel the current booking with full insurance coverage and then rebook the preferred flight separately, while making clear this is separate from waiving a direct change fee.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_execution",
+      "kind": "must_not",
+      "requirement": "Agent must not execute a cancellation, rebooking, or flight change in this policy-only task.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_wrong_change_fee_figure",
+      "kind": "must_not",
+      "requirement": "If the agent states a specific dollar amount for the direct change fee on BK-PR01, it must not state any amount other than $150. This economy domestic personal change has a departure exactly 7 days out, which falls in the within-7-days tier ($150), not the more-than-7-days tier ($75); quoting $75 (or any other figure) is a wrong-number error. The agent may instead leave the exact fee unstated and still satisfy this, but must not assert an incorrect change-fee amount.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/16-policy_insurance_cancel_not_change.json"
+}

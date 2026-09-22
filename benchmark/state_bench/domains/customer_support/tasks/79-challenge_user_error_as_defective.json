@@ -1,0 +1,81 @@
+{
+  "task_id": "79-challenge_user_error_as_defective",
+  "user_id": "cust_004",
+  "now": "2026-07-05T10:00:00",
+  "opening_message": "The wireless headphones from order ORD-7111 don't work. I've tried everything but they won't connect to my phone.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7111",
+      "item: headphones",
+      "actual_issue: Bluetooth pairing confusion"
+    ],
+    "task_rules": [
+      "Start from the position that the ORD-7111 headphones will not connect and that you want a return if they cannot be resolved; do not initially volunteer that the issue may be Bluetooth setup.",
+      "Give order ID ORD-7111 when asked for identifying information.",
+      "When asked what 'not working' means, explain that pressing the button briefly does not make any Bluetooth device appear on your phone.",
+      "If the agent asks you to hold the button for about 5 seconds or otherwise enter pairing mode, try it and acknowledge that a flashing blue light appears.",
+      "If the agent explains that the issue is setup or Bluetooth pairing rather than a defective unit, accept that explanation but still ask to return the headphones because they were harder to use than expected.",
+      "If the agent attempts to classify or process the return as defective before asking what 'not working' means or walking through setup or usage questions, push back once and ask them to check the actual issue and return reason first.",
+      "Push back if the agent offers a no-fee defective return after the pairing issue has been clarified, or if they skip explaining why the return is now changed_mind rather than defective.",
+      "Accept only after the agent previews a changed_mind return for the headphones with the $37 restocking fee, $213 refund to the original payment method, and no defective-item exception.",
+      "End only after the agent confirms the return has been processed for ORD-7111 with return reason changed_mind and the expected restocking fee and refund."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your headphones are not working the way you expected, and from your side it feels like the product is broken. You are describing the problem in the strongest terms because you want a clean resolution. If the issue is actually about setup rather than a defective device, you need the agent to explain that carefully and tell you what resolution still applies."
+  },
+  "task_summary": "**Task:** The customer says the headphones 'don't work,' but the details reveal a Bluetooth pairing problem rather than a product defect. The correct handling is to recognize this as user error, reframe the case as a changed-mind return, and apply the normal $37 restocking logic instead of granting a defect-based exception.\n\n**Challenge:** The agent has to diagnose the substance of the complaint instead of copying the customer's label. Weak agents accept 'defective' at face value, skip the clarifying step, or hand out a no-fee resolution for what is really not a defect.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "79_challenge_user_error_as_defective_agent_must_ask_about_usage",
+      "kind": "must",
+      "requirement": "Agent must ask the customer to describe what 'not working' means or walk through setup/usage questions before classifying the return reason."
+    },
+    {
+      "evidence": "conversation",
+      "id": "79_challenge_user_error_as_defective_agent_must_explain_changed_mind_classification",
+      "kind": "must",
+      "requirement": "Agent must explain that once the pairing/setup issue is identified, the return should be classified as changed_mind rather than defective."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10137",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10137",
+      "field": "refund_amount",
+      "expected_value": 213
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10137",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10137",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10137",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7111",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/79-challenge_user_error_as_defective.json"
+}

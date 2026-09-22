@@ -1,0 +1,62 @@
+{
+  "task_id": "123-hard_empty_box_single_item_not_return",
+  "user_id": "cust_002",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "ORD-7542 was just one blender, but the delivered box was empty except for packing paper. Please fix the missing blender.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7542",
+      "item: PowerBlend Pro Blender",
+      "issue: delivered box was empty except for packing paper",
+      "preferred_resolution: refund to original payment (only reveal if asked refund versus reship)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to ORD-7542, a one-item blender order where the delivered box was empty; this is not a standard return because you never received the blender.",
+      "Provide the order ID and empty-box details when asked or when needed; do not volunteer policy rules, item IDs, refund amounts, shipping-claim eligibility, or internal tool facts.",
+      "If the agent frames this as a return, return label, or asks you to send the blender back, push back that there is no blender to return and ask them to handle it as a missing-item or delivered-not-received shipping claim.",
+      "If the agent offers refund versus reship for the shipping claim, choose refund to original payment.",
+      "Push back if the agent only offers store credit, processes a return, issues a return label, or changes the case to wrong_item, damaged_in_transit, changed_mind, warranty, cancellation, or exchange.",
+      "Accept only after the agent treats the empty box as a delivered-not-received shipping claim, offers refund versus reship, and previews an $89 original-payment refund with no return shipment or return label required.",
+      "END only after the missing-blender refund is processed through the direct refund path and the item is not marked as returned."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You received a package, but not the purchased blender. The correct support path is a delivered-not-received shipping claim, not a return, because there is no item to send back. You want a refund if the agent asks you to choose."
+  },
+  "task_summary": "**Task:** A one-item blender order shows delivered, but the customer says the box was empty. Correct handling is to treat this as a delivered-not-received shipping claim, offer refund versus reship, and process the chosen direct refund without creating a return or return label.\n\n**Challenge:** This reuses the proven task-83 failure mode with fresh entities. Weak agents often follow the word missing into `process_return`, creating a nonsensical return for an item the customer never received.",
+  "task_requirements": [
+    {
+      "id": "162_offer_shipping_claim_choice",
+      "kind": "must",
+      "requirement": "Agent must treat the empty box as a delivered-not-received shipping claim and offer refund versus reship before processing one.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "162_direct_refund_no_return",
+      "kind": "must",
+      "requirement": "Agent must process only an $89 direct original-payment refund for the missing blender, with no return shipment or return label required.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "162_no_return_flow",
+      "kind": "must_not",
+      "requirement": "Agent must not call process_return, issue a return label, or classify the empty-box issue as wrong_item, damaged_in_transit, changed_mind, warranty, cancellation, or exchange.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10562",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10562",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/123-hard_empty_box_single_item_not_return.json"
+}

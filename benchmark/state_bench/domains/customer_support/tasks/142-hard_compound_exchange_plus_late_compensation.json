@@ -1,0 +1,90 @@
+{
+  "task_id": "142-hard_compound_exchange_plus_late_compensation",
+  "user_id": "cust_003",
+  "now": "2026-07-08T18:00:00",
+  "opening_message": "ORD-7253 arrived late and the shirt is too small. I need the large size and compensation for the delay.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7253",
+      "exchange: large shirt",
+      "late: 4 days",
+      "preferred_compensation_destination: original payment card (only reveal if the agent asks where to put any compensation)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging the too-small shirt from ORD-7253 for the large size and receiving separate compensation for the four-day delivery delay.",
+      "Provide the order ID, late-arrival timing, and large-size exchange preference when asked or when needed; do not volunteer the compensation destination unless the agent asks where to issue it.",
+      "If the agent handles only the exchange or only the delay compensation, ask once for the missing part of the resolution.",
+      "If the agent asks where to issue the late-delivery compensation, choose the original payment card; if compensation is issued as store credit without that question, push back once and ask for it on the card instead.",
+      "Push back on return, cancellation, wrong-size refund-only, store-credit-only, or replacement-size paths that do not process the requested large-size exchange and separate delay compensation.",
+      "Accept only after the agent previews both actions: the exchange to the large shirt and the separate late-delivery compensation to the original payment method.",
+      "End only after the agent confirms the exchange has been processed and the separate original-payment compensation has been issued."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7253. Shirt arrived late and in the wrong size. Agent must process a size exchange and separately issue late-delivery compensation. You want any delay compensation back to your original payment method, not store credit — but don't volunteer this preference unprompted; let the agent ask. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Shirt arrived late and in the wrong size. Agent must process a size exchange and separately issue late-delivery compensation.",
+  "task_requirements": [],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10255",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10255",
+      "field": "refund_amount",
+      "expected_value": 22
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10255",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10255",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7253",
+          "product_id": "PROD-4266",
+          "quantity": 1,
+          "unit_price": 59,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7253",
+        "product_id": "PROD-4266",
+        "quantity": 1,
+        "unit_price": 59,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7253",
+        "product_id": "PROD-4266",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 59
+      }
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/142-hard_compound_exchange_plus_late_compensation.json"
+}

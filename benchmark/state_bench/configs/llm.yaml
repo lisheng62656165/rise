@@ -1,0 +1,9 @@
+# Shared LLM call defaults.
+
+max_tokens:
+  default: 8192
+  agent: 8192
+
+retry:
+  max_attempts: 5
+  wait_seconds: 3

@@ -1,0 +1,49 @@
+{
+  "task_id": "105-hard_compat_dock_wrong_laptop",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Add a dock for my CreatorBook 15. The ProBook dock looks close enough if it works.",
+  "user_simulator": {
+    "user_sim_context": "You need a dock for your CreatorBook 15 and think the ProBook dock might be close enough if it works. You want the agent to verify compatibility instead of relying on brand or name similarity.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You need a dock for your CreatorBook 15, and the ProBook dock is acceptable only if the agent verifies it is compatible before any cart change.",
+      "If the agent asks what device the dock is for, say it is for your CreatorBook 15 and ask them to check compatibility.",
+      "If the agent relies on brand similarity, says the dock is close enough, or asks to add it without compatibility evidence, ask them to verify compatibility with CreatorBook 15 first.",
+      "If the agent checks compatibility and says the ProBook dock is not compatible with CreatorBook 15, accept that no dock should be added and the cart should remain unchanged.",
+      "If the agent suggests a hub, another dock, or any other accessory, decline substitutes unless you explicitly ask for a new recommendation later.",
+      "End only after the agent has verified the ProBook dock incompatibility for CreatorBook 15 and confirmed that the cart was left unchanged.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences unless this task is explicitly about that topic.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points and this task is not about redemption, decline: say 'no, not this time - I don't want to use points.'",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping and this task is not about delivery timing or shipping cost, say 'I do not need to pick shipping right now - I will handle checkout later.'"
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_004 opens with: \"Add a dock for my CreatorBook 15. The ProBook dock looks close enough if it works.\" Relevant catalog/policy surface: CreatorBook 15 (SP-H103), ProBook USB-C Dock (SP-H110), 7-Port USB-C Hub (SP-H111). Final cart/account state should remain unchanged.\n\n**Challenge:** Dock compatibility list excludes CreatorBook; agent must not infer from brand/category. Primary pitfall: Adds ProBook dock based on brand similarity. Correct behavior: No cart mutation; explain ProBook dock is not compatible with CreatorBook 15. Novelty: Tests negative compatibility with a plausible same-brand accessory. Family: compatibility_variant.",
+  "task_requirements": [
+    {
+      "id": "checked_creatorbook_compatibility",
+      "kind": "must",
+      "requirement": "Agent checked compatibility/details for the dock against CreatorBook 15.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "declined_wrong_dock",
+      "kind": "must",
+      "requirement": "Agent declined to add ProBook USB-C Dock for CreatorBook 15.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_incompatible_add",
+      "kind": "must_not",
+      "requirement": "Agent did not add SP-H110 or another incompatible dock.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "compatibility_variants",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/105-hard_compat_dock_wrong_laptop.json"
+}

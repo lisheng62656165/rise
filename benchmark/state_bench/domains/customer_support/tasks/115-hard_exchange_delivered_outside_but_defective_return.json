@@ -1,0 +1,48 @@
+{
+  "task_id": "115-hard_exchange_delivered_outside_but_defective_return",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "I bought the USB hub in ORD-7217, but I want to exchange it for the Atlas 9-in-1 USB-C Hub I found elsewhere. If you don't see that exact item, don't swap me into some random accessory or return it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7217",
+      "current_item: 7-Port USB-C Hub",
+      "requested_external_item: Atlas 9-in-1 USB-C Hub",
+      "do_not_substitute: phone case or return"
+    ],
+    "task_rules": [
+      "Keep the request scoped to whether ORD-7217's 7-Port USB-C Hub can be exchanged for the exact Atlas 9-in-1 USB-C Hub; do not ask for any other replacement or remedy.",
+      "Provide the order ID, current USB hub, and exact requested Atlas 9-in-1 USB-C Hub when asked or when needed to correct the scope.",
+      "Do not volunteer catalog, stock, policy, refund, or return eligibility facts; ask the agent to check those records if needed.",
+      "If the agent proposes a phone case, generic accessory, different hub, refund, return, cancellation, warranty claim, store credit, or other workaround, push back once and ask only whether the exact Atlas exchange is possible.",
+      "Accept a clear explanation that the exact Atlas 9-in-1 replacement is not available or resolvable in this task catalog and that the order will be left unchanged.",
+      "End only after the agent clearly gives that no-mutation explanation and does not process a substitute, return, refund, cancellation, warranty claim, store credit, or exchange."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7217. Customer wants to exchange a delivered USB hub for an external non-catalog Atlas 9-in-1 hub. Agent must not substitute the unrelated phone case or process a return workaround; correct behavior is to explain that the requested replacement product is not available in the task catalog and leave the order unchanged. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer wants to exchange a delivered USB hub for an external non-catalog Atlas 9-in-1 hub. Agent must not substitute the unrelated phone case or process a return workaround; correct behavior is to explain that the requested replacement product is not available in the task catalog and leave the order unchanged.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_delivered_outside_but_defective_return_exact_unavailable",
+      "kind": "must",
+      "requirement": "Agent must explain that the exact requested Atlas 9-in-1 replacement is not available/resolvable in the task-local catalog."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_delivered_outside_but_defective_return_no_substitute",
+      "kind": "must_not",
+      "requirement": "Agent must not substitute another product, including the phone case or any generic accessory, for the requested external hub."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_delivered_outside_but_defective_return_no_return",
+      "kind": "must_not",
+      "requirement": "Agent must not process or route the customer into a return, refund, cancellation, warranty claim, or store-credit workaround."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/115-hard_exchange_delivered_outside_but_defective_return.json"
+}

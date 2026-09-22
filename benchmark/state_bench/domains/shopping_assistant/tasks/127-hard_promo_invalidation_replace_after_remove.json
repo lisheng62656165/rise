@@ -1,0 +1,89 @@
+{
+  "task_id": "127-hard_promo_invalidation_replace_after_remove",
+  "user_id": "shop_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Remove the ErgoLift Standing Desk from my cart. If that makes OFFICE20 invalid, use the best valid remaining code instead, but tell me the promo impact before changing it.",
+  "user_simulator": {
+    "user_sim_context": "Your cart already has an ErgoLift Standing Desk and LumaDesk Task Lamp with OFFICE20 applied. You want the desk removed, but only if the assistant handles the promo replacement correctly.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives.",
+      "You know your cart has OFFICE20, but you do not know the minimum or which fallback code is valid after removing the desk."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want the desk removed and the best valid remaining promo used, but you asked for the promo impact before the change.",
+      "If the agent explains that removing the desk leaves only the $69 lamp, OFFICE20 becomes invalid below the $250 minimum, and SAVE10 is valid for $6 off / $63 final total, consent to removing the desk and replacing OFFICE20 with SAVE10.",
+      "After consenting, do not include [TASK_DONE] in the same message; wait for the agent to confirm the desk was removed and SAVE10 is the only promo.",
+      "If the agent says OFFICE20 still applies after removing the desk, object that they should check the promo minimum.",
+      "If the agent removes the desk or changes promos before explaining the promo impact, object once that you asked for the impact first.",
+      "If the lamp remains and SAVE10 is the only promo after your consent, end your next message with [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_003 opens with: \"Remove the ErgoLift Standing Desk from my cart. If that makes OFFICE20 invalid, use the best valid remaining code instead, but tell me the promo impact before changing it.\" Relevant catalog/policy surface: Seeded cart with ErgoLift Standing Desk (SP-H120), LumaDesk Task Lamp (SP-H122), OFFICE20 applied, SAVE10 available. Correct final state: desk removed, lamp remains, OFFICE20 gone, SAVE10 applied, total is $63.\n\n**Challenge:** Removing the desk invalidates OFFICE20, but a weaker fallback code remains valid; the agent must plan the promo replacement before writing. Primary pitfall: Leaves invalid OFFICE20, fails to apply SAVE10, changes cart before explaining impact, or quotes wrong final total. Correct behavior: Check cart/promos, explain OFFICE20 invalidation and SAVE10 fallback, get consent, remove desk, apply SAVE10 only. Novelty: Cart removal forces promo replacement rather than simple promo drop disclosure. Family: promotions_discounts.",
+  "task_requirements": [
+    {
+      "id": "checked_cart_and_promo_rules",
+      "kind": "must",
+      "requirement": "Agent checked the current cart and promo eligibility before removing the desk or changing promo codes.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "explained_office20_invalid_save10_fallback",
+      "kind": "must",
+      "requirement": "Agent explained that removing the $299 desk leaves only the $69 lamp, making OFFICE20 invalid because the home-office subtotal falls below $250, and that SAVE10 is the best valid remaining code for $6 off the lamp.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "got_consent_for_remove_and_replace",
+      "kind": "must",
+      "requirement": "Agent got explicit consent after explaining the promo invalidation and SAVE10 fallback before removing the desk and replacing OFFICE20 with SAVE10.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "removed_desk_replaced_promo",
+      "kind": "must",
+      "requirement": "Agent removed the ErgoLift Standing Desk, removed or allowed OFFICE20 to drop, and applied SAVE10 only; final cart keeps the LumaDesk Task Lamp with total $63.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "applied_promo_codes",
+      "expected_value": [
+        "SAVE10"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "discount_amount",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0002"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "subtotal",
+      "expected_value": 69
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "total",
+      "expected_value": 63
+    }
+  ],
+  "task_type": "promotions_discounts",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/127-hard_promo_invalidation_replace_after_remove.json"
+}

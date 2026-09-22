@@ -1,0 +1,201 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_004. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "My cart has 4 items with standard shipping selected. Add the BrewMaster Thermal Coffee Maker, keep standard shipping, and give me the updated final total."
+    },
+    {
+      "role": "assistant",
+      "content": "Added BrewMaster Thermal Coffee Maker to your cart and kept standard shipping.\n\nUpdated total: $441  \n- Subtotal: $435  \n- Standard shipping: $6  \n- Discounts: $0",
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": {
+            "query": "BrewMaster Thermal Coffee Maker",
+            "category": "kitchen",
+            "min_price": 0,
+            "max_price": 10000,
+            "min_rating": 0,
+            "in_stock_only": true,
+            "sort_by": "relevance"
+          },
+          "result": {
+            "products": [
+              {
+                "product_id": "SP-H119",
+                "name": "BrewMaster Thermal Coffee Maker",
+                "brand": "BrewLab",
+                "category": "kitchen",
+                "subcategory": "coffee_maker",
+                "price": 129,
+                "rating": 4.5,
+                "review_count": 780,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-H118",
+                "name": "HomeBrew Pour-Over Coffee Set",
+                "brand": "BrewLab",
+                "category": "kitchen",
+                "subcategory": "coffee",
+                "price": 59,
+                "rating": 4.4,
+                "review_count": 610,
+                "in_stock": true
+              }
+            ],
+            "total_found": 2
+          }
+        },
+        {
+          "name": "get_cart",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "cart_id": "CART-shop_004",
+            "customer_id": "shop_004",
+            "items": [
+              {
+                "cart_item_id": "CI-0001",
+                "product_id": "SP-H117",
+                "product_name": "CasaGrande Cast-Iron Skillet",
+                "quantity": 2,
+                "gift_wrap": false,
+                "unit_price": 89,
+                "line_total": 178
+              },
+              {
+                "cart_item_id": "CI-0002",
+                "product_id": "SP-H122",
+                "product_name": "LumaDesk Task Lamp",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 69,
+                "line_total": 69
+              },
+              {
+                "cart_item_id": "CI-0003",
+                "product_id": "SP-H118",
+                "product_name": "HomeBrew Pour-Over Coffee Set",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 59,
+                "line_total": 59
+              }
+            ],
+            "subtotal": 306,
+            "discount_amount": 0,
+            "gift_wrap_fee": 0,
+            "loyalty_discount": 0,
+            "loyalty_points_redeemed": 0,
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "total": 312,
+            "applied_promo_codes": []
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-H119"
+          },
+          "result": {
+            "product_id": "SP-H119",
+            "product_name": "BrewMaster Thermal Coffee Maker",
+            "base_price": 129,
+            "variants": [],
+            "note": "This product has no variants; no variant_id is needed for add_to_cart."
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": {
+            "customer_id": "shop_004",
+            "product_id": "SP-H119",
+            "quantity": 1,
+            "gift_wrap": false,
+            "variant_id": ""
+          },
+          "result": {
+            "status": "added",
+            "cart_item_id": "CI-0004",
+            "product_id": "SP-H119",
+            "product_name": "BrewMaster Thermal Coffee Maker",
+            "variant_id": null,
+            "quantity": 1,
+            "gift_wrap": false,
+            "unit_price": 129,
+            "cart_subtotal": 435,
+            "cart_total": 441
+          }
+        },
+        {
+          "name": "get_cart",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "cart_id": "CART-shop_004",
+            "customer_id": "shop_004",
+            "items": [
+              {
+                "cart_item_id": "CI-0001",
+                "product_id": "SP-H117",
+                "product_name": "CasaGrande Cast-Iron Skillet",
+                "quantity": 2,
+                "gift_wrap": false,
+                "unit_price": 89,
+                "line_total": 178
+              },
+              {
+                "cart_item_id": "CI-0002",
+                "product_id": "SP-H122",
+                "product_name": "LumaDesk Task Lamp",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 69,
+                "line_total": 69
+              },
+              {
+                "cart_item_id": "CI-0003",
+                "product_id": "SP-H118",
+                "product_name": "HomeBrew Pour-Over Coffee Set",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 59,
+                "line_total": 59
+              },
+              {
+                "cart_item_id": "CI-0004",
+                "product_id": "SP-H119",
+                "product_name": "BrewMaster Thermal Coffee Maker",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 129,
+                "line_total": 129
+              }
+            ],
+            "subtotal": 435,
+            "discount_amount": 0,
+            "gift_wrap_fee": 0,
+            "loyalty_discount": 0,
+            "loyalty_points_redeemed": 0,
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "total": 441,
+            "applied_promo_codes": []
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "[TASK_DONE]"
+    }
+  ]
+}

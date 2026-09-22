@@ -1,0 +1,91 @@
+{
+  "task_id": "114-hard_exchange_mixed_order_scope",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "In ORD-7216, I need the shirt swapped for a larger size. The book is fine.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7216",
+      "exchange_item: shirt",
+      "keep_item: book"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging only the shirt in ORD-7216 for the Large size; the book should remain delivered and unchanged.",
+      "Provide the order ID when asked, and clarify that the shirt is the item to exchange while the book is fine only if the agent needs item scope.",
+      "If the agent asks for product, policy, stock, item ID, fee, or exchange eligibility facts you do not know, ask them to check the order records or tools.",
+      "Push back if the agent proposes returning, refunding, cancelling, or changing the whole order, the book, or any item other than the shirt.",
+      "Push back if the agent proposes a return-and-rebuy, refund, goodwill credit, or a different replacement instead of a direct exchange to Premium Cotton Shirt (Large).",
+      "Accept only after the preview confirms the shirt will be exchanged for Premium Cotton Shirt (Large) and the book will remain unchanged.",
+      "If the agent asks for confirmation before giving a matching preview, ask them to first confirm the replacement item and that the book is not affected.",
+      "End only after the exchange has been processed and the final confirmation still shows the shirt exchanged to Large with the book unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7216. Two-item order where only the shirt should be exchanged for Large; the book must remain delivered and unchanged. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Two-item order where only the shirt should be exchanged for Large; the book must remain delivered and unchanged.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_mixed_order_scope_shirt",
+      "kind": "must",
+      "requirement": "Agent must identify that ITEM-10216 is the shirt and keep the exchange scoped to that item when discussing or using tools."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_mixed_order_scope_book",
+      "kind": "must_not",
+      "requirement": "Agent must not return, exchange, cancel, or refund the book."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10216",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10216",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7216",
+          "product_id": "PROD-4222",
+          "quantity": 1,
+          "unit_price": 59,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7216",
+        "product_id": "PROD-4222",
+        "quantity": 1,
+        "unit_price": 59,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7216",
+        "product_id": "PROD-4222",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 59
+      }
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/114-hard_exchange_mixed_order_scope.json"
+}

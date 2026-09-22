@@ -1,0 +1,83 @@
+{
+  "task_id": "83-challenge_military_visit_not_deployment",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to change my flight BK-1000 to June 26. My plans changed because I am visiting my brother at a military base and the dates shifted. My user ID is user_005.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: LAX to DFW, June 22.",
+      "Visiting brother at a military base.",
+      "Wants to change to June 26."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the goal focused on changing BK-1000 to June 26 because your personal visit to your brother at a military base shifted dates; do not ask for cancellation, rebooking, upgrades, or add-ons.",
+      "Do not volunteer a policy interpretation or claim military status; if the agent asks, explain that you are a civilian visiting your brother who is stationed there.",
+      "If the agent treats the base visit as a military exemption or says the change is free for that reason, push back once by clarifying that this is only a personal visit and ask whether the ordinary personal-change fee applies.",
+      "If the agent presents June 26 options, choose the same-route economy AA afternoon option that fits the request and budget; ask for missing airline, time range, or stop-count details before approving the change.",
+      "Accept the change only after the agent explains or clearly implies that the military exemption does not apply, quotes the $150 personal change fee, includes the $30 fare difference, and the total additional cost is within budget.",
+      "For a flight change to this existing booking, keep the existing booking preferences unless asked to confirm them; if the final changed booking has a wrong persisted preference, correct one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "End only after the June 26 change is completed and the final booking details, $150 change fee, $30 fare difference, and expected preserved preferences are confirmed.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You mention a military base because that is relevant to why your plans changed, but the trip is a personal visit, not an official deployment. From your point of view, that distinction may not seem important until the policy turns on it. You need the agent to handle that nuance carefully."
+  },
+  "task_summary": "**Task:** User mentions visiting a military base, but the trip is not military deployment and should be treated as a personal change. Correct resolution: Visiting a military base as a civilian does not qualify for the military change-fee exemption.\n\n**Challenge:** The agent does not over-trigger the military exception and instead keeps the change reason and fee on the ordinary personal path.",
+  "task_requirements": [
+    {
+      "id": "state_not_military_exception",
+      "kind": "must",
+      "requirement": "Agent must explain or clearly imply that visiting a military base as a civilian does not qualify for the military change-fee exemption.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_personal_fee",
+      "kind": "must",
+      "requirement": "Agent must state that the applicable change fee for this booking is $150.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_no_free_military_change",
+      "kind": "must_not",
+      "requirement": "Agent must not tell the user that this change is free under a military exception.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 150
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "AA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 580
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/83-challenge_military_visit_not_deployment.json"
+}

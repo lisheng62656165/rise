@@ -1,0 +1,70 @@
+{
+  "task_id": "84-hard_platinum_loyalty_bonus_compensation_cap",
+  "user_id": "cust_001",
+  "now": "2026-07-15T10:00:00",
+  "opening_message": "ORD-7561 was only a phone case, but it arrived four days late. I'm Platinum with a lot of orders; can you check the full compensation?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7561",
+      "issue: phone case delivered four days late",
+      "membership: Platinum",
+      "loyalty_bonus_status: you have not used the one-time Platinum loyalty bonus",
+      "preferred_refund_method: original payment"
+    ],
+    "task_rules": [
+      "Keep the request scoped to late-delivery compensation for ORD-7561.",
+      "Provide the order ID and four-day-late issue when asked; do not volunteer exact compensation math, policy names, or tool facts.",
+      "If the agent checks whether your one-time Platinum loyalty bonus has already been used, say it has not been used.",
+      "If the agent offers only the late-delivery credit and does not mention any loyalty-bonus check, ask once whether your Platinum account history adds anything else.",
+      "If the agent says the uncapped compensation would be more than the order cap allows, accept the capped amount after they explain it.",
+      "If the agent tries to return, cancel, exchange, replace, or warranty the phone case, push back that you are keeping it and only want delay compensation.",
+      "Accept only after the agent explains the $30 Platinum late-delivery credit, the $50 one-time loyalty bonus eligibility, and the 50%-of-order-total cap reducing the payable refund to $21.",
+      "End only after the $21 original-payment compensation refund has been processed for the order item."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are a high-volume Platinum customer with a low-value order that arrived late. You have not used the one-time Platinum loyalty bonus. A perfect agent should check shipping compensation policy, check the customer profile, ask whether the one-time bonus has already been redeemed, apply the 50%-of-order-total cap, and issue only the capped amount."
+  },
+  "task_summary": "**Task:** A Platinum customer with 50+ prior orders had a $43-total phone-case order delivered in the 3-5 day late tier. Correct handling is to compute the $30 Platinum late-delivery credit, ask whether the one-time $50 loyalty bonus has already been used, recognize the uncapped $80 compensation, and apply the 50%-of-order-total cap so only $21 is refunded to original payment.\n\n**Challenge:** This targets the under-used loyalty-bonus branch plus the policy cap interaction. Weak agents stop at $30, pay the full $80, forget to ask whether the loyalty bonus was already used, or mutate the order instead of issuing capped compensation.",
+  "task_requirements": [
+    {
+      "id": "171_check_loyalty_bonus_redeemed",
+      "kind": "must",
+      "requirement": "Agent must ask whether the one-time Platinum loyalty bonus has already been redeemed before including it in the compensation calculation.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "171_apply_compensation_cap",
+      "kind": "must",
+      "requirement": "Agent must explain that the $80 uncapped compensation is reduced to $21 by the 50%-of-order-total cap.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "171_issue_capped_compensation",
+      "kind": "must",
+      "requirement": "Agent must process only a $21 original-payment refund for ITEM-10561 as the capped late-delivery compensation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "171_no_overpay_or_order_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not issue or promise $30, $50, $80, or any amount other than the capped $21, and must not return, cancel, exchange, replace, or warranty-claim the phone case.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10561",
+      "field": "refund_amount",
+      "expected_value": 21
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10561",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/84-hard_platinum_loyalty_bonus_compensation_cap.json"
+}

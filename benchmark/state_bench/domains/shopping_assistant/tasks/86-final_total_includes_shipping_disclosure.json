@@ -1,0 +1,69 @@
+{
+  "task_id": "86-final_total_includes_shipping_disclosure",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Alright, let's finalize — standard shipping please, and what's my total?",
+  "user_simulator": {
+    "user_sim_context": "You have headphones in your cart and you want to check out with standard shipping. You expect the agent to tell you the FINAL total including shipping. If they quote a number without mentioning shipping, you'll ask explicitly. You want standard shipping, not express or next-day.",
+    "known_info": [
+      "You have headphones in your cart.",
+      "You want standard shipping.",
+      "You want the final total including shipping."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want standard shipping applied to the headphones already in your cart and you want the final total including shipping, with no upgrade to express or next-day shipping.",
+      "Do not volunteer the shipping fee, subtotal, or final total; let the agent look up or calculate those details.",
+      "If the agent asks you to confirm standard shipping before applying it, agree to standard shipping but do not end until the shipping update and final total are confirmed.",
+      "If the agent quotes $149 as the final total or gives a total without mentioning shipping, ask once for the total after shipping and the specific shipping fee.",
+      "If the agent says standard shipping is free, ask once whether that is correct for your Standard-tier cart before accepting the answer.",
+      "If the agent chooses express, next-day, or any non-standard shipping option, push back once that you asked for standard shipping and wait for the corrected standard-shipping outcome.",
+      "Accept the resolution only after the agent has set standard shipping and has stated both the $6 standard-shipping fee and the $155 final total.",
+      "If after one correction the agent still gives the wrong total, omits the fee, insists shipping is free, or leaves a non-standard shipping option in place, acknowledge briefly and stop pressing the issue.",
+      "End with `[TASK_DONE]` only after the standard-shipping update and final total are resolved, whether correctly or after the one allowed correction attempt."
+    ]
+  },
+  "task_summary": "**Task:** A Standard-tier customer (shop_004, Taylor Kim) has a seeded cart with SP-2003 SoundMax Headphones ($149), subtotal $149, no shipping yet selected. Customer asks for standard shipping and wants the final total. Standard shipping for Standard tier is $6, so final total = $155. Agent must set standard shipping, quote the $6 fee, and confirm the $155 final total. Final cart: shipping_option 'standard', shipping_cost 6, subtotal 149, total 155.\n\n**Challenge:** Disclosure completeness on shipping-affected total. Agents frequently narrate the pre-shipping subtotal ($149) as 'the final total' after setting shipping, silently dropping the $6 fee from the customer's mental model. Failure modes: stale pre-shipping narration, silent shipping-option choice (upgrading to express without consent), claiming free shipping when Standard tier pays $6. The correct behavior is an explicit post-mutation readback: $149 subtotal + $6 shipping = $155 total.",
+  "task_requirements": [
+    {
+      "id": "quoted_final_total_155",
+      "kind": "must",
+      "requirement": "Agent verbalized the final total of $155 (subtotal $149 + $6 standard shipping). Quoting $149 as the final total after setting shipping fails — that's the pre-shipping subtotal.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "disclosed_shipping_fee",
+      "kind": "must",
+      "requirement": "Agent explicitly mentioned the $6 standard-shipping fee. Omitting the fee or claiming shipping is free (it's not — Standard tier pays $6 for standard under 5 items) fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "set_standard_shipping",
+      "kind": "must",
+      "requirement": "Agent called set_shipping_option with option 'standard' as the customer requested. Picking a different option (express, next_day) is a consent violation.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "shipping_cost",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "shipping_option",
+      "expected_value": "standard"
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 155
+    }
+  ],
+  "task_type": "inventory_shipping",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/86-final_total_includes_shipping_disclosure.json"
+}

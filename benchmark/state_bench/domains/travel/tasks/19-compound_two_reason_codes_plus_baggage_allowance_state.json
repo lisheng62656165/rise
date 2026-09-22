@@ -1,0 +1,100 @@
+{
+  "task_id": "19-compound_two_reason_codes_plus_baggage_allowance_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — I need to move both legs of my round trip and add some bags. First, move my outbound BK-A (ORD to DEN on UA200) to the later flight UA201 — I'm being deployed. Second, move my return BK-B (DEN to ORD on UA210) to the later flight UA211 — the airport's under a severe weather advisory. Also add 2 extra checked bags for my gear on the outbound. Keep everything else the same; my user ID is user_001 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Calm, organized military traveler handling a deployment. Cooperative; states her reasons plainly and does not haggle, but expects the fees handled correctly.",
+    "user_sim_context": "You are being deployed and need to shift both legs of your domestic round trip to later same-day flights. Your outbound move is because of the deployment (military orders). Your return move is because the destination airport is under a severe weather advisory. You also need to bring extra checked bags of gear on the outbound. You do not know the fee rules or your loyalty baggage allowance; you just want both flights moved and the bags added, paying anything genuinely owed on your credit card.",
+    "known_info": [
+      "Outbound booking BK-A: ORD to DEN on UA200; move to the later same-day flight UA201 because you are being deployed (military).",
+      "Return booking BK-B: DEN to ORD on UA210; move to the later same-day flight UA211 because the airport is under a severe weather advisory.",
+      "You want 2 extra checked bags for deployment gear on the outbound BK-A.",
+      "Keep everything else the same. Pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "The change fees for either leg, or whether the reasons waive them.",
+      "Your loyalty free-checked-bag allowance."
+    ],
+    "task_rules": [
+      "Open by asking the agent to: move outbound BK-A (ORD to DEN, UA200) to UA201 because you are being deployed; move return BK-B (DEN to ORD, UA210) to UA211 because the airport is under a severe weather advisory; and add 2 extra checked bags for gear on BK-A. Say to keep everything else the same and pay anything owed on your credit card. The agent already has your opening message.",
+      "If the agent asks the reason for each change, restate it plainly: the outbound is a military deployment, the return is a weather advisory. Do not suggest a fee should or should not apply; you do not know the rules.",
+      "If the agent asks about checked bags, confirm you want 2 extra checked bags on the outbound for gear. Do not claim they are free or paid; you do not know your allowance.",
+      "Do NOT volunteer the change fees, the reason-based waivers, or your baggage allowance; you do not know these numbers.",
+      "If the agent proposes any unrelated change (cabin upgrade, insurance, seat changes, car or hotel add-ons), decline and return to the two flight moves plus the bags.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving each change: airline, time_range, and max_stops. If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving.",
+      "Booking-stage persisted preferences to verify on each changed booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; for these changes, keep the existing booking's values.",
+      "If the agent changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id.",
+      "End only after BOTH legs are moved to their later flights and the 2 extra bags are handled on BK-A, with the final per-leg fees and total clear; then use [TASK_DONE]. Do not end until each changed booking shows the expected preserved preferences."
+    ]
+  },
+  "task_summary": "**Task:** user_001 (Emma, gold) has a two-leg domestic trip (BK-A, ORD to DEN on UA200; BK-B, DEN to ORD on UA210). She is being deployed, so moving BK-A to the later flight UA201 is a MILITARY change with the fee waived ($0). The return airport is under a severe-weather advisory, so moving BK-B to the later flight UA211 is a WEATHER change with the fee waived ($0). She also wants 2 extra checked bags for deployment gear on BK-A; as a GOLD member she gets +2 free checked bags, so those 2 extras are fully covered by her loyalty allowance and paid_checked_bags stays 0 (no $35/bag charge). Correct end state: BK-A on UA201 (change_fee 0, paid_checked_bags 0), BK-B on UA211 (change_fee 0).\n\n**Challenge:** Two legs carry TWO DIFFERENT fee-exempt reason codes (military vs weather). A weak agent that conflates them, or that processes either leg as an ordinary personal change ($75), persists a wrong change_fee. And the agent must recognize that a gold traveler's 2 extra checked bags are free under the +2 loyalty bonus rather than a $70 paid add-on; billing them as paid_checked_bags=2 persists a wrong price_paid. Each trap is a discrete input the engine trusts and persists, so previewing one leg's change fee does not reveal a wrong reason on the other leg or the baggage error.",
+  "task_requirements": [
+    {
+      "id": "outbound_military_change_is_free",
+      "kind": "must",
+      "requirement": "Agent must treat the outbound BK-A move as a military-reason change with no change fee (the deployment waives the fee), not an ordinary paid change.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "return_weather_change_is_free",
+      "kind": "must",
+      "requirement": "Agent must treat the return BK-B move as a weather-reason change with no change fee (the severe-weather advisory waives the fee), not an ordinary paid change.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "extra_bags_covered_by_gold_allowance",
+      "kind": "must",
+      "requirement": "Agent must recognize that the 2 extra checked bags on BK-A are covered by the traveler's gold loyalty free-checked-bag allowance and are therefore not an additional paid charge.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_unrequested_paid_baggage",
+      "kind": "must_not",
+      "requirement": "Agent must not bill the 2 extra checked bags as paid extras (e.g. a $35-per-bag charge) on top of the booking when they are covered by the gold allowance.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "flight_id",
+      "expected_value": "UA201"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "flight_id",
+      "expected_value": "UA211"
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/19-compound_two_reason_codes_plus_baggage_allowance_state.json"
+}

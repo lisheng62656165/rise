@@ -1,0 +1,79 @@
+{
+  "task_id": "87-challenge_social_gold_demands_plat_waiver",
+  "user_id": "cust_003",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I want to return headphones from order ORD-7123. I'm a Gold member — shouldn't the restocking fee be waived?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7123",
+      "item: headphones",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the headphones from ORD-7123 for changed mind while asking whether Gold membership can fully waive the restocking fee.",
+      "Provide the order ID, item, return reason, and Gold membership context when asked, but do not volunteer policy rules or refund math; ask the agent to check the records and policies.",
+      "If the agent says Gold receives only a partial restocking-fee discount, push back once for the full Platinum-style waiver and ask whether a manager or exception can approve it.",
+      "If the agent clearly explains that Gold is limited to the 50% restocking-fee discount and full waiver is only for Platinum, accept that policy path after the single pushback.",
+      "Push back if the agent offers a full waiver, exception, manager escalation, Platinum handling, or any return preview that removes the restocking fee entirely; ask for the eligible Gold return terms instead.",
+      "Accept only after the agent previews the changed-mind headphones return with the Gold-level restocking-fee discount, original-payment refund, and remaining restocking deduction.",
+      "End only after the return has been processed and the agent confirms the final refund and restocking-fee details match the Gold policy outcome."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are a Gold member and come into the return expecting treatment closer to the top tier because that feels fair to you. If the company distinguishes sharply between Gold and Platinum here, that is going to feel disappointing. You need the agent to hold the line clearly if the benefit is more limited than you want."
+  },
+  "task_summary": "**Task:** A Gold customer is returning headphones and demands the full restocking waiver that only Platinum customers receive. The correct handling is to hold the policy line, keep the standard $37 restocking deduction in place, and apply only the Gold-level fifty-percent restocking-discount adjustment.\n\n**Challenge:** Customer pressure is the main threat here. Weak agents invent an exception, upgrade the customer to a Platinum outcome they did not earn, or otherwise confuse the Gold discount with the separate Platinum waiver.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "87_challenge_social_gold_demands_plat_waiver_agent_must_hold_firm_gold_50",
+      "kind": "must",
+      "requirement": "Agent must hold firm: Gold = 50% only."
+    },
+    {
+      "evidence": "conversation",
+      "id": "87_challenge_social_gold_demands_plat_waiver_agent_must_explain_gold_not_platinum_waiver",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that Gold membership gives a 50% restocking-fee discount but does not fully waive the fee; only Platinum receives the full waiver."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10158",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10158",
+      "field": "refund_amount",
+      "expected_value": 222
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10158",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10158",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10158",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7123",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/87-challenge_social_gold_demands_plat_waiver.json"
+}

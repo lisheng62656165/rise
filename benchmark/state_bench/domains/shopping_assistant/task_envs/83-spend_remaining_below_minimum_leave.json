@@ -1,0 +1,66 @@
+{
+  "products": [
+    {
+      "product_id": "SP-LP1",
+      "name": "Lumio Pro Display",
+      "category": "electronics",
+      "subcategory": "monitor",
+      "brand": "Lumio",
+      "price": 1600,
+      "rating": 4.5,
+      "review_count": 80,
+      "description": "Pro-grade Lumio display.",
+      "specs": {},
+      "compatible_with": [],
+      "in_stock": true,
+      "stock_quantity": 20,
+      "shipping_days": 4,
+      "gift_wrap_available": true,
+      "backorder_available": false,
+      "previous_price": null,
+      "variants": null
+    }
+  ],
+  "customers": [
+    {
+      "customer_id": "shop_lp",
+      "name": "Morgan Ellis",
+      "email": "morgan.ellis@example.com",
+      "tier": "gold",
+      "is_first_time": false,
+      "loyalty_points": 300,
+      "purchase_history": [
+        "SP-OLD1"
+      ]
+    }
+  ],
+  "carts": [
+    {
+      "cart_id": "CART-shop_lp",
+      "customer_id": "shop_lp",
+      "item_ids": [
+        "CI1"
+      ],
+      "subtotal": 1600,
+      "discount_amount": 0,
+      "gift_wrap_fee": 0,
+      "total": 1200,
+      "applied_promo_codes": [],
+      "loyalty_points_redeemed": 40000,
+      "loyalty_discount": 400,
+      "shipping_option": null,
+      "shipping_cost": 0
+    }
+  ],
+  "cart_items": [
+    {
+      "cart_item_id": "CI1",
+      "customer_id": "shop_lp",
+      "product_id": "SP-LP1",
+      "quantity": 1,
+      "gift_wrap": false,
+      "variant_id": null
+    }
+  ],
+  "promotions": []
+}

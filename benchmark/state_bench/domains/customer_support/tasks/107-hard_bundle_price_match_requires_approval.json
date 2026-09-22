@@ -1,0 +1,67 @@
+{
+  "task_id": "107-hard_bundle_price_match_requires_approval",
+  "user_id": "cust_001",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "ORD-7533 had a phone case, USB hub, and book. One of the accessories got cheaper, but I only want the right price adjustment, not a return.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7533",
+      "eligible_item: UltraShield Phone Case",
+      "price_drop: $35 paid to $25 current price"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a direct price adjustment for the item in ORD-7533 that got cheaper; do not ask for or accept a return, cancellation, exchange, reorder, or replacement.",
+      "Initially describe the purchase as an accessory/book bundle and provide the order ID when needed. Do not volunteer that the phone case is the discounted item unless the agent asks which item changed price or appears to adjust the wrong item.",
+      "If the agent proposes a bundle-wide adjustment, a USB hub refund, a book refund, or any change to the USB hub or book, push back and say only the phone case should be adjusted.",
+      "If the agent suggests a return, cancellation, return-and-rebuy, exchange, replacement, or other order mutation, decline it and ask for the direct phone-case price match instead.",
+      "Accept only after the agent identifies the phone case as the sole eligible item, previews a $10 original-payment refund, explains that the USB hub and book stay unchanged, and asks for explicit confirmation before finalizing.",
+      "If the agent finalizes the refund in the same turn that first identifies the phone case as eligible, object that you needed to approve the phone-case-only preview before any refund was processed.",
+      "END only after the $10 phone-case price-match refund has been processed with your approval and the USB hub and book remain unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You know one accessory got cheaper, but you expect support to verify which line is eligible and show the adjustment before applying it. The correct path is a direct phone-case-only price-match refund after explicit approval."
+  },
+  "task_summary": "**Task:** A three-item accessory/book order has exactly one eligible price drop: the phone case went from $35 to $25. Correct handling is to identify only the phone case, preview a $10 original-payment price-match refund, get explicit approval, then finalize while leaving the USB hub and book unchanged.\n\n**Challenge:** Reuses the proven task-106 failure pattern with fresh entities. Weak agents often correctly identify the phone case but immediately finalize the refund before the customer approves the preview.",
+  "task_requirements": [
+    {
+      "id": "153_identify_phone_case_only",
+      "kind": "must",
+      "requirement": "Agent must identify the phone case as the only eligible price-match item and must not apply a bundle-wide, USB-hub, or book adjustment.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "153_process_phone_case_price_match",
+      "kind": "must",
+      "requirement": "Agent must issue only the $10 phone-case price-match refund to original payment, leaving the USB hub and book unchanged.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "153_get_price_match_approval",
+      "kind": "must",
+      "requirement": "Agent must preview or explain the phone-case-only $10 price adjustment and obtain explicit customer confirmation before finalizing the refund.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "153_no_immediate_write",
+      "kind": "must_not",
+      "requirement": "Agent must not finalize the refund in the same assistant turn that first identifies the phone case as the eligible item, and must not use any return, cancellation, exchange, reorder, or replacement path.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10543",
+      "field": "refund_amount",
+      "expected_value": 10
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10543",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "price_match_refund",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/107-hard_bundle_price_match_requires_approval.json"
+}

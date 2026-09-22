@@ -1,0 +1,73 @@
+{
+  "task_id": "106-spare_price_match_bundle_anchor",
+  "user_id": "cust_001",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "ORD-7271 had a little bundle of accessories and a book. One item got cheaper, but I only want the right adjustment, not a return.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7271",
+      "cheaper_item: phone case"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a price-match adjustment for the item in ORD-7271 that got cheaper; do not ask for or agree to a return, cancellation, exchange, reorder, or replacement.",
+      "Initially describe the purchase as the little accessory bundle, and provide the order ID when the agent needs it.",
+      "Do not volunteer which item got cheaper unless the agent asks or appears to be applying the price match to the wrong item; then clarify that it is only the phone case.",
+      "If the agent proposes a bundle-wide adjustment, a USB hub or book refund, or any change to the USB hub or book, push back and restate that only the phone case should be adjusted.",
+      "If the agent suggests a return, cancellation, return-and-rebuy, exchange, replacement, or other order mutation, decline it and ask for the direct phone-case price match instead.",
+      "Accept only after the agent previews a phone-case-only $10 refund to the original payment method and asks for confirmation before finalizing it.",
+      "If the agent tries to finalize the refund in the same turn that first identifies the phone case as eligible, object that you need the phone-case-only preview before any refund is processed.",
+      "End only after the agent confirms the $10 phone-case price-match refund has been processed and the USB hub and book were left unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7271. Three-item accessory/book order where only the phone case qualifies for a price-match refund. Agent must not treat the whole bundle or the USB hub as discounted. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Three-item accessory/book order where only the phone case qualifies for a price-match refund. Agent must not treat the whole bundle or the USB hub as discounted.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_price_match_bundle_anchor_anchor",
+      "kind": "must",
+      "requirement": "Agent must identify the phone case as the only price-match item."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_price_match_bundle_anchor_refund",
+      "kind": "must",
+      "requirement": "Agent must issue only the $10 phone-case price-match refund."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_price_match_bundle_anchor_others",
+      "kind": "must_not",
+      "requirement": "Agent must not refund, return, cancel, or alter the USB hub or book."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_price_match_bundle_anchor_hard3_preview_confirm",
+      "kind": "must",
+      "requirement": "Agent must preview the phone-case-only $10 price adjustment and obtain explicit user confirmation before finalizing the refund."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_price_match_bundle_anchor_hard3_no_immediate_write",
+      "kind": "must_not",
+      "requirement": "Agent must not finalize the refund in the same assistant turn that first identifies the phone case as the eligible bundle item."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10271",
+      "field": "refund_amount",
+      "expected_value": 10
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10271",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "price_match_refund",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/106-spare_price_match_bundle_anchor.json"
+}

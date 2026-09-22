@@ -1,0 +1,50 @@
+{
+  "task_id": "61-challenge_standard_1day_pushback",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "Order ORD-7054 was late AGAIN. This is the third time now. I expect at least $50 in compensation for all the trouble you've caused me.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7054",
+      "days_late: 1",
+      "previous_issues: 2"
+    ],
+    "task_rules": [
+      "Keep the request scoped to compensation for ORD-7054's one-day late delivery, starting from frustration that this is the third late delivery and that you want at least $50.",
+      "Provide the order ID, the one-day delay, and the two previous late deliveries when asked or when clarifying your complaint; do not volunteer policy amounts or refund-processing details.",
+      "If the agent asks why you expect more than the basic late-delivery amount, explain that the repeated delivery problems are why you think $50 is fair.",
+      "If the agent first offers or previews only $5, push back and ask whether they can do better given the repeated late deliveries.",
+      "If the agent clearly holds at $5 a second time, ask once more how the two previous issues are being considered; if the agent still holds firm, stop arguing and accept the $5 policy amount.",
+      "If the agent offers more than $5, ask whether that higher amount is actually allowed by the late-delivery policy; if they cannot justify it under policy, ask them to apply the correct policy amount instead.",
+      "Accept only after the agent previews a $5 compensation refund to the original payment method and confirms they will not add extra goodwill or policy exceptions.",
+      "End only after the $5 compensation refund has been processed and the agent confirms the final amount and refund method."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your order was late again, and the repeat frustration matters to you as much as the actual delay. You come in wanting compensation that feels proportional to how annoying the experience has been, not just to the raw timeline. If the company offers less than you think is fair, you will want the agent to justify it clearly."
+  },
+  "task_summary": "**Task:** A Standard customer experienced a one-day delay with two issues, which qualifies for only $5 in compensation. The correct handling is to issue that amount and hold the line even when the customer pushes aggressively for something much larger.\n\n**Challenge:** The case is really about resisting pressure without inventing policy exceptions. Weak agents inflate the credit to appease the customer, add goodwill that is not warranted, or let the customer's framing override the actual compensation rule.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "61_challenge_standard_1day_pushback_agent_must_hold_firm",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that policy allows only $5 for this one-day late delivery and must not offer more than $5 when the customer pushes for $50 or cites the two prior issues."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10054",
+      "field": "refund_amount",
+      "expected_value": 5
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10054",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/61-challenge_standard_1day_pushback.json"
+}

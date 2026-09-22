@@ -1,0 +1,180 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_001. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "Hey \u2014 can you add the ProBook 13 to my cart? I want it in silver, please."
+    },
+    {
+      "role": "assistant",
+      "content": "I found the ProBook Laptop 13-inch, but the Silver variant is currently out of stock.\n\nAvailable right now:\n- Midnight Blue \u2014 $999\n\nIf you want, I can add the blue one instead.",
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": {
+            "query": "ProBook 13",
+            "category": "electronics",
+            "min_price": 0,
+            "max_price": 100000,
+            "min_rating": 0,
+            "in_stock_only": true,
+            "sort_by": "relevance"
+          },
+          "result": {
+            "products": [
+              {
+                "product_id": "SP-1002",
+                "name": "ProBook Laptop 13-inch",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 999,
+                "rating": 4.6,
+                "review_count": 2180,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1101",
+                "name": "ProBook Laptop 15-inch",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 1299,
+                "rating": 4.7,
+                "review_count": 1890,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1001",
+                "name": "SlimBook Air 13",
+                "brand": "SlimBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 849,
+                "rating": 4.5,
+                "review_count": 1240,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-2006",
+                "name": "ProBook USB-C Dock",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "accessory",
+                "price": 129,
+                "rating": 4.3,
+                "review_count": 920,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1106",
+                "name": "ProBook Chromebook 11",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 329,
+                "rating": 3.9,
+                "review_count": 530,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1107",
+                "name": "SlimBook Touch 15",
+                "brand": "SlimBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 1099,
+                "rating": 4.5,
+                "review_count": 410,
+                "in_stock": true
+              }
+            ],
+            "total_found": 6
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-1002"
+          },
+          "result": {
+            "product_id": "SP-1002",
+            "product_name": "ProBook Laptop 13-inch",
+            "base_price": 999,
+            "variants": [
+              {
+                "variant_id": "silver",
+                "label": "Silver",
+                "effective_price": 999,
+                "in_stock": false,
+                "stock_quantity": 0
+              },
+              {
+                "variant_id": "blue",
+                "label": "Midnight Blue",
+                "effective_price": 999,
+                "in_stock": true,
+                "stock_quantity": 12
+              },
+              {
+                "variant_id": "space_grey",
+                "label": "Space Grey",
+                "effective_price": 999,
+                "in_stock": false,
+                "stock_quantity": 0
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Okay \u2014 please add the Midnight Blue one instead."
+    },
+    {
+      "role": "assistant",
+      "content": "Sure \u2014 would you like gift wrap on it? It\u2019s $5 per unit.",
+      "tool_calls": null
+    },
+    {
+      "role": "user",
+      "content": "No gift wrap, please."
+    },
+    {
+      "role": "assistant",
+      "content": "Added \u2014 ProBook Laptop 13-inch in Midnight Blue, qty 1, no gift wrap.\n\nCart total: $999\n\nIf you want, I can also check for any promo codes that might apply.",
+      "tool_calls": [
+        {
+          "name": "add_to_cart",
+          "arguments": {
+            "customer_id": "shop_001",
+            "product_id": "SP-1002",
+            "quantity": 1,
+            "gift_wrap": false,
+            "variant_id": "blue"
+          },
+          "result": {
+            "status": "added",
+            "cart_item_id": "CI-0001",
+            "product_id": "SP-1002",
+            "product_name": "ProBook Laptop 13-inch",
+            "variant_id": "blue",
+            "quantity": 1,
+            "gift_wrap": false,
+            "unit_price": 999,
+            "cart_subtotal": 999,
+            "cart_total": 999
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "[TASK_DONE]"
+    }
+  ]
+}

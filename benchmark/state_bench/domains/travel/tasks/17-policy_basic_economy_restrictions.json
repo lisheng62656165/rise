@@ -1,0 +1,59 @@
+{
+  "task_id": "17-policy_basic_economy_restrictions",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I have booking BK-PR02 and I'd like to either change it to a different date or upgrade to business class. Also, how many bags can I check?",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-PR02: very cheap fare.",
+      "Wants to bring 2 checked bags on this trip."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want an explanation of what booking BK-PR02 allows for date changes, upgrades, cancellation, and checked bags; keep the conversation informational and do not authorize any action.",
+      "If the agent asks for booking details, provide BK-PR02 and explain that it was a very cheap fare; do not volunteer unrelated preferences or new trip requirements.",
+      "If the agent only addresses part of the request, ask about the missing basic-economy restriction: date changes after the initial 24-hour window, business-class upgrades, cancellation without insurance, or checked-bag allowance and fees.",
+      "When discussing checked bags, say you want to bring 2 checked bags if the agent asks how many; if the agent says there are 0 free checked bags but omits the cost, ask how much each checked bag would cost.",
+      "If the agent offers to search for flights, upgrade, change, cancel, add bags, or book something else, say you only want the policy explained and do not want any action taken.",
+      "If the agent confirms the restrictions are severe, you may express frustration and ask once whether there is any general way to get a better deal or more flexibility without changing the booking.",
+      "End with [TASK_DONE] only after the agent has clearly explained the change restriction, upgrade restriction, cancellation restriction, 0 free checked bags, and the $50 checked-bag fee."
+    ],
+    "user_sim_context": "You booked a very cheap fare and now want to understand just how boxed in you are. You care about whether you can change, upgrade, cancel, or at least bring bags without nasty surprises. This is an information-seeking conversation, but you are likely to sound frustrated if the answer keeps getting worse."
+  },
+  "task_summary": "**Task:** User asks for a full explanation of what a basic economy booking does and does not allow. Correct resolution: This basic economy booking cannot be changed after the initial 24-hour window.\n\n**Challenge:** The agent covers the core basic-economy restrictions on changes, upgrades, cancellation, and checked bags, and keeps the conversation informational only.",
+  "task_requirements": [
+    {
+      "id": "state_no_changes_after_24h",
+      "kind": "must",
+      "requirement": "Agent must explain that this basic economy booking cannot be changed after the initial 24-hour window.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_no_upgrades",
+      "kind": "must",
+      "requirement": "Agent must explain that this basic economy booking is not eligible for upgrades.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_cancel_restriction",
+      "kind": "must",
+      "requirement": "Agent must explain that after the first 24 hours this basic economy booking cannot be cancelled without insurance coverage.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_baggage_rules",
+      "kind": "must",
+      "requirement": "Agent must explain that this booking includes 0 free checked bags and that checked bags would cost $50 each.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_execution",
+      "kind": "must_not",
+      "requirement": "Agent must not execute any booking action in this information-only policy task.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/17-policy_basic_economy_restrictions.json"
+}

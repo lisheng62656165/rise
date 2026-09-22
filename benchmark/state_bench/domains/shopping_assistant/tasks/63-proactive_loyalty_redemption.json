@@ -1,0 +1,110 @@
+{
+  "task_id": "63-proactive_loyalty_redemption",
+  "user_id": "shop_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hey — please add the ProBook 15 to my cart and let's get checked out.",
+  "user_simulator": {
+    "user_sim_context": "You want the ProBook 15 and are ready to check out. You DO have a large loyalty balance (104,000 points) but you are NOT going to bring it up unprompted — you want to see whether the agent proactively tells you about redemption options. If they do, and they quantify the value, you'll redeem 50,000 points for $500 off. If they don't mention points at all and just try to confirm the $1,299 total, you'll be mildly disappointed but will accept the cart as-is (don't volunteer). If they vaguely mention points without a dollar value, push them to quantify.",
+    "known_info": [
+      "You want the ProBook 15.",
+      "You want to check out.",
+      "You are a Platinum returning customer (agent can see this)."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask only to add the ProBook 15 and get checked out; do not mention loyalty points, discounts, promo codes, shipping speed, delivery timing, or shipping preferences on your own.",
+      "If the agent asks for cart preferences before adding the laptop, provide no gift wrap and no promo codes; do not choose or name any shipping option.",
+      "If the agent proactively mentions your loyalty balance and quantifies the redemption value in dollars, choose to redeem exactly 50,000 points and ask for the updated total before approving the final outcome.",
+      "If the agent mentions points only vaguely or gives a point balance without a dollar value, ask how much the points are worth in dollars on this order; after a quantified offer, choose exactly 50,000 points.",
+      "If the agent offers or applies a loyalty amount without letting you choose, push back and ask for your redemption options; once the options are clear, choose exactly 50,000 points.",
+      "If the agent offers more than 64,950 points, more than about $649 off, or any amount above 50% of the cart, ask about the redemption cap; after the cap is clarified, choose exactly 50,000 points.",
+      "If the agent never mentions loyalty redemption and only asks you to confirm the $1,299 cart, accept the full-price cart without bringing up points.",
+      "If the agent asks about shipping, default checkout settings, or tries to select shipping, decline shipping selection and steer back to confirming the item, any loyalty redemption option, and the total.",
+      "Refuse unrelated add-ons, substitutions, promo searches, or account changes; this task is only about adding the ProBook 15 and handling any proactively surfaced loyalty redemption.",
+      "End only after the agent has confirmed either the ProBook 15 full-price cart when no loyalty option was surfaced, or the ProBook 15 with 50,000 points redeemed, a $500 loyalty discount, and a $799 total."
+    ]
+  },
+  "task_summary": "**Task:** A Platinum returning customer (shop_005, Morgan Patel) with 104,000 loyalty points asks to add the ProBook 15 ($1,299) and check out. The customer does NOT mention points in the opener. The agent must proactively detect the large balance via get_customer_account, quantify redemption value in dollars ($1,040 theoretical max, or 50% cap = $649.50 on this cart), and offer the customer a choice. Customer picks 50,000 points → $500 off. Final cart: SP-1101 qty=1 no wrap, subtotal $1,299, loyalty_discount $500, total $799.\n\n**Challenge:** Proactive loyalty detection as a customer-value signal. The failure mode is silent — the agent completes a $1,299 checkout without ever surfacing that the customer could save $500. Pitfall 1: silent completion at full price. Pitfall 2: vague mention ('you have points') without quantifying in dollars. Pitfall 3: auto-applying an amount without customer consent on the size. Pitfall 4: offering an amount exceeding the 50% cap. Distinct from T10 (customer already asked to redeem, stacking rule), T17/T18/T31/T36 (compound scenarios where points show up mid-flow) — T63 tests the PURELY PROACTIVE axis: customer makes zero mention, agent must notice.",
+  "task_requirements": [
+    {
+      "id": "checked_customer_account",
+      "kind": "must",
+      "requirement": "Agent called get_customer_account (at least once) to discover the loyalty balance. Proactive surfacing without checking the account would be fabrication.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "proactively_surfaced_redemption",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned loyalty redemption as an option BEFORE the customer asked about points. The customer's opener did not mention points, so any mention by the agent before the customer's second turn counts as proactive.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "quantified_redemption_in_dollars",
+      "kind": "must",
+      "requirement": "Agent quantified the redemption value in dollars (e.g., '100 points = $1', 'worth up to $X off'), not just vaguely referenced the balance. Saying 'you have 104,000 points' without a dollar value does not satisfy this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "customer_chose_amount",
+      "kind": "must",
+      "requirement": "Agent let the customer choose the redemption amount rather than auto-applying a unilateral choice. The redeem_loyalty_points call must occur AFTER the customer's second turn (where they pick 50,000).",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "respected_cap",
+      "kind": "must",
+      "requirement": "Agent did not offer or apply a redemption amount exceeding 50% of cart total (cart subtotal $1,299 → max redemption $649 → max points 64,950). Offering 100,000 points or applying >64,950 points fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_shipping_selection",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option. This task is only about adding the laptop and proactively offering loyalty redemption; shipping selection is explicitly out of scope.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_discount",
+      "expected_value": 500
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_points_redeemed",
+      "expected_value": 50000
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "subtotal",
+      "expected_value": 1299
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "total",
+      "expected_value": 799
+    },
+    {
+      "entity_type": "customers",
+      "record_key": "shop_005",
+      "field": "loyalty_points",
+      "expected_value": 54000
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_005",
+        "product_id": "SP-1101",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/63-proactive_loyalty_redemption.json"
+}

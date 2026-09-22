@@ -1,0 +1,80 @@
+{
+  "task_id": "53-challenge_remorse_as_defective",
+  "user_id": "cust_005",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "I need to return the tablet from order ORD-7011 — it's defective. The silver color looks completely different from what was shown on the website. It doesn't match my setup at all.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7011",
+      "item: SlateTab Pro tablet",
+      "issue: color doesn't match expectation (cosmetic, not functional)"
+    ],
+    "task_rules": [
+      "Start by seeking a return for the SlateTab Pro from ORD-7011 and describe it as defective because the silver color looks different from the website and does not match your setup.",
+      "Provide the order ID when asked, and otherwise keep the request focused on this tablet return.",
+      "If the agent asks what is wrong, explain that the color is more like dark gray than the silver shown online and that the appearance clashes with your setup.",
+      "If the agent asks whether the tablet works or has any functional problem, admit that it works properly and that the issue is the color and appearance, not broken hardware.",
+      "If the agent treats the case as defective without clarifying the issue, correct this once by saying the tablet works technically and ask how that affects the return classification.",
+      "If the agent explains that the cosmetic mismatch is handled as changed_mind rather than defective, reluctantly accept that classification as long as the return can still proceed.",
+      "Accept the return only after seeing a preview that identifies the tablet, uses changed_mind as the reason, and states the refund method, refund amount, and any restocking fee.",
+      "End only after the changed_mind return has been processed and the final refund and restocking-fee details are confirmed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You say the tablet is defective because the color looks different from what you expected online, but the problem is really disappointment with the appearance rather than broken hardware. From your side it still feels like the product failed to meet expectations. You want the agent to sort out what kind of return this actually is without treating you like you are trying to game the system."
+  },
+  "task_summary": "**Task:** The customer calls a tablet defective, but the real issue is cosmetic disappointment rather than a product fault. The correct handling is to reclassify the case as a changed-mind return, apply the normal restocking logic, and avoid handing out the more generous defective-item resolution.\n\n**Challenge:** The agent has to validate the label instead of copying it. Weak agents accept 'defective' at face value, skip the clarifying step, and over-refund a case that does not actually qualify for defect handling.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "53_challenge_remorse_as_defective_agent_must_classify_as_changed_mind",
+      "kind": "must",
+      "requirement": "Agent must decline to process this as a defective return, on the grounds that the tablet functions and the issue is only a cosmetic/appearance mismatch, and must communicate this to the customer."
+    },
+    {
+      "evidence": "conversation",
+      "id": "53_challenge_remorse_as_defective_agent_must_ask_clarifying_questions_about",
+      "kind": "must",
+      "requirement": "Before processing any return, agent must confirm whether the tablet has a functional defect or only a cosmetic/appearance issue."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10011",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10011",
+      "field": "refund_amount",
+      "expected_value": 502
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10011",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10011",
+      "field": "restocking_fee",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10011",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7011",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/53-challenge_remorse_as_defective.json"
+}

@@ -1,0 +1,66 @@
+{
+  "task_id": "99-challenge_gold_7day_all_parts",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "My coffee maker from ORD-7064 was a full week late — 7 days! This is my 4th issue. I want full compensation.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7064",
+      "days_late: 7",
+      "previous_issues: 3"
+    ],
+    "task_rules": [
+      "Keep the request scoped to full compensation for the ORD-7064 coffee maker arriving 7 days late as the customer's 4th issue.",
+      "If the agent asks for identifying or issue details, provide the order ID, the 7-day delay, and that there were 3 previous issues; do not volunteer policy math or refund amounts before the agent checks them.",
+      "Ask for a compensation breakdown that covers the late-delivery credit, the shipping refund, the repeated-issue goodwill credit, and any compensation cap before agreeing to an action.",
+      "Push back if the agent skips one of the three components, multiplies the shipping refund or goodwill credit, rounds the late-delivery credit to $22.50, caps on the $89 order subtotal and under-pays $44, offers $55 (no cap), or splits any amount to store credit. Do not name the final figure yourself.",
+      "Accept only after the agent previews a $48 refund to the original payment method with the $22 late-delivery credit, $8 shipping refund, $25 goodwill credit, and the 50 percent cap on the $97 order total reducing the $55 uncapped total to $48.",
+      "End only after the agent confirms the $48 original-payment refund has actually been processed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your coffee maker was extremely late, and this latest issue feels like part of a broader pattern rather than an isolated annoyance. You are coming in wanting the full compensation picture, not just the most obvious piece of it. You expect the agent to account for every part of what you are owed and explain how it was determined."
+  },
+  "task_summary": "**Task:** A Gold customer had an $89 order ($97 total paid, including $8 shipping) arrive seven days late with three separate service issues. The compensation stacks three components — $22 in delay credit after the Gold multiplier, the $8 shipping refund the customer paid, and a $25 goodwill credit — for an uncapped total of $55. But the 50%-of-order-total cap clamps the payout to $48 (int(97 * 0.5)).\n\n**Challenge:** The agent has to compute every component correctly AND apply the 50%-of-order-total cap. Weak agents round the delay credit to $22.50, multiply the goodwill or shipping refund incorrectly, skip a component, forget to apply the cap and over-pay $55, or cap on the $89 subtotal instead of the $97 order total and under-pay $44.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "challenge_gold_7day_all_parts_agent_must_process_48_refund_to_original_payment",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that a $48 refund has been issued to the original payment method."
+    },
+    {
+      "evidence": "conversation",
+      "id": "challenge_gold_7day_all_parts_agent_must_include_all_three_compensation_components",
+      "kind": "must",
+      "requirement": "Agent must include the $22 late-delivery credit, the $8 shipping refund, and the $25 goodwill credit in the calculation."
+    },
+    {
+      "evidence": "conversation",
+      "id": "challenge_gold_7day_all_parts_agent_must_apply_50_percent_cap",
+      "kind": "must",
+      "requirement": "Agent must apply the 50%-of-order-total cap, clamping the $55 uncapped total down to $48 (50% of the $97 order total)."
+    },
+    {
+      "evidence": "conversation",
+      "id": "challenge_gold_7day_all_parts_agent_must_not_multiply_shipping_or_goodwill",
+      "kind": "must_not",
+      "requirement": "Agent must not apply the gold multiplier to the shipping refund or the goodwill credit."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10069",
+      "field": "refund_amount",
+      "expected_value": 48
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10069",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/99-challenge_gold_7day_all_parts.json"
+}

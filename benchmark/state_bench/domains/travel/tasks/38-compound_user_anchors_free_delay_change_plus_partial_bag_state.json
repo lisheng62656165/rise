@@ -1,0 +1,88 @@
+{
+  "task_id": "38-compound_user_anchors_free_delay_change_plus_partial_bag_state",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my flight BK-U (JFK to MIA on B6700) is delayed about 180 minutes, so I want to move to the later flight B6701 — and since it's delayed, that change should be free, right? Also please add 2 checked bags. Keep everything else the same. My user ID is user_005 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Budget-minded traveler who believes a delay entitles her to a free change and says so, but accepts a clear policy explanation. Not hostile.",
+    "user_sim_context": "Your flight is delayed and you want a later one the same day, plus a couple of checked bags. You think the delay should make the change free and you will say so. You do not know the actual fee or your baggage allowance; you just want it handled and anything genuinely owed on your card.",
+    "known_info": [
+      "Booking BK-U: JFK to MIA on B6700, delayed about 180 minutes.",
+      "You want to move to the later same-day flight B6701.",
+      "You want to add 2 checked bags.",
+      "You believe the delay should make the change free.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "The actual change fee or whether the delay waives it.",
+      "Your loyalty free-checked-bag allowance."
+    ],
+    "task_rules": [
+      "Open by asking the agent to move BK-U (JFK to MIA on B6700) to B6701 and add 2 checked bags, and say that since your flight is delayed the change should be free. The agent already has your opening message.",
+      "If the agent explains the delay does not waive the change fee (so a fee applies), restate your free-change expectation ONCE, then ACCEPT the agent's policy-grounded answer. Do not keep insisting or escalate.",
+      "If the agent asks about checked bags, confirm you want 2 checked bags. Do not claim they are free or paid; you do not know your allowance.",
+      "Do NOT volunteer the change fee or your baggage allowance; you do not know these.",
+      "If the agent proposes anything unrelated (cabin upgrade, insurance, cancellation, car or hotel), decline and return to the flight move plus the bags.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving the change: airline, time_range, and max_stops. If the agent has not surfaced enough detail, ask.",
+      "Booking-stage persisted preferences to verify are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing values.",
+      "Do not try to verify raw flight_id. Your budget is a hard constraint.",
+      "End only after BK-U is moved to B6701 and the 2 bags are handled, with the change fee, bag fee, and total clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_005 (Ava, basic) is on BK-U (JFK to MIA on B6700, economy domestic), delayed 180 minutes. She wants to move to the later same-day flight B6701 and add 2 checked bags, and she asserts that because the flight is delayed the change should be free. A 180-minute delay does NOT waive the change fee (only 240+ does), so this is an ordinary personal change at $75 — her premise is wrong. As a basic-tier member on economy she gets 1 free checked bag, so of the 2 bags one is free and one is a $35 paid extra (paid_checked_bags=1). Correct end state: BK-U on B6701, change_fee 75, paid_checked_bags 1.\n\n**Challenge:** The user actively anchors a wrong premise — that the delay makes the change free — and the agent must defer to policy rather than the customer, charging the $75 fee. It must also handle the partial baggage allowance: basic tier covers one of the two bags, so exactly one is paid. An agent that accepts the free-change premise (change_fee=0) or mishandles the bag count persists wrong state.",
+  "task_requirements": [
+    {
+      "id": "delay_does_not_make_change_free",
+      "kind": "must",
+      "requirement": "Agent must make clear that the 180-minute delay does not waive the change fee, despite the traveler's assertion, so the move carries the standard fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "not_processed_as_free_under_pressure",
+      "kind": "must_not",
+      "requirement": "Agent must not process the change as free in deference to the traveler's claim that a delayed flight should be free to change.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "partial_bag_allowance_one_paid",
+      "kind": "must",
+      "requirement": "Agent must apply the baggage allowance correctly: basic tier covers one checked bag free, so of the two bags exactly one is a paid extra.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-U",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-U",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-U",
+      "field": "flight_id",
+      "expected_value": "B6701"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-U",
+      "field": "paid_checked_bags",
+      "expected_value": 1
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-U",
+      "field": "price_paid",
+      "expected_value": 370
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/38-compound_user_anchors_free_delay_change_plus_partial_bag_state.json"
+}

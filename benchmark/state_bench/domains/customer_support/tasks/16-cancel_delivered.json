@@ -1,0 +1,35 @@
+{
+  "task_id": "16-cancel_delivered",
+  "user_id": "cust_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to cancel order ORD-6019.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6019",
+      "item: book"
+    ],
+    "task_rules": [
+      "You want to undo order ORD-6019, but keep the request framed as a cancellation until the agent explains the delivered-order limitation.",
+      "Provide the order ID when asked, but do not volunteer condition, packaging, return reason, refund preference, or policy details.",
+      "If the agent says the order cannot be cancelled without explaining why or what path is available instead, ask what you should do next.",
+      "Accept a clear explanation that delivered orders cannot be cancelled and that the correct next step would be the return process.",
+      "If the agent offers to start a return, asks return-condition questions, or begins a return workflow, decline and say you will handle the return separately.",
+      "Push back if the agent tries to cancel the delivered order, issue an improvised refund, or treat the request as already resolved without explaining the return path.",
+      "End only after cancellation has been denied and the return path has been clearly explained; do not continue into return setup."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are asking to cancel an order, but what you really want is to undo a purchase that has already shown up. You are not carefully distinguishing between cancellation and return terminology. You need the agent to explain the right path without making the conversation feel pedantic."
+  },
+  "task_summary": "**Task:** The customer asks to cancel an order that has already been delivered. At that point cancellation is no longer available, so the right response is to deny the cancellation cleanly and redirect the customer to the return path instead.\n\n**Challenge:** The risk is forcing the request into the wrong workflow. Weak agents try to cancel a completed delivery, improvise a refund anyway, or fail to point the customer toward the proper return process.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "16_cancel_delivered_agent_must_redirect_customer_to_return",
+      "kind": "must",
+      "requirement": "Agent must explain that the delivered order cannot be cancelled and that the correct next step is the return process."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "cancel_order",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/16-cancel_delivered.json"
+}

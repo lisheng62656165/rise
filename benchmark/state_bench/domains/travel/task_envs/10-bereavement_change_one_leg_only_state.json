@@ -1,0 +1,269 @@
+{
+  "flights": [
+    {
+      "flight_id": "AA600",
+      "airline_code": "AA",
+      "origin": "ORD",
+      "destination": "MIA",
+      "departure_time": "2026-07-06T11:00:00",
+      "arrival_time": "2026-07-06T16:52:00",
+      "duration_minutes": 352,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 400,
+        "business": 1200
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "AA610",
+      "airline_code": "AA",
+      "origin": "ORD",
+      "destination": "MIA",
+      "departure_time": "2026-07-06T12:30:00",
+      "arrival_time": "2026-07-06T16:30:00",
+      "duration_minutes": 240,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 420,
+        "business": 1220
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "UA610",
+      "airline_code": "UA",
+      "origin": "ORD",
+      "destination": "MIA",
+      "departure_time": "2026-07-06T17:30:00",
+      "arrival_time": "2026-07-06T23:27:00",
+      "duration_minutes": 357,
+      "stops": 1,
+      "cabin_prices": {
+        "economy": 410,
+        "business": 1210
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "AA620",
+      "airline_code": "AA",
+      "origin": "ORD",
+      "destination": "ATL",
+      "departure_time": "2026-07-06T15:00:00",
+      "arrival_time": "2026-07-06T19:37:00",
+      "duration_minutes": 277,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 420,
+        "business": 1220
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "AA700",
+      "airline_code": "AA",
+      "origin": "MIA",
+      "destination": "ORD",
+      "departure_time": "2026-07-10T09:30:00",
+      "arrival_time": "2026-07-10T14:43:00",
+      "duration_minutes": 313,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 400,
+        "business": 1200
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "AA710",
+      "airline_code": "AA",
+      "origin": "MIA",
+      "destination": "ORD",
+      "departure_time": "2026-07-10T12:45:00",
+      "arrival_time": "2026-07-10T16:24:00",
+      "duration_minutes": 219,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 430,
+        "business": 1230
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "UA710",
+      "airline_code": "UA",
+      "origin": "MIA",
+      "destination": "ORD",
+      "departure_time": "2026-07-10T17:45:00",
+      "arrival_time": "2026-07-10T20:23:00",
+      "duration_minutes": 158,
+      "stops": 1,
+      "cabin_prices": {
+        "economy": 420,
+        "business": 1220
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    },
+    {
+      "flight_id": "AA720",
+      "airline_code": "AA",
+      "origin": "MIA",
+      "destination": "ATL",
+      "departure_time": "2026-07-10T12:00:00",
+      "arrival_time": "2026-07-10T15:45:00",
+      "duration_minutes": 225,
+      "stops": 0,
+      "cabin_prices": {
+        "economy": 430,
+        "business": 1230
+      },
+      "status": "scheduled",
+      "delay_minutes": 0,
+      "route_type": "domestic"
+    }
+  ],
+  "bookings": [
+    {
+      "booking_id": "BK-9100",
+      "user_id": "user_001",
+      "flight_id": "AA600",
+      "status": "confirmed",
+      "cabin_class": "economy",
+      "seat_type": "aisle",
+      "meal_preference": "kosher",
+      "add_wifi": true,
+      "add_extra_legroom": true,
+      "add_insurance": false,
+      "price_paid": 400,
+      "payment_method": "credit_card",
+      "points_used": 0,
+      "cash_amount": 0,
+      "booked_at": "2026-05-20T10:00:00",
+      "cancellation_fee": null,
+      "refund_amount": null,
+      "change_fee": null,
+      "fare_difference": null,
+      "delay_compensation": null,
+      "paid_checked_bags": 0
+    },
+    {
+      "booking_id": "BK-9101",
+      "user_id": "user_001",
+      "flight_id": "AA700",
+      "status": "confirmed",
+      "cabin_class": "economy",
+      "seat_type": "aisle",
+      "meal_preference": "kosher",
+      "add_wifi": true,
+      "add_extra_legroom": true,
+      "add_insurance": false,
+      "price_paid": 400,
+      "payment_method": "credit_card",
+      "points_used": 0,
+      "cash_amount": 0,
+      "booked_at": "2026-05-20T10:00:00",
+      "cancellation_fee": null,
+      "refund_amount": null,
+      "change_fee": null,
+      "fare_difference": null,
+      "delay_compensation": null,
+      "paid_checked_bags": 0
+    }
+  ],
+  "users": [
+    {
+      "user_id": "user_001",
+      "name": "Emma Smith",
+      "email": "emma.smith@example.com",
+      "loyalty_tier": "gold",
+      "loyalty_points": 75000,
+      "budget": 1500,
+      "preferences": {
+        "meal_preference": "kosher",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false
+      }
+    },
+    {
+      "user_id": "user_002",
+      "name": "Liam Johnson",
+      "email": "liam.johnson@example.com",
+      "loyalty_tier": "basic",
+      "loyalty_points": 5000,
+      "budget": 800,
+      "preferences": {
+        "meal_preference": "vegetarian",
+        "seat_type": "window",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": false
+      }
+    },
+    {
+      "user_id": "user_003",
+      "name": "Olivia Williams",
+      "email": "olivia.williams@example.com",
+      "loyalty_tier": "platinum",
+      "loyalty_points": 120000,
+      "budget": 2000,
+      "preferences": {
+        "meal_preference": "standard",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": true
+      }
+    },
+    {
+      "user_id": "user_004",
+      "name": "Noah Brown",
+      "email": "noah.brown@example.com",
+      "loyalty_tier": "silver",
+      "loyalty_points": 15000,
+      "budget": 600,
+      "preferences": {
+        "meal_preference": "standard",
+        "seat_type": "window",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": true
+      }
+    },
+    {
+      "user_id": "user_005",
+      "name": "Ava Garcia",
+      "email": "ava.garcia@example.com",
+      "loyalty_tier": "basic",
+      "loyalty_points": 12000,
+      "budget": 700,
+      "preferences": {
+        "meal_preference": "vegan",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": false,
+        "add_insurance": false
+      }
+    }
+  ],
+  "hotel_inventory": [],
+  "hotels": [],
+  "car_inventory": [],
+  "car_rentals": []
+}

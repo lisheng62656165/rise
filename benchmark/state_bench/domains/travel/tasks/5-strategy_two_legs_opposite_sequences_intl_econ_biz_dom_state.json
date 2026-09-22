@@ -1,0 +1,137 @@
+{
+  "task_id": "5-strategy_two_legs_opposite_sequences_intl_econ_biz_dom_state",
+  "user_id": "user_003",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I have two trips I need to push to later flights, and I want each done the cheapest valid way. First, booking BK-A from JFK to LHR on flight DL920 — please move it to the later flight DL921. Second, booking BK-B from ORD to LAX on flight AA930 — please move it to the later flight AA931. Both of my current flights are nonstop and I'd like the later ones to be comparable nonstops. Reason is personal for both.",
+  "user_simulator": {
+    "personality": "Organized and cost-conscious. Cooperative and wants both trips moved, but will not let the agent rush either one without confirming it picked the cheaper method for that specific leg.",
+    "user_sim_context": "You have two separate trips you need to push to later flights, and you want each moved the cheapest legitimate way. You assume the agent will work out the best method for each; you do not know whether the two trips should be handled the same way or differently, and you will not do the fare or fee math yourself.",
+    "known_info": [
+      "Booking BK-A: JFK to LHR on flight DL920; move it to the later flight DL921 (same route).",
+      "Booking BK-B: ORD to LAX on flight AA930; move it to the later flight AA931 (same route).",
+      "You want each trip moved the cheapest valid way.",
+      "Both current flights are nonstop and you want the later flights to be comparable nonstops.",
+      "Reason for any change: personal."
+    ],
+    "unknown_info": [
+      "Whether a direct change or cancelling-and-rebooking is cheaper for each trip.",
+      "Whether the two trips should be handled the same way or differently.",
+      "The change fees and cancellation fees on each booking."
+    ],
+    "task_rules": [
+      "Keep the request focused on moving BK-A to DL921 and BK-B to AA931, each by whichever valid method is cheaper; you do not know the fare or fee rules and will not do the arithmetic yourself.",
+      "If the agent asks for booking details or the reason, provide BK-A (to DL921), BK-B (to AA931), and that the reason is personal; do not propose which method to use, and do not volunteer prices, fees, fare math, or policy rules.",
+      "Do not assume the two trips must be handled the same way; if the agent applies one method to both without checking each leg, ask it to confirm that method is actually the cheaper one for each trip separately.",
+      "For each trip, do not approve a method until the agent has compared, for that specific booking, the cost of a direct change against the cost of cancelling and rebooking the same trip (including the cancellation fee and the new fare).",
+      "Once both methods are priced for a trip, reject any choice that would cost more than necessary for that trip and take the genuinely cheaper one; apply this independently to each trip even if that means the two trips end up handled differently.",
+      "Before approving, make sure the agent has surfaced enough detail to confirm each later flight is the comparable nonstop on the same route, and decline unrelated upgrades, add-ons, or itinerary changes.",
+      "End with [TASK_DONE] only after BOTH trips have been moved to their later flights, each by its cheaper method, with the out-of-pocket cost for each summarized.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "**Task:** user_003 wants to move two separate bookings to later flights, each the cheapest valid way. Leg A is BK-A on DL920 (JFK to LHR, international economy, departing within 7 days) moving to the later DL921; leg B is BK-B on AA930 (ORD to LAX, domestic business) moving to the later AA931. The cheapest mechanism inverts between the legs: on leg A cancel-and-rebook (a $160 international-economy cancellation fee, refund, then rebook the same $800 fare) beats a direct change ($200 fee for an international economy change within 7 days), while on leg B a direct change ($0 — business changes are free) beats cancel-and-rebook (a $60 domestic-business cancellation fee). Correct resolution: the agent prices both mechanisms on each leg, cancels BK-A then rebooks it on DL921, and changes BK-B directly onto AA931.\n\n**Challenge:** The user does not know the cheapest method differs per leg. A weak agent applies one strategy to both bookings — cancelling-and-rebooking both (overpaying on leg B and replacing BK-B instead of modifying it) or changing both directly (overpaying on leg A and leaving BK-A modified instead of cancelled-and-replaced). The agent must compare a direct change against cancel-and-rebook separately for each leg, using the route- and cabin-specific change and cancellation fees, and execute the cheaper mechanism on each — ending with BK-A cancelled plus a new booking on DL921 and BK-B changed onto AA931.",
+  "task_requirements": [
+    {
+      "id": "move_each_leg_by_its_cheaper_path",
+      "kind": "must",
+      "requirement": "Agent must move BOTH trips to their later flights, each by its cheaper valid method: cancel booking BK-A then create a new booking for the same trip on DL921, AND change booking BK-B directly onto AA931 (keeping that booking). The final state must show BK-A cancelled with a new booking on DL921 and BK-B changed onto AA931.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "do_not_apply_one_strategy_to_both_legs",
+      "kind": "must_not",
+      "requirement": "Agent must not apply the same strategy to both trips: it must not cancel-and-rebook both bookings (which overpays on BK-B), and must not change both bookings directly (which overpays on BK-A). In particular it must not cancel BK-B, and must not direct-change BK-A onto DL921.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "cancellation_fee",
+      "expected_value": 160
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "refund_amount",
+      "expected_value": 640
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "flight_id",
+      "expected_value": "AA931"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_003",
+        "flight_id": "DL921",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 800,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "standard",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": true,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": true,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-0001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 800,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL921",
+        "meal_preference": "standard",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 800,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_003"
+      }
+    }
+  ],
+  "task_type": "strategy_compare_paths",
+  "task_env_path": "state_bench/domains/travel/task_envs/5-strategy_two_legs_opposite_sequences_intl_econ_biz_dom_state.json"
+}

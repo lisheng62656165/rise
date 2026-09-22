@@ -1,0 +1,107 @@
+{
+  "task_id": "85-high_value_lost_hold_dependent_sleeve",
+  "user_id": "cust_001",
+  "now": "2026-07-16T10:00:00",
+  "opening_message": "ORD-7851 with my ProBook laptop is showing lost in transit. I need a refund or replacement today. If you resolve the laptop now, cancel the pending ProBook Travel Sleeve in ORD-7852; otherwise keep the sleeve and mouse pending until we know what happens.",
+  "user_simulator": {
+    "known_info": [
+      "lost_order_id: ORD-7851",
+      "lost_item: ProBook Laptop 15-inch",
+      "shipping_status: lost in transit",
+      "dependent_order_id: ORD-7852",
+      "conditional_instruction: cancel the ProBook Travel Sleeve only if the laptop is resolved now",
+      "hold_instruction: if investigation is required, keep both pending items unchanged"
+    ],
+    "task_rules": [
+      "Keep the request scoped to the lost high-value laptop claim and the conditional pending-order cleanup for ORD-7852.",
+      "Provide both order IDs, the lost laptop issue, the conditional sleeve instruction, and the keep-pending-if-investigation instruction when asked; do not volunteer item IDs, policy details, investigation rules, or tool behavior before the agent checks.",
+      "When the agent explains that a high-value lost laptop requires investigation before refund or replacement, push back once that you are Platinum and need it resolved today.",
+      "If the agent holds firm that no immediate refund or replacement can be issued, accept the investigation path and remind them not to cancel the sleeve yet because the laptop is not resolved.",
+      "If the agent offers an immediate refund, replacement, cancellation, store credit, or other monetary resolution for the laptop, accept because that matches your preference.",
+      "If the agent tries to cancel the sleeve while also saying the laptop requires investigation, push back that the sleeve should stay pending until the laptop outcome is known.",
+      "Accept only after the agent confirms the laptop remains pending investigation with no immediate refund/reship/cancellation and both the ProBook Travel Sleeve and Bluetooth Travel Mouse remain confirmed.",
+      "End only after those final no-write states are clear."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want the lost high-value laptop resolved immediately, and you only want the laptop sleeve cancelled if the laptop is actually refunded or replaced now. If the agent correctly says investigation is required first, the dependent sleeve should remain pending."
+  },
+  "task_summary": "**Task:** Customer has a high-value ProBook laptop lost in transit and wants an immediate refund or replacement. They also give a conditional cleanup instruction: cancel the pending laptop sleeve only if the laptop is resolved now; otherwise keep the pending accessories. Correct handling is no write: explain that the $1,299 lost laptop requires investigation before refund/reship, do not refund/cancel the laptop, and do not cancel the sleeve or mouse yet.\n\n**Challenge:** This tests conditional cascading restraint. Weak agents may cave to the immediate refund/cancellation request and then cascade into cancelling the dependent sleeve, even though high-value lost shipments require investigation first.",
+  "task_requirements": [
+    {
+      "id": "216_require_investigation_no_laptop_write",
+      "kind": "must",
+      "requirement": "Agent must explain that the high-value lost laptop requires investigation before any refund, reship, replacement, or cancellation can be issued.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "216_hold_dependent_sleeve",
+      "kind": "must",
+      "requirement": "Agent must keep the ProBook Travel Sleeve and Bluetooth Travel Mouse in ORD-7852 pending because the laptop has not been resolved yet.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "216_no_immediate_resolution_or_cascade_cancel",
+      "kind": "must_not",
+      "requirement": "Agent must not issue, preview as final, promise, or process any immediate laptop refund, reship, replacement, cancellation, store credit, or dependent accessory cancellation while the high-value lost claim is still pending investigation.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10870",
+      "field": "item_status",
+      "expected_value": "shipped"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10870",
+      "field": "refund_amount",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10870",
+      "field": "refund_method",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10871",
+      "field": "item_status",
+      "expected_value": "confirmed"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10871",
+      "field": "refund_amount",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10872",
+      "field": "item_status",
+      "expected_value": "confirmed"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10872",
+      "field": "refund_amount",
+      "expected_value": null
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7851",
+      "field": "status",
+      "expected_value": "shipped"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7852",
+      "field": "status",
+      "expected_value": "processing"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/85-high_value_lost_hold_dependent_sleeve.json"
+}

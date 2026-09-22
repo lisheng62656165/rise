@@ -1,0 +1,88 @@
+{
+  "task_id": "46-comparison_set_retention",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Can you compare your top 3 laptops under $1000 for me? I don't want a huge list — just pick a few good ones so I can decide what's best for my day-to-day.",
+  "user_simulator": {
+    "user_sim_context": "You're comparing laptops under $1000. The agent will present 3 options. You'll ask comparative questions one at a time (lightest, best battery, which has 16GB), then pick based on being LIGHT. You expect the agent to keep the SAME 3 options consistent across all answers and not introduce new ones.",
+    "known_info": [
+      "You want a laptop under $1000.",
+      "You care about light weight, good battery, RAM — in that order.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to compare a small set of laptops under $1000, ask one follow-up at a time about lightness, battery life, and 16GB RAM, then choose the light option from that same set for the cart.",
+      "Do not volunteer specific specs, product IDs, promos, loyalty, gift wrap, shipping, or extra preferences; provide only your under-$1000 laptop goal and, if asked, that you care about light weight first, then battery, then RAM.",
+      "After the agent presents the initial comparison set, ask which of those options is lightest; after that answer, ask which has the best battery life; after that answer, ask which has 16GB RAM.",
+      "If the agent answers a comparison question with a product outside the initial set, adds a fourth option, re-searches into a different set, or drops one of the compared options, push back and ask the agent to stick to the original compared laptops.",
+      "If the agent asks you to restate the compared laptops, remind them that they already compared SlimBook, ProBook, and SlateTab, then continue with the next comparison question or choice.",
+      "When the comparison questions are answered, choose the SlimBook Air 13 because it is the light option and ask the agent to add that laptop to your cart with quantity 1 and no gift wrap.",
+      "If the agent recommends ProBook or another product instead after you choose SlimBook Air 13, decline the switch and restate that you want the SlimBook.",
+      "If the agent asks for confirmation before adding the item, agree only to adding SP-1001 SlimBook Air 13 with quantity 1 and no gift wrap; refuse unrelated cart, promo, loyalty, shipping, or checkout actions.",
+      "End only after the agent confirms SP-1001 SlimBook Air 13 was added to the cart with quantity 1, no gift wrap, and no unrelated write actions; then reply with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) asks for a comparison of laptops under $1000. Correct 3-option set: SP-1001 SlimBook Air ($849, 2.6 lb, 14 hrs, 8GB), SP-1002 ProBook ($999, 2.9 lb, 12 hrs, 16GB), SP-1003 SlateTab ($749, 3.2 lb, 11 hrs, 8GB). Customer then asks comparative questions across turns (lightest / best battery / which has 16GB) and ultimately picks the 'light one' — SP-1001. Final cart: SP-1001 qty=1 no wrap, $849.\n\n**Challenge:** Multi-turn comparison set retention. Pitfall: agent re-searches at later turns, producing different 3-option sets; introduces a 4th option; forgets the set by turn 6 and asks customer to restate; answers 'which has 16GB' with an out-of-set product. Correct: hold the same 3 options across all comparative answers, respect the customer's final choice. Tests whether agent treats an earlier comparison as a committed reference set rather than re-querying each turn. Distinct from T41 (progressive requirements) — T46 is set retention with fixed options across a comparative Q&A.",
+  "task_requirements": [
+    {
+      "id": "presented_committed_set",
+      "kind": "must",
+      "requirement": "At turn 2, in response to the customer's request for a curated short list ('your top 3'), the agent presented a specific, explicitly-named comparison set of a few laptops under $1000 — a focused set of roughly 2 to 5 named options is acceptable. A vague 'here are some options' with no clear named set fails, as does presenting 0 or 1. The point is that the agent commits to a concrete short set it can hold across the following turns; do not fail this merely because the exact count or specific SKUs differ from any reference list, as long as the set is focused and clearly named.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "retained_set_across_turns",
+      "kind": "must",
+      "requirement": "Agent answered ALL 3 comparative questions (lightest / best battery / 16GB RAM) using ONLY products from the same comparison set it presented at turn 2. Introducing a NEW product mid-conversation that was not in that original set fails. Silently dropping a product from the set fails. Re-searching into a different set fails. Asking the customer to restate the set fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_comparative_answers",
+      "kind": "must",
+      "requirement": "Agent's answers to the comparative questions were CORRECT relative to the specific set it actually presented at turn 2: 'lightest' must name the lowest-weight product in that set, 'best battery' the highest battery-hours product in that set, and '16GB RAM' must name only product(s) in that set that actually have 16GB. Judge correctness against the agent's own committed set (whatever it is), not against any fixed reference set; an answer that is right for the presented set passes even if a different set would give a different answer.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "added_slimbook_on_light_cue",
+      "kind": "must",
+      "requirement": "Agent added exactly SP-1001 SlimBook Air 13 with quantity=1, gift_wrap=False, after the customer chose it by name (the customer asked to 'go with the SlimBook Air 13' as the light option). The customer specifically named the SlimBook — adding SP-1106 Chromebook (even if lighter) or SP-1002 fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-1001",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "comparison_recommendation",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/46-comparison_set_retention.json"
+}

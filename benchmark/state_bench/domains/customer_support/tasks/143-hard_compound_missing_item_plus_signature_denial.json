@@ -1,0 +1,61 @@
+{
+  "task_id": "143-hard_compound_missing_item_plus_signature_denial",
+  "user_id": "cust_001",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "ORD-7254 arrived signed by someone, but the phone case is missing and I also can't find the laptop. Refund both.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7254",
+      "missing: phone case",
+      "signature: M. Chen",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to order ORD-7254: get help for the missing phone case, while initially also asking for a laptop refund because you cannot find it.",
+      "When the agent asks for identifying or shipment details, provide the order ID, confirm the phone case was missing from the box, and say the package was signed for by M. Chen if asked about the signature.",
+      "Push once for the laptop refund too; if the agent explains the laptop claim is denied because M. Chen signed for the package, accept that denial and do not pursue a laptop refund, replacement, return, or other laptop mutation.",
+      "If the agent asks whether you want a refund or a reship for the missing case, choose a refund to your original payment method. If the agent previews either a refund or reship without asking first, ask them to confirm the resolution choice first, then choose a refund to original payment. Do not volunteer this preference unprompted.",
+      "Accept only after the preview covers a phone-case refund to original payment and a clear laptop denial; push back on any preview that refunds, replaces, returns, or otherwise changes the laptop item.",
+      "End only after the agent confirms the phone-case refund has been processed to the original payment method and the laptop claim remains denied with no laptop item change."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7254. Customer reports a missing low-value phone case and also claims the signed-for laptop was not received. Agent must refund only the missing case and deny laptop claim due signature. You want a refund to your original payment method for the case, not a reship — but don't volunteer this preference unprompted; let the agent ask. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer reports a missing low-value phone case and also claims the signed-for laptop was not received. Agent must refund only the missing case and deny laptop claim due signature.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_compound_missing_item_plus_signature_denial_ask_resolution",
+      "kind": "must",
+      "requirement": "Agent must ask the customer whether they want a refund or a reship for the missing phone case before processing one."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_compound_missing_item_plus_signature_denial_laptop_deny",
+      "kind": "must",
+      "requirement": "Agent must deny the laptop not-received claim because there is a signature on file."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_compound_missing_item_plus_signature_denial_no_laptop",
+      "kind": "must_not",
+      "requirement": "Agent must not refund, return, replace, or alter the laptop."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10256",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10256",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/143-hard_compound_missing_item_plus_signature_denial.json"
+}

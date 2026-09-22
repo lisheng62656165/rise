@@ -1,0 +1,86 @@
+{
+  "task_id": "6-cancel_within_free_window_intl",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to cancel both my upcoming international flights. Can you help?",
+  "user_simulator": {
+    "known_info": [
+      "Booking A BK-1007: SFO→NRT.",
+      "Booking B BK-1008: JFK→LHR.",
+      "You think both bookings were made around two days ago, but you are not sure of the exact times."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to cancel both upcoming international flight bookings and get a clear side-by-side explanation of which one can be canceled free and which one cannot.",
+      "When the agent asks for booking IDs, provide both booking IDs.",
+      "If asked when you booked them, say you think both were booked around two days ago, but you are not sure of the exact times.",
+      "If the agent says one booking is outside the free-cancellation window, express surprise once and ask how they calculated the timing.",
+      "If the agent explains that BK-1007 is still within the 48-hour international cancellation window and BK-1008 is outside it, accept that distinction.",
+      "Push back if the agent says both bookings are free to cancel or treats both bookings as having the same window status; ask them to recheck the exact booking timestamps before you agree.",
+      "Accept cancellation only after the agent previews the fee and refund outcome for each booking, with BK-1007 as the no-fee cancellation and BK-1008 as the paid cancellation.",
+      "End only after both bookings have been canceled and the agent confirms the final fee and refund result for each booking, then reply with [TASK_DONE]."
+    ],
+    "user_sim_context": "You want to cancel two upcoming international flights and expect the timing of when you booked them to matter. The two bookings feel similar to you, so you are looking for a clear side-by-side explanation. You want to know what can be canceled cleanly and what cannot."
+  },
+  "task_summary": "**Task:** A traveler asks to cancel two international bookings that were made only a few hours apart, one just inside and one just outside the free-cancellation window. Correct resolution: BK-1007 qualifies for free cancellation while BK-1008 does not.\n\n**Challenge:** The agent distinguishes the two booking timestamps correctly, explains why only one qualifies for free cancellation, and does not collapse both bookings into the same window logic.",
+  "task_requirements": [
+    {
+      "id": "state_one_free_one_paid",
+      "kind": "must",
+      "requirement": "Agent must explain that BK-1007 qualifies for free cancellation while BK-1008 does not.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_timestamp_window_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain the distinction using the actual booking timing or 48-hour window logic rather than treating both bookings as if they were booked at the same time.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_not_both_free",
+      "kind": "must_not",
+      "requirement": "Agent must not claim that both international bookings qualify for free cancellation under the same 48-hour window.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1007",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1007",
+      "field": "refund_amount",
+      "expected_value": 1400
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1007",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1008",
+      "field": "cancellation_fee",
+      "expected_value": 96
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1008",
+      "field": "refund_amount",
+      "expected_value": 384
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1008",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "cancellation",
+  "task_env_path": "state_bench/domains/travel/task_envs/6-cancel_within_free_window_intl.json"
+}

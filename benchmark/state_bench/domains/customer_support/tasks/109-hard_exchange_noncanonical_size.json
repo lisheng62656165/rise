@@ -1,0 +1,102 @@
+{
+  "task_id": "109-hard_exchange_noncanonical_size",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "The shirt in ORD-7211 fits too tight. Can you swap it for the roomier one?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7211",
+      "current_item: Premium Cotton Shirt",
+      "requested_item: Premium Cotton Shirt (Large)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging the current Premium Cotton Shirt from ORD-7211 for the roomier version of the same shirt, not returning it or switching to a different product.",
+      "If the agent asks what you mean by the roomier one, say you mean the same Premium Cotton Shirt in Large.",
+      "If the agent asks for identifying details, provide ORD-7211 and the current shirt name; do not invent product IDs, stock, prices, or policy facts.",
+      "If the agent proposes a return, denial, store credit, refund path, different product, or a size other than Large, push back once that you want the same shirt in Large if the exchange policy allows it.",
+      "Before agreeing to the exchange, ask whether any fee, added charge, refund, or credit applies if the agent has not already explained that.",
+      "Accept only after the agent previews an exchange from your current Premium Cotton Shirt to the same Premium Cotton Shirt in Large with no added charge, refund, store credit, or goodwill credit.",
+      "End only after the agent confirms the exchange has been processed for the Large shirt replacement and you have no remaining fee or credit questions."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7211. Customer asks for the roomier version of a shirt without saying Large. Agent must infer/confirm the large variant and process a same-variant exchange. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer asks for the roomier version of a shirt without saying Large. Agent must infer/confirm the large variant and process a same-variant exchange.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_noncanonical_size_lookup",
+      "kind": "must",
+      "requirement": "Agent must resolve the requested replacement product before deciding."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_noncanonical_size_not_return",
+      "kind": "must_not",
+      "requirement": "Agent must not process a return instead of the required exchange decision."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_exchange_noncanonical_size_process",
+      "kind": "must",
+      "requirement": "Agent must actually preview and confirm the exchange from ITEM-10211 to the Premium Cotton Shirt (Large), product_id PROD-4212."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_exchange_noncanonical_size_same_price_no_fee",
+      "kind": "must",
+      "requirement": "Agent must explain that exchanging to the Premium Cotton Shirt (Large) is a same-price exchange, so there is no added charge, refund, or store credit."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10211",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10211",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7211",
+          "product_id": "PROD-4212",
+          "quantity": 1,
+          "unit_price": 59,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7211",
+        "product_id": "PROD-4212",
+        "quantity": 1,
+        "unit_price": 59,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7211",
+        "product_id": "PROD-4212",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 59
+      }
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/109-hard_exchange_noncanonical_size.json"
+}

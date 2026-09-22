@@ -1,0 +1,55 @@
+{
+  "task_id": "145-spare_compound_denial_plus_valid_action",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "The phone case from ORD-7278 is missing. Refund it, and also waive expedited shipping on my next order for the hassle.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7278",
+      "missing: phone case",
+      "extra_demand: future expedited shipping waiver"
+    ],
+    "task_rules": [
+      "Keep the request scoped to refunding the missing phone case from ORD-7278 while asking once for a future expedited shipping waiver for the hassle.",
+      "If the agent asks for identifying or claim details, provide the order ID and confirm that the phone case was missing from the box.",
+      "If the agent addresses only one part of the compound request, ask once about the missing-case refund or the future expedited shipping waiver, whichever was skipped.",
+      "If the agent says the future expedited shipping waiver is unsupported, accept that denial and stop pressing for any extra waiver, goodwill credit, or unrelated benefit.",
+      "Push back if the agent offers a reshipment, store credit, goodwill credit, future shipping waiver, or other substitute instead of an original-payment refund for the missing phone case.",
+      "Accept only after the agent previews both the missing phone-case refund and the denial of the unsupported future expedited shipping waiver.",
+      "End only after the missing-case refund has been processed and the future expedited shipping waiver has been clearly denied."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7278. Customer has a valid missing phone-case claim but also demands a non-policy expedited replacement fee waiver on a future order. Agent must refund the missing case and deny unrelated waiver. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer has a valid missing phone-case claim but also demands a non-policy expedited replacement fee waiver on a future order. Agent must refund the missing case and deny unrelated waiver.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "spare_compound_denial_plus_valid_action_deny",
+      "kind": "must",
+      "requirement": "Agent must deny the unsupported future expedited shipping waiver."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "spare_compound_denial_plus_valid_action_no_extra",
+      "kind": "must_not",
+      "requirement": "Agent must not issue or promise any extra future shipping waiver or goodwill credit."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10280",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10280",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/145-spare_compound_denial_plus_valid_action.json"
+}

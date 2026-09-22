@@ -1,0 +1,81 @@
+{
+  "task_id": "21-compound_sub240_delay_change_not_free_plus_baggage_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my flight BK-E (ORD to SEA on AS500) is delayed about 200 minutes, so I'd like to move to the later flight AS501 that still gets me in tonight. Also please add 2 checked bags. Keep everything else the same. My user ID is user_004 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Practical traveler mildly inconvenienced by a delay; cooperative and not demanding, just wants to get on a better flight and bring his bags.",
+    "user_sim_context": "Your flight is delayed a few hours and you'd rather take a later flight that still gets you in tonight. You also want to add a couple of checked bags. You do not know whether the delay makes the change free, and you do not know your baggage allowance; you just want it handled and anything owed on your card.",
+    "known_info": [
+      "Booking BK-E: ORD to SEA on AS500, delayed about 200 minutes.",
+      "You want to move to the later same-day flight AS501.",
+      "You want to add 2 checked bags.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "Whether the delay waives the change fee, or what the change fee is.",
+      "Your loyalty free-checked-bag allowance."
+    ],
+    "task_rules": [
+      "Open by saying your flight BK-E (ORD to SEA on AS500) is delayed about 200 minutes, you want to move to the later flight AS501, and you want to add 2 checked bags. The agent already has your opening message.",
+      "If the agent says the change carries a fee, accept it once they explain it; you may ask once whether the delay covers it, but accept the agent's policy-grounded answer and do NOT insist the move should be free.",
+      "If the agent asks about checked bags, confirm you want 2 checked bags added. Do not claim they are free or paid; you do not know your allowance.",
+      "Do NOT volunteer the change fee, whether the delay waives it, or your baggage allowance; you do not know these.",
+      "If the agent proposes anything unrelated (cabin upgrade, insurance, cancellation, car or hotel add-ons), decline and return to the flight move plus the bags.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving the change: airline, time_range, and max_stops. If the agent has not surfaced enough option detail to verify them, ask.",
+      "Booking-stage persisted preferences to verify on the changed booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing booking's values.",
+      "Do not try to verify raw flight_id. Your budget is a hard constraint.",
+      "End only after BK-E is moved to AS501 and the 2 bags are handled, with the change fee and total clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver) is on BK-E (ORD to SEA on AS500), delayed 200 minutes. He wants to move to the later same-day flight AS501 and add 2 checked bags. A 200-minute delay does NOT waive a flight-change fee (only a 240+ delay does), so moving the flight is an ordinary personal change at the domestic >7-day fee of $75 (change_reason=\"personal\", change_fee=75) — not a free schedule change. As a silver member on economy he gets 2 free checked bags (1 base + 1 bonus), so the 2 bags are fully covered and paid_checked_bags stays 0. Correct end state: BK-E on AS501 with change_reason=\"personal\", change_fee=75, paid_checked_bags=0.\n\n**Challenge:** The agent must NOT over-apply \"the flight was delayed so moving it is free\" — a 200-minute delay qualifies only for a meal voucher and does NOT waive a CHANGE fee, so the move is a $75 personal change. Tagging it as a free/disruption reason persists change_fee=0. It must also not bill 2 checked bags the silver allowance already covers. Both are discrete inputs the engine accepts and persists, so the change-fee preview only protects an agent that asks as 'personal'; one convinced the move is free will persist a wrong $0 fee.",
+  "task_requirements": [
+    {
+      "id": "sub240_delay_does_not_waive_change_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that the 200-minute delay does not waive the flight-change fee (only a longer delay would), so moving to the later flight is an ordinary change that carries the standard fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "change_processed_as_personal_not_free",
+      "kind": "must_not",
+      "requirement": "Agent must not process the flight change as a free or fee-exempt (schedule-change/disruption) move; the 200-minute delay does not make it free.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "bags_covered_by_silver_allowance",
+      "kind": "must",
+      "requirement": "Agent must recognize that the 2 checked bags are covered by the traveler's silver free-checked-bag allowance and are not an additional paid charge.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-E",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-E",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-E",
+      "field": "flight_id",
+      "expected_value": "AS501"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-E",
+      "field": "price_paid",
+      "expected_value": 355
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/21-compound_sub240_delay_change_not_free_plus_baggage_state.json"
+}

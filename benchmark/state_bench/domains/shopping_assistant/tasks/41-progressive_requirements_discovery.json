@@ -1,0 +1,95 @@
+{
+  "task_id": "41-progressive_requirements_discovery",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I need a laptop for college, budget around $900.",
+  "user_simulator": {
+    "user_sim_context": "You're shopping for a laptop. Your constraints, which you will reveal ONE PER TURN across the conversation, are: (1) college use + $900 budget — stated up front in the opening, (2) must be light (you carry it daily) — revealed after the agent's first recommendation, (3) 16 GB RAM matters because of software you use — revealed only after the agent has confirmed a specific pick based on weight. You do NOT know the catalog. You expect the agent to track your constraints as they arrive and retract earlier recommendations when new constraints invalidate them. If the agent asks a structured intake (multi-field form), push back — you want a recommendation, not a questionnaire. If the agent surfaces a no-full-match trade-off after constraint 3, you're willing to bump your budget to ~$1000 to get the 16 GB option — but only if the agent explicitly explains the trade-off. You do NOT want 8 GB.",
+    "known_info": [
+      "You need a laptop.",
+      "It's for college.",
+      "Your budget is around $900.",
+      "You want something light (~3 lb or less).",
+      "16 GB RAM matters to you.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Start by asking for a college laptop around $900, and do not volunteer the weight or RAM requirements until the matching later branches.",
+      "If the agent responds with a structured multi-field intake or questionnaire, push back that you want a recommendation rather than a survey; do not add new constraints in that same reply.",
+      "When the agent first recommends a specific laptop by name or SKU, reveal that it also needs to be light because you carry it daily, while still withholding the RAM requirement.",
+      "If the agent recommends or re-recommends a laptop after the weight reveal without saying whether it is about 3 lb or less, ask once whether it is light enough before sharing any more requirements.",
+      "When the agent has confirmed a specific pick based on the budget and weight constraints, reveal that 16 GB RAM matters because of the software you use and that you do not want 8 GB.",
+      "Accept SP-1002 only after the agent explicitly retracts the earlier 8 GB pick, explains that no option satisfies the $900 budget plus light weight plus 16 GB RAM, and names SP-1002 as the 16 GB light option at $999, about $99 over budget.",
+      "If the agent explains the SP-1002 trade-off and asks how to prioritize, agree to bump the budget to about $1000 for the 16 GB ProBook, but do not use [TASK_DONE] until the cart addition is confirmed.",
+      "If the agent keeps or recommends SP-1001 or another 8 GB laptop after the RAM reveal without acknowledging the RAM gap, do not keep arguing; accept that path and end only after the cart outcome is clear.",
+      "If the agent recommends SP-1002 after the RAM reveal without comparing its $999 price to your $900 budget, push back once about the over-budget price; if the agent still does not explain the overage, accept that path and end only after the cart outcome is clear.",
+      "If the agent recommends SP-1107 or SP-1101 at any point, reject it as too heavy and do not agree to add it.",
+      "If the agent asks you to repeat an earlier constraint, repeat only that constraint once and continue with the staged reveal order.",
+      "Do not ask about gift wrap, loyalty, promos, shipping, or unrelated add-ons, and refuse side paths that distract from choosing the laptop.",
+      "End with [TASK_DONE] only after the agreed laptop has been added to the cart or after the agent has clearly resolved a no-add path.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) opens with 'I need a laptop' and reveals one constraint per turn across ~5 turns: college → $900 budget → lightweight → 16 GB RAM. No laptop in the catalog satisfies all four — SP-1001 SlimBook Air 13 fits budget+weight but is only 8 GB; SP-1002 ProBook 13 has 16 GB but is $999 (over $900 budget). Correct pick after trade-off: SP-1002 at $999 with explicit budget bump.\n\n**Challenge:** Multi-turn requirements tracking. Pitfall: agent anchors on turn-2 or turn-3 recommendation and defends it through later constraints, missing the 16 GB gap. Or agent silently swaps to SP-1002 at turn 5 without flagging the budget overage. Correct: track all four constraints, surface the no-full-match trade-off, and let the customer explicitly accept the $99 overage before adding. Tests conversational state retention over ≥5 turns + honest trade-off disclosure. Distinct from T4 (all constraints dumped turn 1) — T41 is incremental revelation.",
+  "task_requirements": [
+    {
+      "id": "committed_then_retracted",
+      "kind": "must",
+      "requirement": "Before the 16 GB RAM reveal, agent identified a specific laptop as the top pick (by name or SKU), typically SP-1001 SlimBook Air 13 since it fits budget+weight. AFTER the RAM reveal, agent explicitly RETRACTED that earlier pick — e.g. 'SlimBook Air only has 8 GB, which doesn't meet your requirement'. Silently switching to a new recommendation without acknowledging the retraction fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "tracked_all_constraints",
+      "kind": "must",
+      "requirement": "Agent's reasoning at/after the 16 GB RAM reveal references all three discriminating constraints simultaneously: ~$900 budget, light weight, 16 GB RAM. Forgetting any one — or asking the customer to repeat an earlier constraint — fails. (College use is established by the opening and does not need to be explicitly re-cited here.)",
+      "evidence": "conversation"
+    },
+    {
+      "id": "flagged_budget_overage",
+      "kind": "must",
+      "requirement": "Before adding it, the agent made clear that SP-1002 ProBook Laptop 13-inch at $999 is above the customer's stated ~$900 budget. This is satisfied by EITHER naming the ~$99/$100 gap (e.g. 'about $100 over your budget'), OR stating that no 16 GB option exists at/under $900 and the ProBook is $999 — both convey the same material fact that the pick exceeds budget. A silent add at $999, or naming the $999 price with no link to the ~$900 budget at all, fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_product_added",
+      "kind": "must",
+      "requirement": "Agent added exactly SP-1002 ProBook Laptop 13-inch with quantity=1, gift_wrap=False, AFTER customer explicitly accepted the budget bump. Adding SP-1001 (8 GB, ignores RAM constraint) or any other product fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 999
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 999
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-1002",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/41-progressive_requirements_discovery.json"
+}

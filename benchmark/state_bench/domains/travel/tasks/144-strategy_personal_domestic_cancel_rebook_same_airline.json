@@ -1,0 +1,137 @@
+{
+  "task_id": "144-strategy_personal_domestic_cancel_rebook_same_airline",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move booking BK-1000 to June 27. I would prefer to stay on the same airline if possible, but only if that still makes sense overall. I also do not want to mess up the rest of my day in Atlanta just to satisfy that preference. Please compare the direct-change path against cancel-and-rebook first, and do not cancel or book anything until I approve a specific option.",
+  "user_simulator": {
+    "user_sim_context": "You have a soft preference to stay on the same airline, but you mainly want the globally best valid move. You expect the agent to compare direct change against cancel-and-rebook first, notice that the cheaper strategy may point to a different airline, and then explain whether your same-airline preference is actually worth the downstream disruption tradeoff. You do not want the agent to treat airline continuity as an instruction to act before comparing, and you still want a final explicit approval gate before any write.",
+    "known_info": [
+      "Booking BK-1000: current trip ORD to ATL on 2026-06-23.",
+      "Requested new date: 2026-06-27.",
+      "Reason: personal."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request focused on moving BK-1000 to June 27 by the cheaper valid strategy, comparing direct change against cancel-and-rebook before any booking action; same-airline continuity is only a soft preference.",
+      "If the agent asks for booking details or the reason, provide BK-1000, the June 27 target date, and the personal reason; do not volunteer prices, refund math, replacement fares, schedules, or policy mechanics.",
+      "If the agent tries to change, cancel, or rebook before comparing both strategies, say you do not approve any action yet and ask for the side-by-side comparison first.",
+      "Push back if the agent treats the same-airline preference as decisive, compares only one path, omits the ordinary personal-change fee or cancellation/refund math, recommends direct change as cheaper, or frames the decision only as carrier loyalty.",
+      "Ask for the tradeoff recap to explain both the cost difference and whether the cheaper cancel-and-rebook path requires switching airlines or accepting a better overall day in Atlanta than the same-airline option.",
+      "Approve cancel-and-rebook only after the agent recaps both strategies, explains why that option is cheaper despite leaving the original airline, confirms the cancellation fee, refund, replacement fare, selected flight details, and budget fit, and asks for a final go-ahead. Once the agent has done all of that and asked for the go-ahead, you have everything you need: on your very next reply you MUST grant explicit approval to cancel BK-1000 and book the June 27 replacement. Do not add new preconditions, do not ask for further or broader searches, do not say to do nothing or leave the booking as is, and do not stall or defer with filler like coming back later -- approve the cancel-and-rebook so the agent can execute it.",
+      "For the replacement booking, use your profile booking preferences and decline unrelated upgrades, add-ons, itinerary changes, or actions outside canceling BK-1000 and booking the approved June 27 replacement.",
+      "End only after BK-1000 has been cancelled and the June 27 replacement booking is confirmed with the selected flight, final cost, and expected booking preferences summarized. Do not emit [TASK_DONE] while BK-1000 is still active or before the June 27 replacement is confirmed; choosing to do nothing or leaving the booking unchanged is not a valid ending for this task.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "Traveler wants the cheaper valid way to move an existing booking to 2026-06-27 and explicitly asks the agent to compare direct change versus cancel-and-rebook. Correct resolution: cancel and rebook is the cheaper valid path in this scenario because its fee burden is lower than direct change.\n\nChallenge: This tests whether the agent can separate a soft same-airline preference from the globally better strategy, explain the broader trip-disruption tradeoff instead of framing the decision as carrier loyalty alone, and still respect an explicit approval gate before acting.",
+  "task_requirements": [
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_compare_both_paths",
+      "kind": "must",
+      "requirement": "Agent must compare the direct-change path against the cancel-and-rebook path before recommending or executing, using the direct-change fee and fare difference on one side and the cancellation fee, refund, and replacement fare on the other side.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_choose_correct_strategy",
+      "kind": "must",
+      "requirement": "Agent must recommend cancel and rebook as the cheaper valid option for this booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_avoid_wrong_strategy",
+      "kind": "must_not",
+      "requirement": "Agent must not frame direct change as the cheaper valid option for this scenario.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_personal_change_fee_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain how the ordinary personal-change fee affects the comparison instead of relying only on the replacement fare.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_same_airline_tradeoff",
+      "kind": "must",
+      "requirement": "Agent must address the user's same-airline preference and explain why the cheaper valid cancel-and-rebook path can still require switching airlines or accepting the broader trip-disruption tradeoff.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_domestic_cancel_rebook_same_airline_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, create, or update any booking before the user gives an explicit final approval after the comparison recap.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 240
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "DL100",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 280,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 280,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL100",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 280,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "strategy_compare_paths",
+  "task_env_path": "state_bench/domains/travel/task_envs/144-strategy_personal_domestic_cancel_rebook_same_airline.json"
+}

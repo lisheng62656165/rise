@@ -1,0 +1,67 @@
+{
+  "task_id": "23-policy_upgrade_basic_blocked",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I have two upcoming flights and I'd like to upgrade both to business class. My bookings are BK-PR08a and BK-PR08b.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-PR08a: wants to upgrade to business class.",
+      "Booking BK-PR08b: wants to upgrade to business class."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask to upgrade both BK-PR08a and BK-PR08b to business class, and keep the scope limited to those two bookings.",
+      "If the agent asks for booking details, provide BK-PR08a and BK-PR08b; do not add route, fare-class, or price details unless the agent looks them up or asks you to confirm them.",
+      "If the agent gives one blended answer for both bookings, ask them to compare each booking separately because you want to know whether both are eligible.",
+      "When the agent says BK-PR08a cannot be upgraded, ask why if the basic-economy restriction has not already been explained; accept the no-upgrade outcome only after that reason is clear.",
+      "For BK-PR08b, ask for the business-class upgrade cost and whether it fits within your $700 budget before authorizing any change.",
+      "Push back if the agent says BK-PR08a can be upgraded, treats BK-PR08b as blocked without explanation, quotes a BK-PR08b cost above your budget, or proposes changing both bookings anyway.",
+      "Approve upgrading BK-PR08b only after the agent clearly states that BK-PR08a remains blocked, BK-PR08b is eligible, the fare difference is $420, and the cost fits within your $700 budget.",
+      "End only after the agent confirms BK-PR08b has been upgraded to business and BK-PR08a was left unchanged; then reply with [TASK_DONE]."
+    ],
+    "user_sim_context": "You want to upgrade two bookings and are treating them as if the same upgrade logic should apply to both. Budget matters, but your bigger question is whether both itineraries are even eligible. You want the agent to compare them clearly instead of giving one blended answer."
+  },
+  "task_summary": "**Task:** User asks about upgrading two bookings, one basic economy and one regular economy, with a $700 budget. Correct resolution: Booking BK-PR08a cannot be upgraded because it is a basic economy fare.\n\n**Challenge:** The agent blocks the basic-economy upgrade, quotes the eligible economy-to-business upgrade correctly for the second booking, and frames the result against the user’s budget before proceeding only on the eligible booking.",
+  "task_requirements": [
+    {
+      "id": "state_basic_blocked",
+      "kind": "must",
+      "requirement": "Agent must explain that booking BK-PR08a cannot be upgraded because it is a basic economy fare.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_second_booking_upgrade_cost",
+      "kind": "must",
+      "requirement": "Agent must explain that booking BK-PR08b can be upgraded to business for a $420 fare difference.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_budget_tradeoff",
+      "kind": "must",
+      "requirement": "Agent must explain that the $420 upgrade for BK-PR08b fits within the user’s $700 budget, while still making clear that only the second booking is eligible.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-PR08b",
+      "field": "cabin_class",
+      "expected_value": "business"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-PR08b",
+      "field": "fare_difference",
+      "expected_value": 420
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-PR08b",
+      "field": "price_paid",
+      "expected_value": 700
+    }
+  ],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/23-policy_upgrade_basic_blocked.json"
+}

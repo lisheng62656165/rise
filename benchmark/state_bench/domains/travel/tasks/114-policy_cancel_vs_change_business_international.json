@@ -1,0 +1,58 @@
+{
+  "task_id": "114-policy_cancel_vs_change_business_international",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Before I decide what to do with booking BK-EP01, can you compare what it would cost me to cancel versus just change it? Do not cancel or change anything yet.",
+  "user_simulator": {
+    "user_sim_context": "You have an international business-class booking and want a clean compare-only explanation first. Because business class is flexible in some ways but not necessarily in every way, you want the agent to separate cancellation rules from change rules instead of hand-waving both as 'premium'. After that informational comparison, you want the agent to help you decide what to do under a hard budget for cancellation loss, but only after keeping the first phase informational.",
+    "known_info": [
+      "Booking BK-EP01."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request to a compare-first policy explanation for booking BK-EP01; do not ask the agent to cancel, change, rebook, or otherwise modify anything.",
+      "If the agent asks for the booking reference, provide BK-EP01; otherwise do not introduce unrelated trip preferences, replacement dates, or add-ons.",
+      "If the agent gives only the cancellation side or only the change side, ask for the missing side before discussing a decision or recommendation.",
+      "Push back if the agent treats international business cancellation as automatically free, because you need the cancellation rule kept separate from the no-change-fee rule.",
+      "After the agent explains both cancellation and change costs, say you would only cancel if the cancellation loss were $250 or less, and ask which path the agent recommends under that constraint.",
+      "If the agent offers to execute a cancellation, change, or rebooking before or after the recommendation, refuse and restate that this is only a compare-and-recommend policy question.",
+      "End with [TASK_DONE] only after the agent has answered the $250-loss recommendation question with no pending action to authorize."
+    ]
+  },
+  "task_summary": "Traveler wants a compare-first explanation of cancel versus change for an international business-class booking, then a recommendation under a hard budget for acceptable cancellation loss. Correct resolution: the agent should explain that the booking can be changed for no fee, that cancellation is not free and still follows the international business cancellation formula, and then recommend keeping the change path because cancellation exceeds the user's loss threshold.\n\nChallenge: This tests whether the agent can keep premium-cabin cancellation and change rules separate, preserve an information-only first phase, and then reason from those rules into a recommendation without jumping into execution.",
+  "task_requirements": [
+    {
+      "id": "policy_cancel_vs_change_business_international_1",
+      "kind": "must",
+      "requirement": "Agent must explain that changing the international business booking does not incur a change fee.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "policy_cancel_vs_change_business_international_2",
+      "kind": "must",
+      "requirement": "Agent must explain that cancellation is not free and still follows the international business cancellation policy for this booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "policy_cancel_vs_change_business_international_3",
+      "kind": "must",
+      "requirement": "After the user introduces a hard maximum acceptable cancellation loss of $250, agent must recommend against cancellation because the cancellation loss exceeds that threshold while the change path remains fee-free.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "policy_cancel_vs_change_business_international_4",
+      "kind": "must_not",
+      "requirement": "Agent must not claim that international business cancellation is automatically free just because business-class changes are free.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "policy_cancel_vs_change_business_international_5",
+      "kind": "must_not",
+      "requirement": "Agent must not execute (confirm) a cancellation, change, or rebooking during this compare-and-recommend policy task; a non-confirming preview or quote used only to obtain the costs is allowed.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/114-policy_cancel_vs_change_business_international.json"
+}

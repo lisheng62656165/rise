@@ -1,0 +1,954 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a customer service agent for a travel company. Today's date: <REDACTED>. You are currently helping customer user_001. Use the available tools to help the customer."
+    },
+    {
+      "role": "user",
+      "content": "Two things on my booking BK-1 (JFK to ORD on UA800): I need to move it to the next available later flight for a medical appointment, and please add 2 checked bags. My user ID is user_001; put anything owed on my card."
+    },
+    {
+      "role": "assistant",
+      "content": "I checked BK-1.\n\n- I couldn\u2019t move it yet because there are no later JFK \u2192 ORD flights available in the system after your current UA800 on 2026-06-30.\n- On the bags: you don\u2019t need to buy any. Your Gold status on this economy domestic trip includes up to 3 checked bags free, so 2 checked bags are already covered and there\u2019s nothing to charge to your card.\n\nIf you want, I can next look for:\n1. a flight on a different date, or  \n2. an alternate nearby airport option.",
+      "tool_calls": [
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-1"
+          },
+          "result": {
+            "booking_id": "BK-1",
+            "user_id": "user_001",
+            "flight_id": "UA800",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "kosher",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 300,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-06-13T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": null,
+            "fare_difference": null,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "ORD",
+            "departure_time": "2026-06-30T09:45:00",
+            "route_type": "domestic"
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "UA",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "UA800",
+                "airline_code": "UA",
+                "origin": "JFK",
+                "destination": "ORD",
+                "departure_time": "2026-06-30T09:45:00",
+                "arrival_time": "2026-06-30T12:18:00",
+                "duration_minutes": 153,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 300,
+                  "business": 800
+                },
+                "status": "scheduled",
+                "route_type": "domestic"
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "UA",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "UA",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "UA800",
+                "airline_code": "UA",
+                "origin": "JFK",
+                "destination": "ORD",
+                "departure_time": "2026-06-30T09:45:00",
+                "arrival_time": "2026-06-30T12:18:00",
+                "duration_minutes": 153,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 300,
+                  "business": 800
+                },
+                "status": "scheduled",
+                "route_type": "domestic"
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-06-30",
+            "airline": "",
+            "time_range": "red_eye",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "early_morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "get_user_details",
+          "arguments": {
+            "user_id": "user_001"
+          },
+          "result": {
+            "user_id": "user_001",
+            "name": "Emma Smith",
+            "email": "emma.smith@example.com",
+            "loyalty_tier": "gold",
+            "loyalty_points": 75000
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "baggage",
+            "cabin_class": "economy",
+            "loyalty_tier": "basic",
+            "route_type": "domestic"
+          },
+          "result": {
+            "topic": "baggage",
+            "carry_on": 1,
+            "base_checked_bags": 1,
+            "loyalty_bonus_checked_bags": 0,
+            "checked_bags_free": 1,
+            "checked_bag_fee": 35,
+            "oversized_bag_fee": 100,
+            "cabin_class": "economy",
+            "loyalty_tier": "basic"
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "baggage",
+            "cabin_class": "economy",
+            "loyalty_tier": "gold",
+            "route_type": "domestic"
+          },
+          "result": {
+            "topic": "baggage",
+            "carry_on": 1,
+            "base_checked_bags": 1,
+            "loyalty_bonus_checked_bags": 2,
+            "checked_bags_free": 3,
+            "checked_bag_fee": 35,
+            "oversized_bag_fee": 100,
+            "cabin_class": "economy",
+            "loyalty_tier": "gold"
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "change",
+            "cabin_class": "economy",
+            "loyalty_tier": "gold",
+            "route_type": "domestic"
+          },
+          "result": {
+            "topic": "change",
+            "rules": {
+              "free_change_window": "Free changes within 24 hours (domestic) or 48 hours (international) of booking",
+              "basic_economy": "Not changeable after free window",
+              "economy_domestic_personal": "Domestic change fee: $75 if departure >7 days, $150 if \u22647 days. Fare difference also applies.",
+              "economy_international_personal": "International change fee: $100 if departure >7 days, $200 if \u22647 days. Fare difference also applies.",
+              "economy_medical": "Medical changes: 50% discount on standard fee, rounded down to the nearest dollar (requires change_reason='medical')",
+              "economy_bereavement": "Bereavement changes: 75% discount on standard fee, rounded down to the nearest dollar (requires change_reason='bereavement')",
+              "jury_duty": "Jury duty: free change (change_reason='jury_duty')",
+              "military": "Military deployment: free change (change_reason='military')",
+              "schedule_change": "Airline schedule changes: free, no fee (change_reason='schedule_change')",
+              "weather": "Weather-related changes: free, no fee (change_reason='weather')",
+              "business": "Free changes (fare difference still applies)",
+              "first": "Free changes (fare difference still applies)",
+              "change_reason_required": "Pass change_reason parameter: 'personal', 'medical', 'bereavement', 'jury_duty', 'military', 'schedule_change', or 'weather'",
+              "route_type_matters": "Fees differ by route type. Check flight route_type."
+            },
+            "applicable_cabin_class": "economy",
+            "applicable_route_type": "domestic"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Please look for the next available later flight on a different date, then. I only need the date changed and 2 checked bags on the booking."
+    },
+    {
+      "role": "assistant",
+      "content": "Done \u2014 I changed BK-1 to the next available later date.\n\nUpdated booking:\n- Flight: UA801\n- Route: JFK \u2192 ORD\n- Departure: 2026-07-05 at 8:15 AM\n- Cabin: Economy\n\nCharges:\n- Medical change fee: $37\n- Fare difference: $0\n- Charged to card: $37\n- New total paid on booking: $337\n\nChecked bags:\n- Your Gold status includes 3 free checked bags on this economy domestic trip.\n- So your 2 checked bags are covered at no charge.\n- No paid bag fee was added to the booking because none is needed.\n\nAnything else you want updated on BK-1?",
+      "tool_calls": [
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "early_morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-01",
+            "airline": "",
+            "time_range": "red_eye",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "early_morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-02",
+            "airline": "",
+            "time_range": "red_eye",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "early_morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-03",
+            "airline": "",
+            "time_range": "red_eye",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-04",
+            "airline": "",
+            "time_range": "early_morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-04",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-04",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-04",
+            "airline": "",
+            "time_range": "evening",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-04",
+            "airline": "",
+            "time_range": "red_eye",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-05",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [
+              {
+                "flight_id": "UA801",
+                "airline_code": "UA",
+                "origin": "JFK",
+                "destination": "ORD",
+                "departure_time": "2026-07-05T08:15:00",
+                "arrival_time": "2026-07-05T14:12:00",
+                "duration_minutes": 357,
+                "stops": 0,
+                "cabin_prices": {
+                  "economy": 300,
+                  "business": 800
+                },
+                "status": "scheduled",
+                "route_type": "domestic"
+              }
+            ]
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-05",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-06",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-06",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-07",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-07",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-08",
+            "airline": "",
+            "time_range": "morning",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "search_flights",
+          "arguments": {
+            "origin": "JFK",
+            "destination": "ORD",
+            "date": "2026-07-08",
+            "airline": "",
+            "time_range": "afternoon",
+            "max_stops": 2,
+            "max_price": -1
+          },
+          "result": {
+            "flights": [],
+            "message": "No flights found matching your criteria."
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-1",
+            "flight_id": "UA801",
+            "change_reason": "medical",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "kosher",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": false
+          },
+          "result": {
+            "status": "preview",
+            "booking_id": "BK-1",
+            "flight_id": "UA801",
+            "change_fee": 37,
+            "fare_difference": 0,
+            "price_paid": 337
+          }
+        },
+        {
+          "name": "update_booking",
+          "arguments": {
+            "booking_id": "BK-1",
+            "flight_id": "UA801",
+            "change_reason": "medical",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "kosher",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "delay_compensation": "none",
+            "paid_checked_bags": 0,
+            "confirm": true
+          },
+          "result": {
+            "status": "updated",
+            "booking_id": "BK-1",
+            "changes_applied": [
+              "flight_id",
+              "change_reason"
+            ],
+            "price_paid": 337,
+            "change_fee": 37,
+            "fare_difference": 0
+          }
+        },
+        {
+          "name": "get_booking",
+          "arguments": {
+            "booking_id": "BK-1"
+          },
+          "result": {
+            "booking_id": "BK-1",
+            "user_id": "user_001",
+            "flight_id": "UA801",
+            "status": "confirmed",
+            "cabin_class": "economy",
+            "seat_type": "aisle",
+            "meal_preference": "kosher",
+            "add_wifi": true,
+            "add_extra_legroom": true,
+            "add_insurance": false,
+            "price_paid": 337,
+            "payment_method": "credit_card",
+            "points_used": 0,
+            "cash_amount": 0,
+            "booked_at": "2026-06-13T10:00:00",
+            "cancellation_fee": null,
+            "refund_amount": null,
+            "change_fee": 37,
+            "fare_difference": 0,
+            "delay_compensation": null,
+            "paid_checked_bags": 0,
+            "origin": "JFK",
+            "destination": "ORD",
+            "departure_time": "2026-07-05T08:15:00",
+            "route_type": "domestic"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Thanks \u2014 just to confirm, BK-1 is now on UA801 on 2026-07-05 at 8:15 AM, and the 2 checked bags are taken care of, right? [TASK_DONE]"
+    }
+  ]
+}

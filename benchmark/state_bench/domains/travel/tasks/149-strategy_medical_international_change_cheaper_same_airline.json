@@ -1,0 +1,99 @@
+{
+  "task_id": "149-strategy_medical_international_change_cheaper_same_airline",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move booking BK-1000 to July 4 because of a medical procedure. I would prefer to stay on the same airline if the cheaper valid option does not get worse because of that preference, but I do not want you to do anything until you compare the direct-change path against cancel-and-rebook and then get my final approval.",
+  "user_simulator": {
+    "user_sim_context": "The medical reason makes you expect direct change to be strong, and you also prefer to stay on the same airline if that does not make the answer worse. You want the agent to compare both strategies explicitly, explain whether the same-airline preference changes anything, and hold off on any write until you confirm after the recap.",
+    "known_info": [
+      "Booking BK-1000: JFK to GRU on 2026-06-29.",
+      "Requested new date: 2026-07-04.",
+      "Reason: medical."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to move BK-1000 to 2026-07-04 for a medical reason using the cheaper valid strategy, while staying on the same airline only if that preference does not make the strategy worse.",
+      "Provide BK-1000, the July 4 date, the medical reason, and the same-airline preference when relevant; do not introduce unrelated date, route, cabin, add-on, or upgrade requests.",
+      "If the agent proposes any booking change, cancellation, or replacement booking before comparing both strategies, refuse approval and ask for the direct-change versus cancel-and-rebook comparison first.",
+      "Push back if the agent treats the medical reason or same-airline preference as decisive by itself, omits the international medical-discount reasoning, recommends cancel-and-rebook as cheaper, or fails to explain whether the same-airline preference changes the recommendation or only aligns with it.",
+      "Approve only after the agent recaps both paths, identifies direct change as the cheaper valid path, gives the direct-change fee and fare difference, explains the cancel-and-rebook cost pieces, confirms the selected July 4 same-airline flight details and budget fit, and asks for a final explicit go-ahead.",
+      "For this existing-booking change, preserve BK-1000's current booking-stage preferences and decline unrelated upgrades, add-ons, cancellations, replacement bookings, or changes outside moving BK-1000 to July 4 by the approved direct-change path.",
+      "End only after the approved direct change has been completed and the agent summarizes the July 4 booking, final cost, flight details, and preserved booking preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "Traveler wants the cheaper valid way to move an existing booking to 2026-07-04 and explicitly asks the agent to compare direct change versus cancel-and-rebook. Correct resolution: direct change is the cheaper valid path in this scenario because its fee burden is lower than cancel and rebook.\n\nChallenge: The agent must combine an international medical discount with a same-airline preference inside a compare-recap-finalize workflow rather than treating airline continuity or the medical reason alone as permission to act.",
+  "task_requirements": [
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_compare_both_paths",
+      "kind": "must",
+      "requirement": "Agent must compare the direct-change path against the cancel-and-rebook path before recommending or executing, using the direct-change fee and fare difference on one side and the cancellation fee, refund, and replacement fare on the other side.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_choose_correct_strategy",
+      "kind": "must",
+      "requirement": "Agent must recommend direct change as the cheaper valid option for this booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_avoid_wrong_strategy",
+      "kind": "must_not",
+      "requirement": "Agent must not frame cancel and rebook as the cheaper valid option for this scenario.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_medical_discount_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain how the medical-reason change discount affects the direct-change economics before recommending a strategy.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_same_airline_preference",
+      "kind": "must",
+      "requirement": "Agent must address the user's same-airline preference and explain whether it changes the recommendation or only aligns with the cheaper direct-change path.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_medical_international_change_cheaper_same_airline_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, create, or update any booking before the user gives an explicit final approval after the comparison recap.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 60
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "DL182"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 1030
+    }
+  ],
+  "task_type": "strategy_compare_paths",
+  "task_env_path": "state_bench/domains/travel/task_envs/149-strategy_medical_international_change_cheaper_same_airline.json"
+}

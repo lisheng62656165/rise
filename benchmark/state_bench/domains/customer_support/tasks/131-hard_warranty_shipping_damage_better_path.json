@@ -1,0 +1,103 @@
+{
+  "task_id": "131-hard_warranty_shipping_damage_better_path",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "The blender from ORD-7236 arrived shattered. Should I use my warranty to get it fixed?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7236",
+      "issue: arrived shattered",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to resolving the shattered ORD-7236 blender through the right path; you are asking whether warranty is needed because the damage happened during shipping.",
+      "Provide the order ID and shattered-on-arrival issue when asked or when needed to identify the order, but do not volunteer your refund preference until the agent asks what resolution you want.",
+      "If the agent tries to file, preview, or process a warranty claim, push back and ask for the shipping-damage return path instead of using the warranty.",
+      "If the agent asks what resolution you want for the shipping damage, choose a refund to your original payment method and decline replacement or exchange options.",
+      "If the agent proposes, previews, or processes a shipping-damage resolution before asking what you want, say you wanted to be asked first; when asked, choose a refund to original payment.",
+      "Accept only after the agent explains that shipping damage should avoid a warranty claim and previews a damaged-in-transit return with an original-payment refund, free return label, no restocking fee, and any separate shipping-damage credit to original payment.",
+      "End only after the agent confirms the warranty was not used and the damaged-in-transit return, original-payment refund, return label, and any separate shipping-damage credit have been processed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7236. Customer asks for warranty help, but the blender arrived shattered in transit yesterday. Correct path is shipping/return resolution, not consuming a warranty claim. You want your money back to your original payment method, not a replacement — but don't volunteer this preference unprompted; let the agent ask. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer asks for warranty help, but the blender arrived shattered in transit yesterday. Correct path is shipping/return resolution, not consuming a warranty claim.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_warranty_shipping_damage_better_path_ask_resolution",
+      "kind": "must",
+      "requirement": "Agent must give the customer a say in the resolution before acting — either by asking which resolution they prefer OR by presenting the available resolution options (e.g. refund vs. replacement/exchange) and letting them choose. Proceeding to pick or execute a resolution without offering the customer any choice fails."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_warranty_shipping_damage_better_path_avoid_warranty",
+      "kind": "must",
+      "requirement": "Agent must explain that the customer should not use a warranty claim for shipping damage."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_warranty_shipping_damage_better_path_no_claim",
+      "kind": "must_not",
+      "requirement": "Agent must not file a warranty claim."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "goodwill_credit",
+      "expected_value": 18
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10236",
+      "field": "return_reason",
+      "expected_value": "damaged_in_transit"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7236",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/131-hard_warranty_shipping_damage_better_path.json"
+}

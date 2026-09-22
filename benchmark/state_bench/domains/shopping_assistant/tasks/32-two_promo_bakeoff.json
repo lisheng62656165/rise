@@ -1,0 +1,108 @@
+{
+  "task_id": "32-two_promo_bakeoff",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Add the ErgoDesk Standing Desk to my cart. I've got two promo codes — SAVE10 and OFFICE20 — which one's better for this? Just use the better one.",
+  "user_simulator": {
+    "user_sim_context": "You want SP-3003 ErgoDesk Standing Desk and you have two promo codes. You do not know which is better; you want the agent to compute and pick. You do not know the actual prices, discount values, or the one-code-per-cart rule. The test is whether the agent validates BOTH codes, shows the math for each, picks the better one (OFFICE20), and applies only that one.",
+    "known_info": [
+      "You want one ErgoDesk Standing Desk (SP-3003), no gift wrap.",
+      "You have two promo codes: SAVE10 and OFFICE20.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to add one ErgoDesk Standing Desk (SP-3003) with no gift wrap and have the agent compare SAVE10 against OFFICE20, then use the single valid code that saves more.",
+      "If the agent asks for the product, quantity, gift-wrap preference, or promo codes, provide only the known details: one SP-3003, no gift wrap, and the codes SAVE10 and OFFICE20.",
+      "If the agent asks which promo you prefer or asks you to choose without doing the comparison, ask them to calculate both discounts and pick the better code for you.",
+      "Do not volunteer prices, discount amounts, promo eligibility, the one-code rule, loyalty details, shipping preferences, bundles, or unrelated shopping preferences.",
+      "If the agent shows specific savings for both SAVE10 and OFFICE20, recommends OFFICE20, explains that only one promo code can apply, and confirms the desk has been added with only OFFICE20 applied, acknowledge the result and end with [TASK_DONE].",
+      "If the agent compares the codes but has not clearly applied one, ask once which code was used before ending.",
+      "If the agent applies a code silently, applies SAVE10 or another single code, or says both promo codes were applied, do not challenge the cart math or policy; accept once the desk and promo state are confirmed.",
+      "If the agent suggests add-ons, shipping changes, loyalty redemption, checkout, or unrelated account actions, decline and keep the request limited to the desk and the better promo code.",
+      "End only after the agent has confirmed the desk is in the cart and has stated the final promo state; do not include [TASK_DONE] in a message that is still asking the agent to apply or clarify a promo.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) wants SP-3003 ErgoDesk Standing Desk ($449, home_office) and presents two real promo codes — SAVE10 (10%, min $100, any cat) and OFFICE20 (20%, min $200, home_office only, max $90). Both validate; OFFICE20 gives $89 off vs SAVE10's $44. Customer explicitly asks the agent to pick the better one. Policy: one code per cart.\n\n**Challenge:** Comparative discount math + promo_stacking rule. Pitfall: agent applies SAVE10 by saliency (first-mentioned, simpler rule), or attempts to apply BOTH codes even though policy forbids it, or picks silently without showing the comparison, or bounces the decision back to the customer. Correct: validate both via validate_promo, compute both discounts with specific numbers, recommend OFFICE20, cite the one-code rule, apply ONLY OFFICE20. Tests math + policy citation + tool-chain discipline.",
+  "task_requirements": [
+    {
+      "id": "validated_both_codes",
+      "kind": "must",
+      "requirement": "Agent called validate_promo (or apply_promo, which internally validates) for BOTH SAVE10 AND OFFICE20 before recommending. Skipping validation on either fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "showed_comparative_math",
+      "kind": "must",
+      "requirement": "Agent verbalized specific discount amounts for BOTH codes in the conversation (e.g. '~$44 with SAVE10, ~$89 with OFFICE20'). Vague 'OFFICE20 is better' without numbers fails. Off-by-one-dollar numbers (e.g. $45/$90 rounded) are acceptable if clearly referring to each code.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "verified_or_cited_one_code_rule",
+      "kind": "must",
+      "requirement": "Agent established the one-promo-code-per-cart rule for the customer, either by (a) looking it up via get_policies(topic='promo_stacking'), OR (b) explicitly telling the customer in conversation that only one promo code can be applied per cart (the two codes cannot be stacked / combined, so only the better one is used). Silently applying OFFICE20 and showing the $44-vs-$89 comparison WITHOUT either verifying the stacking policy via tool OR stating the one-code rule fails this requirement.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "applied_only_office20",
+      "kind": "must",
+      "requirement": "Final cart applied_promo_codes must equal exactly ['OFFICE20']. Applying SAVE10 alone, both codes, or no code all fail this requirement.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "did_not_stack_codes",
+      "kind": "must_not",
+      "requirement": "Agent must NOT attempt to apply both SAVE10 and OFFICE20 as the final discount strategy. Final applied_promo_codes must not contain both codes.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "applied_promo_codes",
+      "expected_value": [
+        "OFFICE20"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "discount_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 449
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 360
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-3003",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "promotions_discounts",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/32-two_promo_bakeoff.json"
+}

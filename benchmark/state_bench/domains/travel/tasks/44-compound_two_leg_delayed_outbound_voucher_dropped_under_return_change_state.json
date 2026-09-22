@@ -1,0 +1,77 @@
+{
+  "task_id": "44-compound_two_leg_delayed_outbound_voucher_dropped_under_return_change_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Two things on my JFK-London trip: my outbound BK-A (JFK to LHR on BA10) is delayed about 200 minutes, but it's still the fastest way to London so I'll keep it — just sort out whatever the delay entitles me to. Separately, I'd like my return BK-B (LHR to JFK on BA20) moved to two days later. My user ID is user_004; put anything owed on my card.",
+  "user_simulator": {
+    "personality": "Traveler juggling a delayed outbound and a return he wants to shift; cooperative but does not know the rules and does not coach the agent.",
+    "user_sim_context": "Your outbound to London is delayed but it is still the fastest way there, so you will keep it; separately you want your return flight moved to a later date. You do not know anything about fare rules, insurance, delay compensation, or fees; you just want both legs sorted and whatever the delay entitles you to.",
+    "known_info": [
+      "Outbound BK-A: JFK to LHR on BA10, delayed about 200 minutes; you are fine keeping it since it is still the fastest way to London.",
+      "Return BK-B: LHR to JFK on BA20; you want to move it to two days later.",
+      "You want whatever the delay entitles you to handled, and your return on the later date."
+    ],
+    "unknown_info": [
+      "What the delay entitles you to, or any fees. You do not bring these up."
+    ],
+    "task_rules": [
+      "Open by saying your outbound BK-A (JFK to LHR on BA10) is delayed about 200 minutes but you are happy to keep it since it is still the fastest way to London, and separately you want your return BK-B (LHR to JFK on BA20) moved two days later. The agent already has your opening message.",
+      "You do not know how the system works; do NOT tell the agent what to do for the delay or how to sequence anything. Just hold the two goals.",
+      "If the agent mentions a meal voucher (or anything) for the delay, say yes, you'll take whatever the delay entitles you to.",
+      "If the agent asks about preferences for the return change, say to keep the booking's existing preferences; you are only changing the date.",
+      "Do NOT coach the agent or remind it to record anything, and do NOT correct it if it forgets something; just answer its direct questions.",
+      "If the agent proposes anything unrelated (upgrades, bags, a hotel or car), decline and return to the delay and the return change.",
+      "Do not try to verify raw flight_id.",
+      "End once the agent has handled the delay on the outbound and moved your return to the later date; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver) has a two-leg JFK/LHR trip. The outbound BK-A (basic economy, insured, JFK to LHR on BA10) is delayed 200 minutes, which entitles him to a meal voucher; the delayed BA10 is still the fastest reasonable way to London, so he keeps it. Separately he wants the return BK-B (economy, insured, LHR to JFK on BA20) moved two days later to BA21 — a simple in-place change (intl personal change fee $100). Correct end state: BK-A has delay_compensation recorded as meal_voucher, and BK-B is moved to BA21 with the $100 change fee, still confirmed.\n\n**Challenge:** Handling the return change absorbs the agent's attention so it drops the delayed outbound's one-line meal-voucher write. The 200-minute delay unambiguously entitles the traveler to a meal voucher (the engine's compensation for a 120-239 minute delay), and the traveler accepts it — but an agent that moves the return correctly and merely mentions the voucher without recording it on BK-A leaves the owed compensation unwritten and fails the deterministic state check on the missing delay_compensation.",
+  "task_requirements": [
+    {
+      "id": "outbound_meal_voucher_persisted",
+      "kind": "must",
+      "requirement": "The agent must actually record the meal-voucher delay compensation on the delayed outbound BK-A (persist delay_compensation = meal_voucher), not merely mention it in conversation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "return_simple_change_to_later_date",
+      "kind": "must",
+      "requirement": "The agent must move the return BK-B to the later date with an in-place flight change, keeping it confirmed.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A",
+      "field": "delay_compensation",
+      "expected_value": "meal_voucher"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "change_fee",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "flight_id",
+      "expected_value": "BA21"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-B",
+      "field": "price_paid",
+      "expected_value": 580
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/44-compound_two_leg_delayed_outbound_voucher_dropped_under_return_change_state.json"
+}

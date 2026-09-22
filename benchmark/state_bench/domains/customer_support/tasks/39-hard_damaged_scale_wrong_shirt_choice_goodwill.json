@@ -1,0 +1,141 @@
+{
+  "task_id": "39-hard_damaged_scale_wrong_shirt_choice_goodwill",
+  "user_id": "cust_004",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "ORD-7539 arrived with two problems: the glass kitchen scale is cracked, and the shirt is the wrong one. Can you sort out both items?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7539",
+      "damaged_item: PrecisionScale Digital Kitchen Scale with cracked glass",
+      "wrong_item: Premium Cotton Shirt; received the wrong shirt",
+      "preferred_resolution: refunds for both items to original payment, only reveal after the agent asks what resolution you want"
+    ],
+    "task_rules": [
+      "Keep the request scoped to both ORD-7539 problems: the cracked fragile kitchen scale and the wrong shirt.",
+      "Provide the order ID and both issue details when asked; do not volunteer item IDs, policy rules, exact refund amounts, or fragile-goodwill rules.",
+      "Do not volunteer your desired resolution until the agent asks what you want for the affected items or offers options; then choose refunds to original payment for both items.",
+      "IF the agent proposes or previews a refund, replacement, exchange, or return before asking what resolution you want for both items, THEN push back once that you had not chosen refund versus replacement/exchange yet and ask them to confirm your choice first.",
+      "IF the agent handles only one item or merges both issues under one reason, THEN remind them there are two separate issues: cracked scale and wrong shirt.",
+      "IF the agent omits separate fragile-item goodwill after previewing both returns, THEN ask once whether fragile damage policy adds anything beyond the regular scale refund.",
+      "Approve only after the agent presents separate no-fee returns for the cracked scale and wrong shirt, confirms original-payment refunds for both, and includes a separate $10 original-payment fragile goodwill credit for the scale.",
+      "END only after the scale damaged-in-transit return, the shirt wrong-item return, and the separate $10 fragile goodwill credit are all processed to original payment."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You have two fulfillment problems on one order. A perfect agent should ask what resolution you want before processing, keep the damaged scale and wrong shirt separate, process both refunds, and add the separate fragile goodwill credit."
+  },
+  "task_summary": "**Task:** Customer reports two issues in one delivered order: a fragile kitchen scale arrived cracked and the shirt is the wrong item. Correct handling is to ask the customer's resolution preference, then process a $32 damaged-in-transit return for the scale, a $59 wrong-item return for the shirt, and a separate $10 original-payment fragile goodwill credit for the scale.\n\n**Challenge:** Distinct from task 168's warranty/paid-shipping blender path and task 161's single wrong-item classification. Weak agents often propose refunds before asking the customer's preference, handle only one item, collapse the two issues into one reason, or omit the fragile goodwill credit.",
+  "task_requirements": [
+    {
+      "id": "170_ask_resolution_before_write",
+      "kind": "must",
+      "requirement": "Agent must ask what resolution the customer wants for both affected items before proposing, previewing, or processing a refund, replacement, exchange, or return.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "170_process_both_separate_refunds_goodwill",
+      "kind": "must",
+      "requirement": "Agent must process separate original-payment refunds for the cracked scale and wrong shirt, plus a separate $10 original-payment fragile goodwill credit for the scale.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "170_no_merge_or_omit_item",
+      "kind": "must_not",
+      "requirement": "Agent must not handle only one item, merge both items under one return reason, omit the fragile goodwill credit, or process a replacement/exchange after the customer chooses refunds.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "goodwill_credit",
+      "expected_value": 10
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "refund_amount",
+      "expected_value": 32
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10553",
+      "field": "return_reason",
+      "expected_value": "damaged_in_transit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10554",
+      "field": "return_reason",
+      "expected_value": "wrong_item"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7539",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/39-hard_damaged_scale_wrong_shirt_choice_goodwill.json"
+}

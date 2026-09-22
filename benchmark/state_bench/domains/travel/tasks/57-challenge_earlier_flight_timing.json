@@ -1,0 +1,75 @@
+{
+  "task_id": "57-challenge_earlier_flight_timing",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi, I need to move my flight BK-1000 from June 25 to June 18 instead — something came up and I need to fly earlier. My user ID is user_002.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: ORD→SFO on June 25; needs to move to June 18 instead."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to change existing booking BK-1000 from June 25 to June 18 for a personal schedule reason; stay focused on an earlier same-route flight and do not ask for cancellation, upgrades, or unrelated trip changes.",
+      "If the agent asks for booking details, provide BK-1000, ORD to SFO, the original June 25 date, and the June 18 target date; if asked why, say something came up and you need to fly earlier.",
+      "When the agent presents flight options, choose only a June 18 ORD to SFO option that stays within your budget and keep the existing booking preferences for the changed booking.",
+      "Before approving the change, require the agent to explain that the change-fee tier is based on the original June 25 departure timing rather than the newly selected June 18 flight date.",
+      "Push back once if the agent quotes a $150-or-higher change fee or a $180 total because that appears to use the new departure date; ask the agent to recheck the fee against the original June 25 departure timing.",
+      "Accept only after the preview states a $75 change fee plus a $30 fare difference, for a $105 total additional cost, and identifies the June 18 ORD to SFO change.",
+      "End only after the agent completes the change for BK-1000 and confirms the June 18 ORD to SFO booking details with the $75 change fee and $30 fare difference or the $105 total additional cost.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You need to move your trip earlier and are mostly thinking about landing on a workable date. You assume the timing of the new flight may be what matters most for the cost. You want the agent to explain what actually drives the fee instead of leaving you to infer it."
+  },
+  "task_summary": "**Task:** User moves a flight to an earlier date, but the change-fee tier should still be based on the original departure date rather than the new one. Correct resolution: The applicable fee tier is determined by the original June 25 departure timing rather than the newly selected June 18 flight date.\n\n**Challenge:** The agent uses the original June 25 departure to pick the lower $75 fee tier, explicitly rejects the tempting but wrong $150 new-date tier, and gives the correct $105 total change cost.",
+  "task_requirements": [
+    {
+      "id": "state_original_departure_basis_explained",
+      "kind": "must",
+      "requirement": "Agent must explain that the applicable fee tier is determined by the original June 25 departure timing rather than the newly selected June 18 flight date.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_correct_earlier_change_math",
+      "kind": "must",
+      "requirement": "Agent must quote the correct math for this change as a $75 change fee plus a $30 fare difference, for a total additional cost of $105.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "UA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 455
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/57-challenge_earlier_flight_timing.json"
+}

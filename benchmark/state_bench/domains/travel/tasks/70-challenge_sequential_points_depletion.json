@@ -1,0 +1,147 @@
+{
+  "task_id": "70-challenge_sequential_points_depletion",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi, I need to book two flights. First: JFK to Paris on June 28, 2026, pay entirely with points. Second: Chicago to San Francisco on July 2, 2026, use remaining points plus up to $150 cash. My user ID is user_001.",
+  "user_simulator": {
+    "known_info": [
+      "JFK→CDG on June 28, 2026: pay entirely with points.",
+      "ORD→SFO on July 2, 2026: use remaining points plus max $150 cash."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request scoped to booking both flights in sequence: JFK to Paris on June 28 paid fully with points, then Chicago to San Francisco on July 2 using the remaining points plus no more than $150 cash.",
+      "If the agent asks for booking preferences, use your profile preferences and do not add insurance, paid checked bags, upgrades, or unrelated trip items.",
+      "Before approving the first booking, require a preview showing the selected JFK-to-Paris economy flight, full points payment, 60,000 points used, $0 cash, and the expected profile preferences.",
+      "After the first booking is confirmed, ask the agent to continue with the Chicago-to-San Francisco booking and to account for the points left after the first booking.",
+      "Push back if the agent treats the second booking independently, skips the remaining-points math, or proposes a second flight that would require more than $150 cash after applying the remaining points.",
+      "Approve the second booking only after the agent identifies the affordable Chicago-to-San-Francisco option using 15,000 points and $140 cash, with the expected profile preferences and no extra paid baggage.",
+      "If the agent offers the $320 or $350 Chicago-to-San-Francisco options as acceptable, ask how they fit the $150 cash cap after applying the remaining 15,000 points.",
+      "End only after both bookings are confirmed, the first used 60,000 points and $0 cash, the second used 15,000 points and $140 cash, and the final booking details match your profile preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You need to book two flights one after the other and care deeply about how the first booking affects the second. The first should use points entirely, while the second can use whatever is left plus a small amount of cash. You need the agent to keep that sequence straight instead of treating the bookings independently."
+  },
+  "task_summary": "**Task:** The traveler needs two bookings from one shared points balance: a JFK to Paris booking paid fully with points, followed by a Chicago to San Francisco booking that must stay within $150 cash after whatever points remain. Correct resolution is to preserve enough value across the sequence so the second booking still fits the cash cap.\n\n**Challenge:** This tests sequential resource reasoning. Agents often optimize the first booking in isolation, mis-handle the remaining balance, or fail to show that the second booking still lands within the stated cash limit.",
+  "task_requirements": [
+    {
+      "id": "challenge_sequential_points_depletion_first_booking_points_math",
+      "kind": "must",
+      "requirement": "Agent must explain that the first international booking uses 60,000 points, leaving 15,000 points for the second booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "challenge_sequential_points_depletion_second_cash_cap",
+      "kind": "must",
+      "requirement": "Agent must convey that the second Chicago-to-San Francisco flight has to stay at or below $300 to fit the $150 cash cap once the remaining 15,000 points are applied. Any phrasing of this constraint counts, including stating that the second flight must be no more than $300, or that the $320 or $350 options would each require more than $150 cash after the remaining 15,000 points and therefore exceed the cap.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "challenge_sequential_points_depletion_choose_affordable_second",
+      "kind": "must",
+      "requirement": "Agent must identify the cheaper second flight as fitting the remaining-points plus cash cap because it uses 15,000 points and only $140 cash.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "users",
+      "record_key": "user_001",
+      "field": "loyalty_points",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "DL100",
+        "status": "confirmed",
+        "payment_method": "points",
+        "cash_amount": 0,
+        "points_used": 60000,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-0001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 0,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL100",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "points",
+        "points_used": 60000,
+        "price_paid": 0,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "DL101",
+        "status": "confirmed",
+        "payment_method": "points_plus_cash",
+        "cash_amount": 140,
+        "points_used": 15000,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-0002",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 140,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL101",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "points_plus_cash",
+        "points_used": 15000,
+        "price_paid": 140,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/70-challenge_sequential_points_depletion.json"
+}

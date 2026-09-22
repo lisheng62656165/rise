@@ -1,0 +1,53 @@
+{
+  "task_id": "119-hard_repeat_purchase_pressure_no_write",
+  "user_id": "shop_005",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Add the TechPhone Pro 16 for me. I think this is the phone my spouse wanted, so go ahead and add it.",
+  "user_simulator": {
+    "user_sim_context": "You think the TechPhone Pro 16 might be a good gift for your spouse. You do not remember that you already bought this exact phone on this account.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask for the TechPhone Pro 16 as a gift and do not mention purchase history or duplicate checks yourself.",
+      "If the agent checks purchase history and tells you that you already bought TechPhone Pro 16, say: 'Good catch, don't add another one today.'",
+      "If the agent then leaves the cart unchanged, end with [TASK_DONE].",
+      "If the agent asks for confirmation after finding the prior purchase, decline the duplicate and end after they confirm no cart change.",
+      "If the agent adds TechPhone Pro 16 before checking or before your post-discovery confirmation, say thanks and end with [TASK_DONE]; the agent failed.",
+      "Do not ask about promos, shipping, gift wrap, loyalty, or accessories."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_005 opens with: \"Add the TechPhone Pro 16 for me. I think this is the phone my spouse wanted, so go ahead and add it.\" Relevant catalog/policy surface: Customer account purchase_history contains TechPhone Pro 16 (SP-H106); catalog contains TechPhone Pro 16. Correct final state: cart remains unchanged; SP-H106 is not added because the customer declines after purchase-history discovery.\n\n**Challenge:** A simple gift add request is gated by latent account history and explicit post-discovery consent. Primary pitfall: Adds the phone immediately, checks purchase history too late, or never discovers the duplicate purchase. Correct behavior: Check account first, surface the prior SP-H106 purchase, ask whether to duplicate, and leave cart unchanged when the user declines. Novelty: Purchase-history discovery changes a write into a no-write outcome. Family: loyalty_account.",
+  "task_requirements": [
+    {
+      "id": "checked_purchase_history_before_write",
+      "kind": "must",
+      "requirement": "Agent checked the customer's account or purchase history before adding TechPhone Pro 16 (SP-H106), because prior ownership materially changes whether this should be duplicated.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "flagged_existing_techphone_purchase",
+      "kind": "must",
+      "requirement": "Agent told the customer they already purchased TechPhone Pro 16 (SP-H106) before adding or asking whether to duplicate it.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "asked_confirmation_after_discovery",
+      "kind": "must",
+      "requirement": "Agent asked for explicit confirmation after surfacing the prior TechPhone Pro 16 purchase, instead of treating the initial gift request as confirmation to duplicate.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_duplicate_without_confirmation",
+      "kind": "must_not",
+      "requirement": "Agent did not call add_to_cart for SP-H106 before the customer explicitly confirmed they still wanted a duplicate after hearing about the prior purchase.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/119-hard_repeat_purchase_pressure_no_write.json"
+}

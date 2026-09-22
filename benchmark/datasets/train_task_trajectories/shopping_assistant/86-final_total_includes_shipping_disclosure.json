@@ -1,0 +1,66 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_004. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "Alright, let's finalize \u2014 standard shipping please, and what's my total?"
+    },
+    {
+      "role": "assistant",
+      "content": "Standard shipping is set.\n\nTotal: $155  \nShipping: $6  \nETA: 3 business days\n\nIf you want, I can also recap what\u2019s in your cart.",
+      "tool_calls": [
+        {
+          "name": "get_shipping_options",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "options": [
+              {
+                "option": "standard",
+                "cost": 6,
+                "eta_description": "3 business days",
+                "eligibility": "$6"
+              },
+              {
+                "option": "express",
+                "cost": 12,
+                "eta_description": "2 business days",
+                "eligibility": "$12"
+              },
+              {
+                "option": "next_day",
+                "cost": 15,
+                "eta_description": "next business day",
+                "eligibility": "$15"
+              }
+            ],
+            "cart_item_count": 1,
+            "customer_tier": "standard"
+          }
+        },
+        {
+          "name": "set_shipping_option",
+          "arguments": {
+            "customer_id": "shop_004",
+            "option": "standard"
+          },
+          "result": {
+            "status": "set",
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "cart_subtotal": 149,
+            "cart_total": 155
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "[TASK_DONE]"
+    }
+  ]
+}

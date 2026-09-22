@@ -1,0 +1,56 @@
+{
+  "task_id": "118-hard_shipping_low_value_not_received_refund",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "ORD-7221 says delivered, but the phone case is not here. There was no signature.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7221",
+      "item: UltraShield Phone Case",
+      "shipping_status: delivered",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to the missing UltraShield Phone Case from ORD-7221; you are not asking for an investigation, return, exchange, or unrelated order change.",
+      "Provide the order ID, item name, delivered status, and lack of signature when asked or when needed to keep the missing-delivery claim clear.",
+      "Do not volunteer your refund preference until the agent asks you to choose between refund and reship, or until the agent proposes a resolution without asking.",
+      "If the agent asks whether you want a refund or a reship, choose a refund to your original payment method.",
+      "Push back once if the agent starts an investigation-only path, denies the claim without signature evidence, processes a reship, or otherwise skips the refund-versus-reship choice.",
+      "Accept only a refund preview that confirms the phone case, original-payment method, and no reship; if the preview appears before a choice was offered, state that you choose refund and ask the agent to proceed on that basis.",
+      "End only after the agent confirms the refund has been processed for the phone case to the original payment method."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7221. Low-value delivered phone case was not received and has no signature. Policy allows immediate refund/reship; customer chooses refund. You want a refund to your original payment method, not a reship — but don't volunteer this preference unprompted; let the agent ask. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Low-value delivered phone case was not received and has no signature. Policy allows immediate refund/reship; customer chooses refund.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_shipping_low_value_not_received_refund_ask_resolution",
+      "kind": "must",
+      "requirement": "Agent must ask the customer whether they want a refund or a reship before processing one."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_shipping_low_value_not_received_refund_shipping",
+      "kind": "must",
+      "requirement": "Agent must identify from order/shipping facts that this is a delivered-not-received claim under $500 with no signature, so refund or reship is available."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10221",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10221",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/118-hard_shipping_low_value_not_received_refund.json"
+}

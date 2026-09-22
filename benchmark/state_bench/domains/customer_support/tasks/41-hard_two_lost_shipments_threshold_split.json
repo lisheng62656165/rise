@@ -1,0 +1,91 @@
+{
+  "task_id": "41-hard_two_lost_shipments_threshold_split",
+  "user_id": "cust_003",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "I have two orders that both show lost in transit: ORD-7451 has my coffee maker, and ORD-7452 has my tablet. Please get both handled today.",
+  "user_simulator": {
+    "known_info": [
+      "low_value_order: ORD-7451",
+      "low_value_item: BrewPerfect Coffee Maker",
+      "low_value_status: lost in transit",
+      "high_value_order: ORD-7452",
+      "high_value_item: SlateTab Pro 11-inch",
+      "high_value_status: lost in transit",
+      "preferred_resolution_for_coffee_maker: refund to original payment (only reveal if asked)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to two separate lost-in-transit shipments: ORD-7451 for the coffee maker and ORD-7452 for the tablet.",
+      "Provide both order IDs, item names, and lost-tracking facts when asked or when needed; do not volunteer item prices, policy thresholds, investigation requirements, refund amounts, or item IDs.",
+      "If the agent asks whether you want refund or reship for the coffee maker, choose a refund to original payment.",
+      "If the agent asks what you want for the tablet, ask for a refund or replacement today because it is expensive and already lost.",
+      "When the agent explains that the tablet order is high value and requires a carrier investigation before any refund or replacement, push back once by asking why the coffee maker can be refunded now but the tablet cannot.",
+      "If the agent holds firm that ORD-7452 requires investigation first, accept that outcome and do not pursue a tablet refund, replacement, cancellation, credit, or manager exception.",
+      "Push back if the agent refunds, replaces, cancels, credits, escalates for credit, or otherwise changes the tablet order/item before investigation; ask them to leave ORD-7452 unchanged until the required investigation completes.",
+      "Accept only after the agent previews a $149 original-payment refund for the lost coffee maker and clearly states that the lost tablet requires investigation before any refund or replacement.",
+      "End only after the coffee-maker refund has been processed and the tablet order remains unchanged with investigation as the only next step."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about two lost shipments on the same day. The inexpensive coffee maker can be resolved now by refund or reship, but the expensive tablet crosses the high-value threshold and must go through investigation before any refund or replacement. You want fast help, push once on the inconsistent-looking outcomes, then accept a clear policy explanation."
+  },
+  "task_summary": "**Task:** A customer has two lost-in-transit shipments: a low-value coffee maker and a high-value tablet. Correct handling is to offer refund versus reship for the coffee maker, process the chosen $149 original-payment refund, and leave the tablet order unchanged while explaining that high-value lost shipments require carrier investigation before refund or replacement.\n\n**Challenge:** This reuses the proven high-value lost-shipment failure pattern from tasks 20 and 54 in a threshold-contrast setup. Weak agents overgeneralize the immediate low-value refund path to the expensive item, or cancel/refund both lost orders to be helpful.",
+  "task_requirements": [
+    {
+      "id": "156_coffee_maker_refund_choice",
+      "kind": "must",
+      "requirement": "Agent must ask whether the customer wants a refund or a reship for the lost coffee maker before processing one.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "156_coffee_maker_direct_refund",
+      "kind": "must",
+      "requirement": "Agent must process only a $149 original-payment refund for the lost coffee maker from ORD-7451, without cancelling or returning the order/item.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "156_tablet_investigation_required",
+      "kind": "must",
+      "requirement": "Agent must explain that ORD-7452 is a high-value lost shipment requiring carrier investigation before any refund, reship, or replacement.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "156_no_tablet_immediate_action",
+      "kind": "must_not",
+      "requirement": "Agent must not offer as available, confirm, refund, reship, replace, cancel, return, credit, escalate for credit, or otherwise mutate ORD-7452 or ITEM-10452 before investigation. A non-mutating internal preview alone is not a failure unless the agent presents the tablet resolution as available or done.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10451",
+      "field": "refund_amount",
+      "expected_value": 149
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10451",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10452",
+      "field": "item_status",
+      "expected_value": "shipped"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10452",
+      "field": "refund_amount",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7452",
+      "field": "status",
+      "expected_value": "shipped"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/41-hard_two_lost_shipments_threshold_split.json"
+}

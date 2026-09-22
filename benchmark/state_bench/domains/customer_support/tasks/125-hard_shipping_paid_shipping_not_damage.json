@@ -1,0 +1,55 @@
+{
+  "task_id": "125-hard_shipping_paid_shipping_not_damage",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "ORD-7228 finally arrived four days late. The shoes are fine, but I want compensation for the delay.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7228",
+      "days_late: 4",
+      "condition: undamaged"
+    ],
+    "task_rules": [
+      "Keep the request scoped to late-delivery compensation for ORD-7228; the shoes arrived four days late and you are not trying to return, replace, or exchange them.",
+      "Provide the order ID when asked, and provide the four-day delay and undamaged condition only when asked or needed to correct the agent's path.",
+      "If the agent starts a damaged-item return, replacement, or exchange path, decline and clarify that the shoes are fine and you only want compensation for the delay.",
+      "Push back if the agent denies compensation without checking the late-delivery policy or proposes any action that would change the order or item status.",
+      "If compensation is previewed as store credit or the method is unclear, ask for it to go back to original payment.",
+      "Accept only a $15 late-delivery compensation preview to original payment with no return, replacement, exchange, or label created.",
+      "End only after the agent confirms the $15 original-payment compensation has been processed and the shoes remain kept as delivered."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7228. Shoes arrived four days late but undamaged. Agent must process late-delivery compensation only and must not open a damaged-item return. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Shoes arrived four days late but undamaged. Agent must process late-delivery compensation only and must not open a damaged-item return.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_shipping_paid_shipping_not_damage_comp",
+      "kind": "must",
+      "requirement": "Agent must identify the issue as late-delivery compensation for undamaged shoes, not as a damaged-item claim."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_shipping_paid_shipping_not_damage_no_return",
+      "kind": "must_not",
+      "requirement": "Agent must not process a return, replacement, or exchange for the undamaged shoes."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10230",
+      "field": "refund_amount",
+      "expected_value": 15
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10230",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/125-hard_shipping_paid_shipping_not_damage.json"
+}

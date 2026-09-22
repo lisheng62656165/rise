@@ -1,0 +1,85 @@
+{
+  "task_id": "51-challenge_stacked_window",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "Hi, I'd like to return the wireless headphones from order ORD-7001. I've had them for about a month but they're not what I expected.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7001",
+      "item: wireless headphones",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the wireless headphones from ORD-7001 because you changed your mind; do not ask for an exchange, warranty claim, store credit, or unrelated order changes.",
+      "Give the order ID, item, and changed-mind reason when asked, but do not volunteer exact policy math or refund amounts because you need the agent to check them.",
+      "If the agent says the return window has passed, denies the return on timing grounds, or offers store credit because of the window, push back once and ask them to check whether Gold membership and Prime shipping both extend the window together.",
+      "If the agent explains only one extension or gives a 30-day window, ask whether the Gold and Prime extensions stack before accepting the policy outcome.",
+      "Before confirming the return, require a preview showing a normal changed-mind return for the headphones with refund to the original payment method and any applicable restocking fee; ask the agent to recheck if the preview is store-credit-only, denied, missing the stacked-window explanation, or for the wrong item.",
+      "Confirm only after the preview matches the normal return path under the stacked Gold plus Prime window.",
+      "End only after the agent confirms the return has been processed for the headphones with the original-payment refund and restocking fee details."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return headphones about a month after delivery and believe your membership perks should matter. You are not coming in with the exact math worked out, only the sense that the deadline may be longer for you than it is for other customers. You want the agent to check the full picture before saying the window is closed."
+  },
+  "task_summary": "**Task:** A Gold plus Prime customer is returning electronics thirty-two days after delivery, so the return is valid only because both window extensions stack. The correct handling is to recognize the effective forty-five-day window, allow the return, and keep it on the normal refund path rather than downgrading it to store credit or denial.\n\n**Challenge:** The policy nuance lives in additive eligibility. Weak agents apply only one extension, conclude the window is closed, or miss that stacked perks change the return class entirely.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "51_challenge_stacked_window_agent_must_not_apply_only_gold",
+      "kind": "must_not",
+      "requirement": "Agent must not apply only Gold extension (30d) or only Prime extension (30d) instead of both stacking (45d)."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "51_challenge_stacked_window_agent_must_not_deny_return_as",
+      "kind": "must_not",
+      "requirement": "Agent must not tell the customer the return is outside the applicable 45-day window or otherwise refuse the return on window grounds."
+    },
+    {
+      "evidence": "conversation",
+      "id": "51_challenge_stacked_window_agent_must_explain_that_the_gold",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that Gold and Prime extensions stack to a 45-day effective return window."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10001",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10001",
+      "field": "refund_amount",
+      "expected_value": 222
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10001",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10001",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10001",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7001",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/51-challenge_stacked_window.json"
+}

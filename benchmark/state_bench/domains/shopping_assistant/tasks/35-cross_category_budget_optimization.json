@@ -1,0 +1,107 @@
+{
+  "task_id": "35-cross_category_budget_optimization",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I've got $500 total to spend — I need a laptop AND something for my desk setup. What can you put together for me?",
+  "user_simulator": {
+    "user_sim_context": "You have a hard combined budget of $500 for ONE laptop AND ONE home-office item (anything desk-related — a chair, desk, lamp, organizer, whatever fits). You do not know the catalog's specific prices. The test is whether the agent (a) searches both categories, (b) computes a combined cost and confirms it fits the $500 cap, (c) flags that budget laptops in this catalog have quality caveats (low ratings) before committing, and (d) adds both items after confirmation.",
+    "known_info": [
+      "Total budget: $500 combined for BOTH items.",
+      "You want ONE laptop.",
+      "You want ONE home-office item (desk-related, any type).",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want the agent to build one laptop plus one desk/home-office item under a hard $500 combined cap, and you have no brand, product, or desk-item type preference beyond that scope.",
+      "If the agent asks for preferences or constraints, provide only the $500 total cap and the need for one laptop plus one desk-related item; let the agent look up catalog prices and options.",
+      "If the agent proposes only a laptop or only a home-office item, ask once for the missing category before agreeing to any cart action.",
+      "If the agent proposes a pair or product that would put the combined purchase over $500, push back on the budget and do not approve adding it.",
+      "If the agent presents multiple in-budget pairs, favor the option that keeps the combined total under $500 while avoiding the worse-rated laptop when the agent has surfaced that tradeoff.",
+      "Give consent to add both items only after the agent proposes one laptop and one home-office item that fit the combined cap; if the agent states the arithmetic and explains the laptop quality caveat, briefly acknowledge both and approve adding both.",
+      "If the agent proposes a feasible pair but omits the explicit combined arithmetic or the laptop quality caveat, you may still approve the add when asked, but do not coach the agent about the missing disclosure.",
+      "If the agent tries to add only one of the two needed items, ask for the missing item to be included before considering the cart complete.",
+      "Decline gift wrap, add-ons, unrelated substitutions, promo hunting, or bundle side paths, and steer back to the laptop plus desk-item budget goal.",
+      "Do not include [TASK_DONE] when approving the cart addition; wait for the agent to execute the add.",
+      "End with [TASK_DONE] only after the agent confirms both selected items are in the cart, or after a clear no-action outcome where the agent cannot produce an in-budget pair.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) has a hard combined $500 cap for ONE laptop AND ONE home-office item. Only feasible pair: SP-1106 ProBook Chromebook 11 ($329, rating 3.9) + SP-3007 TaskDesk Organizer ($49) = $378. The more expensive laptop in budget (SP-1103 BudgetLine Notebook $449) has worse rating (3.4).\n\n**Challenge:** Cross-category budget optimization + proactive quality flag. Multi-step reasoning: (1) search laptops under ~$451 max, (2) search home-office under the remaining budget, (3) compute the combined cost and verbalize arithmetic, (4) flag the laptop-quality caveat (ratings 3.4-3.9 vs 4.5+ mid-range) because budget-tier options in this catalog are genuinely sub-premium, (5) get consent, (6) add both. Pitfalls: skipping arithmetic, skipping quality flag, missing one category entirely, over-budget pick. Distinct from T9 (over-budget honesty) which tests refusal to exceed budget; T35 tests CONSTRUCTIVE pair assembly + quality caveat within budget.",
+  "task_requirements": [
+    {
+      "id": "searched_both_categories",
+      "kind": "must",
+      "requirement": "Agent called search_products (or equivalent) for BOTH laptops AND home-office items. Only recommending from one category fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "verbalized_combined_cost",
+      "kind": "must",
+      "requirement": "Agent explicitly stated the combined cost of the proposed pair in the conversation, with specific numbers (e.g. '$329 + $49 = $378' or 'total $378 of your $500 budget'). Generic 'this fits' without arithmetic fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "flagged_laptop_quality_caveat",
+      "kind": "must",
+      "requirement": "Agent proactively flagged that the laptop at this budget has a quality caveat — must reference the low rating (3.9 or lower), 'limited options at this price', 'below premium tier', 'not our best-rated', or equivalent wording that tells the customer they're trading quality for price. Silent addition of a 3.9-rated laptop without this flag fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_pair_added",
+      "kind": "must",
+      "requirement": "Agent added BOTH SP-1106 ProBook Chromebook 11 qty=1 AND SP-3007 TaskDesk Organizer Tray qty=1 (no wrap on either) after customer consent. Missing either item fails. Adding different products fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_budget_bust",
+      "kind": "must_not",
+      "requirement": "Agent must NOT add any pair whose combined cost exceeds $500. Adding an over-budget laptop (e.g. SP-1001 at $849) even if offset or discussed later fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 378
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 378
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-1106",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-3007",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "edge_case_or_restraint",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/35-cross_category_budget_optimization.json"
+}

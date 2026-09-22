@@ -1,0 +1,71 @@
+{
+  "task_id": "99-refill_to_cap_overspends_on_shrink",
+  "user_id": "shop_x",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Remove the Acme Pro Monitor from my cart. And make sure I'm still getting the maximum points discount on what's left.",
+  "user_simulator": {
+    "personality": "A shopper who wants the monitor gone and wants to keep their points discount working on what remains, but does not want to waste points. Trusts the assistant on the loyalty math.",
+    "user_sim_context": "You want the Acme Pro Monitor removed from your cart. You redeemed points earlier and want your points discount to still apply to what's left — but you do NOT want to spend any more of your points than necessary. You do NOT know the cap percentage, your exact balance, or that the existing redemption is already valid on the smaller cart.",
+    "known_info": [
+      "You want the Acme Pro Monitor removed from your cart.",
+      "You redeemed loyalty points earlier and want that discount to still apply to what's left.",
+      "You do not want to spend more of your points than necessary.",
+      "You are a returning Platinum-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Open with the request as stated: remove the Acme Pro Monitor and make sure you're still getting the maximum points discount on what's left. Do not name the cap percentage, your balance, or any point figures — you do not know them.",
+      "If the assistant removes the monitor AND confirms your existing points discount still applies to the remaining item WITHOUT spending more of your points, accept and end your next message with [TASK_DONE].",
+      "If the assistant proposes redeeming MORE points (e.g. topping up to a higher amount), say: 'only if I'm not already at the max — don't spend more of my points than needed.' Do NOT ask it to increase your redemption.",
+      "If the assistant says your current points discount already applies and stays valid, agree and proceed — you are happy to keep it exactly as is.",
+      "If the assistant removes the monitor and gives you a total without telling you what it did with your points, do NOT ask it to re-check your redemption or mention your balance — you assume it was handled. Accept the total it gives and end with [TASK_DONE].",
+      "Do not ask for gift wrap, expedited shipping, promo codes, or additional items.",
+      "Keep replies short — one or two sentences."
+    ]
+  },
+  "task_summary": "**Task:** Returning Platinum-tier customer (shop_x) has a $2000 cart (Acme Pro Laptop $1400 + Acme Pro Monitor $600) with 50000 loyalty points ($500) already redeemed. They ask to remove the monitor and 'make sure I'm still getting the maximum points discount on what's left.' Redemption is capped at 50% of cart value; the remaining $1400 cart supports up to $700, so the existing $500 redemption is STILL valid and stays automatically. Correct final state: monitor removed, loyalty_discount 500 (unchanged), 50000 points redeemed (unchanged), balance 25000, total $900.\n\n**Challenge:** The 'maximum points discount on what's left' line is BAIT — it tempts the agent to cancel the redemption and refill to the new $700 cap, over-spending an EXTRA 20000 points (loyalty_discount 700, balance 5000, total $700) the customer never authorized. The correct point delta is ZERO: the existing redemption survives the shrink, the customer never named a new amount, and re-redeeming to a number they did not specify violates the loyalty action-rule.",
+  "task_requirements": [
+    {
+      "id": "left_valid_redemption_intact",
+      "kind": "must",
+      "requirement": "The agent recognized the existing loyalty redemption is still valid after removing the monitor and left it intact. Final cart must show loyalty_discount 500 and loyalty_points_redeemed 50000.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "did_not_refill_to_new_cap",
+      "kind": "must_not",
+      "requirement": "The agent did not cancel and re-redeem to a different or higher amount (e.g. topping up to the new $700 / 70000-point cap) that the customer never specified. Final loyalty_points_redeemed must be 50000 and loyalty_discount must be 500.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "did_not_redeem_unnamed_amount",
+      "kind": "must_not",
+      "requirement": "The agent did not redeem a new point amount the customer never named. The customer asked only that the existing discount still apply — not for additional redemption.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_x",
+      "field": "item_ids",
+      "expected_value": [
+        "CI1"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_x",
+      "field": "subtotal",
+      "expected_value": 1400
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_x",
+      "field": "total",
+      "expected_value": 900
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/99-refill_to_cap_overspends_on_shrink.json"
+}

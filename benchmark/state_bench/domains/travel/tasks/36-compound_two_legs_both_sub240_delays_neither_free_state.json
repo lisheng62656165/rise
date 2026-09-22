@@ -1,0 +1,102 @@
+{
+  "task_id": "36-compound_two_legs_both_sub240_delays_neither_free_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — both my flights are delayed and I want to move each to a later flight the same day. BK-N (ORD to DEN on UA400) is delayed about 150 minutes — move it to UA401. BK-O (ORD to LHR on UA500) is delayed about 230 minutes — move it to UA501. Keep everything else the same. My user ID is user_001 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Organized traveler dealing with two delayed legs; cooperative, wants both moved to later flights and accepts the fees once explained.",
+    "user_sim_context": "Both legs of your trip are delayed and you want to move each to a later flight the same day. You do not know whether the delays make the changes free or what the fees are; you just want both handled and anything owed on your card.",
+    "known_info": [
+      "Booking BK-N: ORD to DEN on UA400, delayed about 150 minutes — move to later flight UA401.",
+      "Booking BK-O: ORD to LHR on UA500, delayed about 230 minutes — move to later flight UA501.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "Whether the delays waive the change fees, or what the fees are."
+    ],
+    "task_rules": [
+      "Open by saying both legs are delayed: BK-N (ORD to DEN on UA400, ~150 min) and BK-O (ORD to LHR on UA500, ~230 min), and you want to move each to its later same-day flight (UA401 and UA501). The agent already has your opening message.",
+      "If the agent says either change carries a fee, accept it once explained; you may ask once whether the delays cover it, but accept the agent's policy-grounded answer and do NOT insist the moves should be free.",
+      "Do NOT volunteer the change fees or whether the delays waive them; you do not know these.",
+      "If the agent proposes anything unrelated (cabin upgrade, insurance, cancellation, bags, car or hotel), decline and return to the two flight moves.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving each change: airline, time_range, and max_stops. If the agent has not surfaced enough detail, ask.",
+      "Booking-stage persisted preferences to verify are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing values.",
+      "Do not try to verify raw flight_id.",
+      "End only after both BK-N and BK-O are moved to their later flights, with each change fee and the totals clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_001 (Emma, gold) has two legs, both delayed but under 240 minutes: BK-N (ORD to DEN on UA400, economy domestic) delayed 150 minutes, and BK-O (ORD to LHR on UA500, economy international) delayed 230 minutes. She wants to move each to its later same-day flight (UA401, UA501). Neither delay reaches the 240-minute waiver, so both moves carry the standard personal change fee — but the fees differ by route: $75 domestic for BK-N and $100 international for BK-O. Correct end state: BK-N on UA401 (change_fee 75), BK-O on UA501 (change_fee 100).\n\n**Challenge:** The agent must not treat either delay as a free-rebooking right (both are below the 240-minute waiver threshold), and must apply the correct per-route fee — $75 for the domestic leg and $100 for the international leg — rather than waiving both or using a single blanket fee. Two distinct persisted change_fee values, so a \"delayed equals free\" assumption or a single-tier fee fails the deterministic state check on one or both legs.",
+  "task_requirements": [
+    {
+      "id": "neither_sub240_delay_waives_change_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that neither the 150-minute nor the 230-minute delay waives the flight-change fee (both are below the threshold), so each move carries the standard fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "per_route_fees_applied_correctly",
+      "kind": "must",
+      "requirement": "Agent must apply the correct change fee to each leg by route — the domestic leg and the international leg carry different standard fees — rather than a single blanket fee for both.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "neither_change_processed_as_free",
+      "kind": "must_not",
+      "requirement": "Agent must not process either flight change as free or fee-exempt on the basis of the delay.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-N",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-N",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-N",
+      "field": "flight_id",
+      "expected_value": "UA401"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-N",
+      "field": "price_paid",
+      "expected_value": 375
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-O",
+      "field": "change_fee",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-O",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-O",
+      "field": "flight_id",
+      "expected_value": "UA501"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-O",
+      "field": "price_paid",
+      "expected_value": 800
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/36-compound_two_legs_both_sub240_delays_neither_free_state.json"
+}

@@ -1,0 +1,80 @@
+{
+  "task_id": "3-delay_no_free_rebook_cheaper_paid_path_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My flight BK-7700 from Chicago to Seattle (United UA800) is delayed about 3 hours! I want to move onto the later United flight UA820 today. Shouldn't a delay this long let me switch for free? My user ID is user_001.",
+  "user_simulator": {
+    "personality": "Frustrated by the delay and convinced it should entitle you to a free switch. You ask from that assumption, not from uncertainty, but you are reasonable once the rules are explained and you care about not overpaying to get onto the later flight.",
+    "user_sim_context": "Your flight is delayed about three hours and you feel that should let you move onto a later flight for free. You want to end up on the later same-day United flight you have in mind, in economy, paying as little as possible to get there. You do NOT know the delay-compensation tiers, the change fee, the cancellation fee, the refund amount, or which way of switching is cheaper — you are simply asking.",
+    "known_info": [
+      "Booking BK-7700: ORD to SEA on United flight UA800, delayed about three hours.",
+      "You want to move onto the later same-day United nonstop UA820 (same ORD to SEA trip), in economy.",
+      "You believe the three-hour delay should make the switch free.",
+      "Your user ID is user_001."
+    ],
+    "unknown_info": [
+      "What a roughly three-hour delay actually entitles you to (you assume a free rebooking).",
+      "The change fee, the cancellation fee, the refund amount, and the fare difference.",
+      "Whether changing the booking or canceling and rebooking is the cheaper way to switch."
+    ],
+    "task_rules": [
+      "You want to move delayed booking BK-7700 onto the later same-day United nonstop UA820 (same ORD to SEA trip), in economy, and you initially believe the roughly three-hour delay should make that switch free.",
+      "If the agent asks for identifiers or scope, provide BK-7700, user_001, the ORD to SEA trip, and that you only want to consider UA820 or an equivalent later same-day United nonstop in economy; do not state any fee, refund, fare, or rule yourself — you do not know them.",
+      "Do not ask for cabin upgrades, other airlines, nearby airports, later dates, or unrelated trip changes; push back if the agent pursues those instead of the later same-day economy switch onto the United nonstop.",
+      "If the agent explains that a roughly three-hour delay only qualifies for a meal voucher and does not waive the cost of moving to a different flight, accept the policy explanation but ask for the cheapest way to switch onto the later flight today.",
+      "If the agent says the delay allows a free rebooking or a free change, or skips checking what the delay actually covers, ask them to double-check what a roughly three-hour delay actually entitles you to before you approve anything.",
+      "Before authorizing any switch, ask the agent which is cheaper for getting onto the later flight — changing the booking, or canceling and rebooking — and approve only the cheaper paid path once they have made clear which one it is.",
+      "Push back once if the agent reaches for canceling and rebooking without checking whether simply changing the booking would cost you less to reach the same economy seat on the later flight.",
+      "Accept the meal voucher if it is offered, but do not let the voucher stand in for actually moving you onto the later flight by the cheaper paid path.",
+      "Decline any unrelated upgrade, add-on, or itinerary change; you only want onto the later United nonstop in economy as cheaply as possible.",
+      "End with [TASK_DONE] only after booking BK-7700 is confirmed moved onto the later United nonstop UA820 in economy by the cheaper paid path, with your existing booking preferences preserved.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "**Task:** A gold traveler (user_001) holds domestic economy booking BK-7700 on United flight UA800 (ORD to SEA, paid $400), departing in about two weeks, that is now delayed about three hours. She wants to move onto the later same-day United nonstop UA820 (same route, economy, also $400) and assumes the three-hour delay should make the move free. Correct resolution: a 180-minute delay qualifies only for a meal voucher and does NOT waive the move cost (the free-move waiver applies only to delays of 240 minutes or more), so she must pay to switch; of the two paid paths, a direct change costs $75 (a $75 change fee, $0 fare difference) while canceling and rebooking costs $120 ($60 cancellation fee plus the $400 fare re-paid against a $340 refund), so the direct change is the cheaper paid path. The agent must execute the direct change of BK-7700 onto UA820 in economy, preserving the existing booking preferences.\n\n**Challenge:** A three-hour delay strongly invites the assumption of a free rebooking, but this delay tier (120-239 minutes) grants only a meal voucher — the free move requires a delay of 240 minutes or more — so the switch is not free. The agent must reject the free-move assumption rather than fabricating a delay waiver, then recognize that the obvious \"cancel and rebook\" instinct is the more expensive path ($120) and that a direct change is cheaper ($75) for the identical economy seat, and execute that direct change. Failing on state means granting a free move (wrong fee), canceling and rebooking (wrong record and $45 more), or moving to a flight that breaks one of her constraints (wrong day, wrong airline, a connection, or a different destination).",
+  "task_requirements": [
+    {
+      "id": "no_fabricated_free_delay_move",
+      "kind": "must_not",
+      "requirement": "Agent must not grant or execute a free delay-based move — it must not waive the change/rebooking cost on the basis of the delay (for example by applying a $0 \"delay waiver\" change, or by treating the cancellation as airline-initiated for a full refund). A roughly three-hour (180-minute) delay qualifies only for a meal voucher; the free move applies only to delays of 240 minutes or more, so moving BK-7700 onto the later flight is a paid action.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "flight_id",
+      "expected_value": "UA820"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "price_paid",
+      "expected_value": 475
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/3-delay_no_free_rebook_cheaper_paid_path_state.json"
+}

@@ -1,0 +1,136 @@
+{
+  "task_id": "42-compound_exchange_plus_credit",
+  "user_id": "cust_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi, I need help with three separate things and I just want each one sorted out the right way. First, on order ORD-9100 the wireless headphones never turned up in the box. Second, on order ORD-9300 I ordered a laptop but I've changed my mind and don't want it anymore. And third, on an older order ORD-9200 I've got a pair of running shoes I changed my mind on and want to send back. Can you take care of all three?",
+  "user_simulator": {
+    "known_info": [
+      "Headphones on order ORD-9100 never arrived in the box.",
+      "Laptop on order ORD-9300: you changed your mind and no longer want it.",
+      "Running shoes on order ORD-9200: you changed your mind and want to send them back.",
+      "You do not know order/shipping status, delivery dates, return windows, or what each remedy should be — that is for the agent to look up."
+    ],
+    "task_rules": [
+      "Raise all three issues — the never-arrived headphones on ORD-9100, the unwanted laptop on ORD-9300, and the changed-mind running shoes on ORD-9200 — and ask the agent to sort out the right outcome for each.",
+      "If the agent asks for identifying details, give the order IDs (ORD-9100, ORD-9300, ORD-9200) and describe each item's situation; do not propose a specific remedy yourself.",
+      "You do NOT know store policy — do not tell the agent which tool to use, whether the shoes still qualify for a cash refund, or how the never-arrived or not-yet-shipped items should be handled. Ask the agent to determine the correct handling and explain it.",
+      "If the agent applies the same remedy to all three without checking each item's order and delivery situation, ask them to handle each item on its own merits.",
+      "For the never-arrived headphones, you want to be made whole for what you paid but did not receive.",
+      "For the laptop you no longer want, you simply want out of the purchase; accept whatever the correct cancellation/refund outcome is once the agent explains it.",
+      "For the shoes, you want to send them back; accept the form of refund the policy actually allows once the agent explains it, rather than demanding cash.",
+      "Approve each resolution only after the agent has explained what it is and why; then let the agent carry it out.",
+      "End only after the agent has actually processed a resolution for all three items and told you the outcome for each."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You have three unrelated problems and you are relying on the agent to know the store's policies and check each order. You are not trying to game anything — you just want each item handled correctly. You genuinely do not know that a never-arrived item is not a 'return', that an order which hasn't shipped is cancelled rather than returned, or that a long-ago changed-mind purchase may only qualify for store credit. You expect the agent to investigate and do the right thing for each."
+  },
+  "task_summary": "**Task:** A gold-tier customer reports three problem items, each requiring a DIFFERENT correct resolution path that the agent must determine by investigating order status, delivery, and the return window — and for each, the naive 'return it for a cash refund' is rejected or redirected by the system:\n- **ITEM-Y** (headphones $249, never arrived): NOT a return — the return tool rejects a missing item. Correct path: **process_refund** for the $249 paid.\n- **ITEM-W** (laptop $799, order not yet shipped): NOT a return — the return tool rejects an undelivered item and points to cancellation. Correct path: **cancel_order** (pre-shipment, full $799 refund, no fee).\n- **ITEM-Z** (shoes $129, changed mind, ~70 days post-delivery): a return that resolves to **store credit ($121)** — past the 60-day window (clothing 30 + gold 15 + prime 15) but inside the 75-day store-credit grace, so store credit, not cash and not the full $129.\n\n**Challenge:** The naive approach — treat all three as ordinary cash-refund returns — is rejected or wrong on every item. The agent must proactively check each order's status and dates and synthesize them into the correct, item-specific resolution.",
+  "task_requirements": [
+    {
+      "id": "42_missing_item_refunded_not_returned",
+      "kind": "must",
+      "requirement": "Agent must make the customer whole for the never-arrived headphones (ITEM-Y) by issuing a refund via process_refund (the correct full refund is $249 to the original payment method), having recognized that a missing/never-received item cannot be processed as a return.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "42_unshipped_item_cancelled_not_returned",
+      "kind": "must",
+      "requirement": "Agent must resolve the unwanted, not-yet-shipped laptop (ITEM-W) by cancelling it via cancel_order (a pre-shipment cancellation with a full $799 refund and no fee), having recognized that an order which has not shipped is cancelled rather than returned.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "42_past_window_store_credit_only",
+      "kind": "must",
+      "requirement": "Agent must determine that the changed-mind running shoes (ITEM-Z) are past the normal return window but still within the store-credit grace window, so the refund is STORE CREDIT (about $121) rather than a cash refund to the original payment method and rather than the full $129. Promising a cash refund, or the full $129, fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "42_did_not_misroute",
+      "kind": "must_not",
+      "requirement": "Agent must not execute a wrong-path resolution for any item: must not process the never-arrived headphones (ITEM-Y) or the not-yet-shipped laptop (ITEM-W) as a return, and must not give the past-window shoes (ITEM-Z) a cash refund to the original payment method or a refund for the full $129. Confirming any such wrong-path action fails; a single rejected preview that the agent then corrects does not, as long as the final committed resolution for each item is the correct one.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-W",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-W",
+      "field": "refund_amount",
+      "expected_value": 799
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-W",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Y",
+      "field": "refund_amount",
+      "expected_value": 249
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Y",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "refund_amount",
+      "expected_value": 121
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-Z",
+      "field": "store_credit_only",
+      "expected_value": true
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-9200",
+      "field": "status",
+      "expected_value": "fully_returned"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-9300",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/42-compound_exchange_plus_credit.json"
+}

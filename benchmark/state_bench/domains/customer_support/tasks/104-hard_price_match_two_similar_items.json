@@ -1,0 +1,53 @@
+{
+  "task_id": "104-hard_price_match_two_similar_items",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "The little accessory bundle like my ORD-7204 items is cheaper on another site. It has a USB hub and phone case together, so refund me the difference on my order.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7204",
+      "claim: competitor bundle listing",
+      "items: USB hub and phone case bought separately"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a price-match refund for ORD-7204 based on a competitor bundle that resembles the separately purchased USB hub and phone case.",
+      "Provide the order ID, the bundle-listing claim, and the fact that the USB hub and phone case were bought separately when asked; do not invent competitor prices, links, policy details, or local price-drop facts.",
+      "If the agent denies the match only because the items were bought separately, push back once that the bundle components look close enough to count and ask them to verify whether either purchased item has its own eligible price drop.",
+      "Push back if the agent offers a refund, price adjustment, goodwill credit, escalation, return, rebuy, cancellation, exchange, or other workaround instead of applying the price-match policy to the purchased listings.",
+      "Accept only after the agent clearly explains that the store only price-matches its own price drops within 7 days of delivery (not a competitor's bundle price) and that neither the USB hub nor the phone case has an eligible local price drop.",
+      "End only after the no-refund/no-action outcome is clear and no order item has been changed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7204. Customer asks for a price match using a cheaper competitor bundle listing that includes a USB hub plus phone case. The purchased order has separate single items with no task-local price drop, so agent must deny price matching and leave the order unchanged. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer asks for a price match using a cheaper competitor bundle listing that includes a USB hub plus phone case. The purchased order has separate single items with no task-local price drop, so agent must deny price matching and leave the order unchanged.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_price_match_two_similar_items_deny_bundle",
+      "kind": "must",
+      "requirement": "Agent must deny the price-match refund, explaining that the store only price-matches its own price drops within 7 days of delivery and does not match a competitor's (bundle) price."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_two_similar_items_no_local_drop",
+      "kind": "must",
+      "requirement": "Agent must establish that neither purchased item has an eligible task-local price drop before denying the refund."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_price_match_two_similar_items_no_refund",
+      "kind": "must_not",
+      "requirement": "Agent must not pitch return-and-rebuy as a way for the customer to capture the competitor bundle price."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_two_similar_items_no_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not mutate either order item."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "price_match_refund",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/104-hard_price_match_two_similar_items.json"
+}

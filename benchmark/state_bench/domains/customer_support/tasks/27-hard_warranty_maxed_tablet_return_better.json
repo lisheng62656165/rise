@@ -1,0 +1,97 @@
+{
+  "task_id": "27-hard_warranty_maxed_tablet_return_better",
+  "user_id": "cust_004",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "My SlateTab from ORD-7519 will not turn on again. I have a warranty, so please handle it without charging me.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7519",
+      "item: SlateTab Pro 11-inch",
+      "issue: will not turn on again",
+      "desired_outcome: no-cost resolution"
+    ],
+    "task_rules": [
+      "Start by asking for a no-cost warranty resolution for the SlateTab that will not turn on again.",
+      "Provide ORD-7519, the tablet item, and the recurring no-power defect when asked; do not volunteer item IDs, warranty claim count, return eligibility, refund amount, fees, or policy rules.",
+      "IF the agent says the warranty is maxed out or only paid repair is available, THEN ask whether there is a no-cost return/refund option unless they already offered that path.",
+      "Push back once if the agent offers paid repair, files another warranty claim, denies help, or fails to check whether the recently delivered defective tablet can be returned.",
+      "Accept only a defective return path for the tablet with a $599 original-payment refund, no restocking fee, and a free return label.",
+      "END only after the defective return is processed with those details."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your tablet is genuinely defective and has a maxed warranty history, but it was delivered recently enough that a defective return is available. You want the best no-cost resolution, not a paid warranty repair."
+  },
+  "task_summary": "**Task:** Customer asks for a no-cost warranty resolution for a defective tablet. The warranty has reached its claim cap, but the tablet is still inside the return window. Correct handling is to check both paths, explain that defective return is better than paid repair, and process the full refund.\n\n**Challenge:** Reuses tasks 100/126's reliable failure pattern: weak agents stop at the maxed warranty path instead of proactively checking the superior return path.",
+  "task_requirements": [
+    {
+      "id": "166_check_warranty_and_return",
+      "kind": "must",
+      "requirement": "Agent must check warranty status and then check the return path before choosing, recommending, or previewing the final resolution.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "166_explain_return_better",
+      "kind": "must",
+      "requirement": "Agent must explain that the warranty path is maxed or paid and that a defective return is the better no-cost option before the customer asks about returns.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "166_process_defective_return",
+      "kind": "must",
+      "requirement": "Agent must process ITEM-10520 as a defective return for a full $599 original-payment refund with no restocking fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "166_no_paid_repair_or_claim",
+      "kind": "must_not",
+      "requirement": "Agent must not file another warranty claim, route the customer to paid repair, or stop after saying the warranty is maxed.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "refund_amount",
+      "expected_value": 599
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10520",
+      "field": "return_reason",
+      "expected_value": "defective"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7519",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/27-hard_warranty_maxed_tablet_return_better.json"
+}

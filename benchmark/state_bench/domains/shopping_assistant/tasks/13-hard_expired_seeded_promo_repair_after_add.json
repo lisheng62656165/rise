@@ -1,0 +1,97 @@
+{
+  "task_id": "13-hard_expired_seeded_promo_repair_after_add",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Add the HomeBrew Pour-Over Coffee Set to my skillet cart. Keep any valid discount, but don't leave an expired promo on the cart. Tell me the final total.",
+  "user_simulator": {
+    "user_sim_context": "Your cart has a CasaGrande skillet and an expired promo shown from a prior session. You want the pour-over set added, but you do not want any expired promo left on the cart.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask to add HomeBrew Pour-Over Coffee Set and keep only valid discounts, not expired promos.",
+      "If the agent adds the pour-over set, replaces expired EXPIRED10 with KITCHEN10, and gives the correct final total, accept and end with [TASK_DONE].",
+      "If the agent leaves EXPIRED10, removes all discounts, or gives the wrong total, accept and end with [TASK_DONE]; the agent failed.",
+      "Do not ask about shipping, gift wrap, loyalty, or other products."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_004 opens with: \"Add the HomeBrew Pour-Over Coffee Set to my skillet cart. Keep any valid discount, but don't leave an expired promo on the cart. Tell me the final total.\" Relevant catalog/policy surface: Seeded cart has CasaGrande Cast-Iron Skillet (SP-H117) with EXPIRED10 applied. EXPIRED10 is expired; KITCHEN10 is valid for kitchen items. Adding SP-H118 gives kitchen subtotal $148 and KITCHEN10 discount $14.. Correct final state: SP-H117 and SP-H118 in cart, KITCHEN10 applied, total $134.\n\n**Challenge:** The seeded promo state is stale and must be repaired after the add. Primary pitfall: Trusts expired EXPIRED10, drops all discounts, or forgets the valid kitchen fallback. Correct behavior: Add SP-H118, replace expired promo with KITCHEN10, and quote $134. Novelty: Expired seeded promo repair tied to an add. Family: promotions_discounts.",
+  "task_requirements": [
+    {
+      "id": "added_pour_over",
+      "kind": "must",
+      "requirement": "Agent added HomeBrew Pour-Over Coffee Set (SP-H118) to the existing skillet cart.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "recognized_expired10_invalid",
+      "kind": "must",
+      "requirement": "Agent recognized EXPIRED10 is expired and should not remain as the cart discount.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "applied_kitchen10",
+      "kind": "must",
+      "requirement": "Agent applied KITCHEN10 as the valid kitchen discount after adding the pour-over set.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "quoted_total_134",
+      "kind": "must",
+      "requirement": "Agent quoted the correct final total after replacing EXPIRED10 with KITCHEN10.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "applied_promo_codes",
+      "expected_value": [
+        "KITCHEN10"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "discount_amount",
+      "expected_value": 14
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0001",
+        "CI-0002"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 148
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 134
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-H118",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "promotions_discounts",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/13-hard_expired_seeded_promo_repair_after_add.json"
+}

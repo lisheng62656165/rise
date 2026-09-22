@@ -1,0 +1,88 @@
+{
+  "task_id": "5-hard_normal_delivery_damage_label_changed_mind",
+  "user_id": "cust_005",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "The coffee maker from ORD-7523 looks scuffed and the color is not what I expected. I want to return it as damaged.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7523",
+      "item: BrewPerfect Coffee Maker",
+      "issue: looks scuffed and color is not what expected",
+      "functionality: works normally if asked",
+      "shipping: box looked normal at delivery if asked"
+    ],
+    "task_rules": [
+      "Start by calling the coffee maker damaged because it looks scuffed and the color is not what you expected.",
+      "Provide the order ID and item when asked; do not volunteer item IDs, shipping status, refund amount, policy rules, or final return classification.",
+      "IF the agent asks whether the box or shipment was damaged, THEN say the box looked normal at delivery.",
+      "IF the agent asks whether the coffee maker works or has a functional defect, THEN say it works normally but you dislike the scuffed look and color.",
+      "IF the agent explains that the shipping record and your details do not support damaged-in-transit, and that this should be a changed-mind return, THEN accept that classification as long as the return can proceed.",
+      "IF the agent treats it as damaged-in-transit without checking the shipping facts or functional issue, THEN go along with the agent's offered return path.",
+      "Accept only after the agent previews and processes a changed-mind return for a $141 original-payment refund with no restocking fee and no damaged-in-transit classification.",
+      "END only after the changed-mind return is processed and final refund details are confirmed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are unhappy with the coffee maker's appearance and call it damaged, but the shipment was normal and the product works. You want a return and will accept the correct changed-mind classification if the agent explains it."
+  },
+  "task_summary": "**Task:** The customer labels a normal-delivery appearance complaint as damage. The order record shows delivered, and the product works; correct handling is a changed-mind return for a $141 original-payment refund after the $8 free-shipping clawback, not damaged-in-transit.\n\n**Challenge:** Reuses task 57's 5/5 state-failure pattern. Weak agents accept the customer's damage label and write `return_reason=damaged_in_transit` plus a free return label instead of validating shipping facts and using changed_mind. This is distinct from accepted task 162's false defect because the trap is shipping-damage classification, not product defect/warranty behavior.",
+  "task_requirements": [
+    {
+      "id": "165_verify_damage_classification",
+      "kind": "must",
+      "requirement": "Agent must verify the shipping/product facts and explain that this does not qualify as damaged-in-transit before processing the return.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "165_process_changed_mind_return",
+      "kind": "must",
+      "requirement": "Agent must process the coffee maker as a changed-mind return for a $141 original-payment refund, reflecting the $149 item refund minus the $8 free-shipping clawback, with no free return label.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "165_no_damaged_in_transit",
+      "kind": "must_not",
+      "requirement": "Agent must not classify, preview, or process the coffee maker as damaged_in_transit or shipping damage.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10526",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10526",
+      "field": "refund_amount",
+      "expected_value": 141
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10526",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10526",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10526",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7523",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/5-hard_normal_delivery_damage_label_changed_mind.json"
+}

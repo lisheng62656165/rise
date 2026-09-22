@@ -1,0 +1,158 @@
+{
+  "task_id": "101-challenge_mixed_strategy_shared_budget",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move two trips and I only have about $120 cash total to spend. Booking BK-1000 needs to move from June 20 to June 23, and booking BK-1001 needs to move from June 21 to June 24. One of them has insurance, and I also have some points. What's the cheapest valid way to handle both?",
+  "user_simulator": {
+    "known_info": [
+      "BK-1000: LAX to Dallas on June 20, basic economy with insurance; move it to June 23.",
+      "BK-1001: SFO to Seattle on June 21, business class with no insurance; move it to June 24.",
+      "You have 15,000 loyalty points and only about $120 total cash available for both trips.",
+      "If BK-1001 is changed rather than replaced, keep its existing no-insurance setting."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want the cheapest valid total plan for moving both bookings within the shared $120 cash limit, and you do not want either booking changed until the agent compares both paths.",
+      "Do not volunteer policy mechanics, refund math, fare differences, or which strategy is best for either booking; let the agent discover and explain those details.",
+      "If the agent asks for booking details, dates, insurance status, points, budget, or preferences you know, provide the relevant facts for both bookings while keeping the shared budget constraint clear.",
+      "If the agent proposes changing, cancelling, or rebooking before giving a specific plan for both bookings, say you do not approve any action yet and need to understand what will happen to each booking and the combined cash total.",
+      "If the agent recommends the same strategy for both bookings, ask why that makes sense when one booking has insurance and the other is a business-class booking without insurance.",
+      "For the Dallas booking, accept the cancel-and-rebook path using AS100 only after the agent explains why it beats a direct change or the $280 nonstop and keeps the combined cash spend within $120.",
+      "For the Seattle booking, accept changing BK-1001 to UA101 only after the agent explains that a direct change is cheaper than cancelling and rebooking.",
+      "If the agent asks about insurance or booking preferences for BK-1001's direct change, say to preserve that booking's existing preferences, including no insurance.",
+      "Accept only after the agent previews both approved actions together: the Dallas cancellation and replacement using 15,000 points plus $90 cash, the Seattle direct change with a $30 fare difference, and the $120 combined cash total.",
+      "End only after both actions are completed and the final details show the Dallas replacement, the Seattle changed booking, zero remaining points, and no cash spend above $120.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You need to move two different bookings and only have about $120 total in cash to solve both problems. You know one trip has insurance and that you still have some points available, but you are not sure how those advantages should be used across the two bookings. You want the agent to think strategically and tell you the cheapest valid overall plan instead of optimizing only one trip at a time."
+  },
+  "task_summary": "**Task:** The traveler needs to move two bookings with only $120 total cash available, but the bookings do not share the same best strategy because one has insurance while the other is better handled as a direct change. Correct resolution is to compare both bookings first, choose the cheapest valid path for each one, and land exactly on the shared $120 cash cap before executing.\n\n**Challenge:** This tests cross-booking optimization rather than local decision-making. Agents fail when they start changing flights before comparing both paths, apply one strategy to both bookings, or miss the mixed strategy that is the only one that satisfies the budget.",
+  "task_requirements": [
+    {
+      "id": "challenge_mixed_strategy_shared_budget_compare_both_bookings",
+      "kind": "must",
+      "requirement": "Agent must compare the valid strategy for each booking before executing, recognizing that the insured basic-economy booking should use cancel-and-rebook while the business booking should use direct change.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "challenge_mixed_strategy_shared_budget_total_cash_math",
+      "kind": "must",
+      "requirement": "Agent must explain that using 15,000 points plus $90 cash for the replacement Dallas booking and paying the $30 Seattle fare difference keeps the combined cash spend at the $120 cap.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "challenge_mixed_strategy_shared_budget_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, create, or update either booking before comparing both bookings and getting the user's approval for the mixed strategy.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "challenge_mixed_strategy_shared_budget_no_single_strategy",
+      "kind": "must_not",
+      "requirement": "Agent must not apply the same strategy to both bookings when the insurance and cabin-policy facts make the cheapest valid strategies different.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 175
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "flight_id",
+      "expected_value": "UA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "price_paid",
+      "expected_value": 630
+    },
+    {
+      "entity_type": "users",
+      "record_key": "user_004",
+      "field": "loyalty_points",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_004",
+        "flight_id": "AS100",
+        "status": "confirmed",
+        "payment_method": "points_plus_cash",
+        "cash_amount": 90,
+        "points_used": 15000,
+        "cabin_class": "economy",
+        "seat_type": "window",
+        "meal_preference": "standard",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "add_wifi": false,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1002",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 90,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "AS100",
+        "meal_preference": "standard",
+        "paid_checked_bags": 0,
+        "payment_method": "points_plus_cash",
+        "points_used": 15000,
+        "price_paid": 90,
+        "refund_amount": null,
+        "seat_type": "window",
+        "status": "confirmed",
+        "user_id": "user_004"
+      }
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/101-challenge_mixed_strategy_shared_budget.json"
+}

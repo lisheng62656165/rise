@@ -1,0 +1,73 @@
+{
+  "task_id": "7-return_restocking_waived",
+  "user_id": "cust_001",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I'd like to return my headphones from order ORD-6011. I've opened them but they don't fit my ears well.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6011",
+      "item: headphones",
+      "opened: yes"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the opened headphones from ORD-6011 because they do not fit comfortably; do not ask for an exchange, replacement, or unrelated order change.",
+      "Provide the order ID, item, opened condition, and fit issue when asked, but do not volunteer refund amounts, policy details, or restocking calculations; ask the agent to check those records.",
+      "If the agent mentions a restocking fee, or previews the return without explaining whether Platinum membership affects any fee, ask once whether your membership changes the restocking charge before confirming.",
+      "Push back if the agent charges a restocking fee, uses the wrong item or return reason, offers a non-return path, or says the opened headphones are ineligible without checking the applicable policy and membership tier.",
+      "If the agent asks to process the return before giving the refund, refund method, and restocking-fee preview, ask for those details first.",
+      "Accept only after the agent previews a return of the headphones for the fit issue with refund to the original payment method, no restocking fee, and the fee waiver or no-fee outcome tied to Platinum membership.",
+      "End only after the agent confirms the return has been processed with the headphones returned, refund going to the original payment method, and no restocking fee charged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return your headphones because they were not comfortable after opening them. You assume your membership status may matter, but you are not leading with policy language or calculations. You want the agent to explain what the return would cost, if anything."
+  },
+  "task_summary": "**Task:** A Platinum customer wants to return opened headphones for changed mind. The correct handling is to process the return on the normal refund path while waiving the electronics restocking fee because Platinum status overrides that deduction.\n\n**Challenge:** The agent has to notice that membership changes the economics without changing the rest of the workflow. Weak agents charge the ordinary restocking fee anyway or fail to tie the waiver back to the customer's tier.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "7_return_restocking_waived_agent_must_check_customer_tier",
+      "kind": "must",
+      "requirement": "Agent must verify the customer is Platinum, either by calling get_customer for cust_001 or by explicitly stating the Platinum tier before confirming the return."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9075",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9075",
+      "field": "refund_amount",
+      "expected_value": 241
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9075",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9075",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9075",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-6011",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/7-return_restocking_waived.json"
+}

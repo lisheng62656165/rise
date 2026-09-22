@@ -1,0 +1,127 @@
+{
+  "task_id": "28-cascade_cancel_rebook_international",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I'd like to cancel my San Francisco to New York flight — booking BK-MS03 — and rebook a flight to London instead.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-MS03.",
+      "Wants JFK → LHR on June 24 in business class",
+      "Prefers DL, morning, and nonstop flights."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the conversation focused on canceling booking BK-MS03 first and then booking a replacement JFK to London business-class flight for June 24.",
+      "Do not volunteer the replacement flight details beyond London until the agent asks for preferences or the original booking cancellation is underway.",
+      "If the agent asks for booking details, destination, date, cabin, airline, time, stops, payment, seat, meal, WiFi, extra legroom, or insurance preferences, answer from what you know and your profile.",
+      "Before agreeing to cancel the original booking, require the agent to state the exact cancellation fee and refund amount; push back if the fee is missing, treated as waived by insurance, or not explained as applying to the domestic business booking.",
+      "After the original booking is cancelled, ask the agent to continue with the JFK to LHR business-class replacement if they do not move there on their own.",
+      "When the agent presents London flight options, choose only an option that is DL, morning, nonstop, business class, and within your $1500 budget; push back if any of those details are missing or mismatched.",
+      "Pay for the replacement London booking with your credit card in full; if the agent asks how you want to pay, say credit card (do not ask to use loyalty points or a points-plus-cash split for this booking).",
+      "Before approving the new booking, require a preview that includes the selected flight, total cash cost, payment method, cabin, seat type, meal, WiFi, extra legroom, and no insurance.",
+      "If the agent proposes changing the old booking instead of creating a new replacement booking, clarify that the old San Francisco to New York booking should be cancelled and the London trip should be booked separately.",
+      "End only after the original booking cancellation is confirmed with its fee and refund, and the replacement London booking is confirmed with the expected flight, cost, and profile preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You want to cancel one trip and quickly pivot into booking a new international one instead. In your mind this is a single replanning conversation rather than two separate tasks. You want the agent to help you close out the old plan and then move directly into the replacement."
+  },
+  "task_summary": "**Task:** User cancels a domestic business booking without insurance and then rebooks an international business flight to London. Correct resolution: Canceling the original domestic business booking incurs a $45 cancellation fee rather than a free insured cancellation.\n\n**Challenge:** The agent quotes the correct 5% domestic-business cancellation fee before canceling, then presents and books the intended DL morning London replacement rather than collapsing the task into a generic cancel-and-book flow.",
+  "task_requirements": [
+    {
+      "id": "state_domestic_business_cancel_fee",
+      "kind": "must",
+      "requirement": "Agent must state that canceling BK-MS03 (the domestic business booking) incurs a $45 cancellation fee with an $855 refund.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "must_not_claim_free_or_insured_cancellation",
+      "kind": "must_not",
+      "requirement": "Agent must not claim that canceling BK-MS03 is free or that the cancellation fee is waived by insurance.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_fee_before_cancel_confirmation",
+      "kind": "must",
+      "requirement": "Agent must give the user the exact cancellation fee before asking for or acting on final cancellation confirmation.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_replacement_option_selection_clear",
+      "kind": "must",
+      "requirement": "After the cancellation, agent must clearly present the June 24 London options and steer the user to the intended DL morning business replacement DL101.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-MS03",
+      "field": "cancellation_fee",
+      "expected_value": 45
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-MS03",
+      "field": "refund_amount",
+      "expected_value": 855
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-MS03",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "DL101",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 1200,
+        "points_used": 0,
+        "cabin_class": "business",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-0001",
+        "cabin_class": "business",
+        "cancellation_fee": null,
+        "cash_amount": 1200,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL101",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 1200,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/28-cascade_cancel_rebook_international.json"
+}

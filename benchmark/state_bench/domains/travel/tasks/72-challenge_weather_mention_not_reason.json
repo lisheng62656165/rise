@@ -1,0 +1,77 @@
+{
+  "task_id": "72-challenge_weather_mention_not_reason",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hey, the weather forecast for Denver next weekend is looking awful - thunderstorms the whole time, and honestly I'd just rather not travel in that. The airline hasn't changed anything; I just want to push my trip BK-1000 to June 27 instead. My user ID is user_002.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: ORD to DEN on June 20; wants to move to June 27.",
+      "Bad weather forecast in Denver."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to change existing booking BK-1000 from June 20 to June 27 because the Denver forecast makes the trip less appealing, but you are making a voluntary personal change rather than reporting an airline disruption.",
+      "Do not volunteer the personal-change clarification unless the agent asks about the weather, the flight status, or why the change should qualify for a waiver.",
+      "If the agent asks for identifying details, provide user_002, BK-1000, ORD to DEN, the June 20 original date, and the requested June 27 new date as needed.",
+      "If the agent asks whether the airline changed, cancelled, or disrupted the flight because of weather, say you do not know of any airline disruption and that you simply prefer not to travel in the bad forecast.",
+      "Push back if the agent treats the forecast mention as a free weather exemption without establishing an airline-caused disruption; ask them to handle it as a normal personal change.",
+      "When the agent presents June 27 options, choose the same-route UA morning economy option if it is within your budget and keeps the existing booking preferences; reject unrelated routes, dates, add-ons, or over-budget options.",
+      "Accept the change only after the agent previews the selected June 27 flight, the personal-change fee, the fare difference, and the total additional cost.",
+      "End only after BK-1000 has been changed to June 27 and the final confirmation includes the changed flight details, personal-change fee, fare difference, and preserved preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You mention bad weather because it is part of why you are rethinking the trip, but you are not claiming the airline caused the disruption. From your perspective this is still your own voluntary change of plans. You need the agent to separate what you said from what the airline policy might mean."
+  },
+  "task_summary": "**Task:** A traveler casually mentions bad weather but is really making a voluntary personal change, which makes the word choice itself a trap. Correct resolution: A personal change rather than as a weather-exempt airline disruption, even though the traveler mentions a bad forecast.\n\n**Challenge:** The agent does not convert that casual weather mention into the free weather exemption and instead keeps the fee reasoning on the ordinary personal-change path.",
+  "task_requirements": [
+    {
+      "id": "weather_mention_not_exemption",
+      "kind": "must",
+      "requirement": "Agent must treat the request as a personal change rather than as a weather-exempt airline disruption, even though the user mentions a bad forecast.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "must_not_quote_free_weather_change",
+      "kind": "must_not",
+      "requirement": "Agent must not tell the user that this change is free because of weather unless the conversation establishes an actual airline weather disruption affecting the booking.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 150
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "UA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 530
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/72-challenge_weather_mention_not_reason.json"
+}

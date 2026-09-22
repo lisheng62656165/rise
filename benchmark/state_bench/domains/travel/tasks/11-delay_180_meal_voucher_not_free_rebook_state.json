@@ -1,0 +1,89 @@
+{
+  "task_id": "11-delay_180_meal_voucher_not_free_rebook_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my flight AA600 (booking BK-7700, ORD to LAX) is delayed about three hours, so I'd like to move to the later flight AA610 on the same route. I'd also like whatever the delay entitles me to. My user ID is user_001. My current flight is nonstop and I'd like the later one to be a comparable nonstop.",
+  "user_simulator": {
+    "personality": "Practical and a bit inconvenienced by the delay, but calm and cooperative. You want to get onto a later flight and you want whatever the delay entitles you to, but you do not know the rules and will accept the agent's correct explanation. You care about not being overcharged, but you will not do the fee math yourself.",
+    "user_sim_context": "Your flight is delayed and you want to move to a later flight on the same route. You have heard that a delay can come with some kind of compensation, and you assume a delay this long might let you switch flights without the usual cost — but you are not sure. You do not know the airline's delay rules, what the change fee is, whether the delay waives it, or what compensation the delay qualifies for, and you will not work any of that out yourself.",
+    "known_info": [
+      "Booking BK-7700: ORD to LAX on flight AA600; that flight is delayed about three hours.",
+      "You want to move to the later same-route flight AA610.",
+      "Your current flight is nonstop and you want the later one to be a comparable nonstop.",
+      "You want whatever the delay entitles you to, and you do not want to overpay."
+    ],
+    "unknown_info": [
+      "What compensation a delay of this length qualifies for.",
+      "The change fee on this booking, and whether the delay waives it.",
+      "Whether moving to the later flight is free because of the delay (it is not — only the meal voucher is owed)."
+    ],
+    "task_rules": [
+      "Open by asking the agent to move BK-7700 to the later same-route flight AA610 because your flight AA600 is delayed about three hours, and say you want whatever the delay entitles you to. You may mention you are hoping the delay covers the cost of switching, but do not insist on it.",
+      "Do not propose or insist on a specific mechanism or fee treatment; you do not know whether the delay waives the change fee or what compensation you qualify for. Do not volunteer prices, fees, fare math, or policy rules; you do not know them.",
+      "If the agent asks for details or the reason, provide BK-7700, that AA600 is delayed about three hours, and that you want the later same-route flight AA610. Do not volunteer any fee figure; you do not know it.",
+      "If the agent explains that the delay qualifies you for a meal voucher but the move to the later flight still costs the normal change fee, accept that explanation; do not argue that the delay should make the switch free.",
+      "If instead the agent tells you the move is free because of the delay, do not correct the agent or supply the rule yourself — you do not know it; just continue and let the agent proceed.",
+      "Before approving, make sure the agent has surfaced enough detail to confirm the later flight is the comparable nonstop on the same route, and decline unrelated upgrades, add-ons, or itinerary changes.",
+      "Once the agent tells you the cost and what the delay entitles you to, take the move it recommends as long as it is handled as a change to your existing booking; you do not need to do the math yourself.",
+      "End with [TASK_DONE] only after the trip has been moved to AA610 as a change to your existing booking and the out-of-pocket cost has been summarized. You want whatever the delay entitles you to, but do not insist the agent take any particular extra step to record it.",
+      "For new booking creation, including a replacement after canceling an existing booking, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] until the final booking has the expected booking-stage preferences."
+    ]
+  },
+  "task_summary": "**Task:** user_001 holds domestic economy booking BK-7700 (ORD to LAX on AA600, $300 paid, departing more than 7 days out, booked outside the 24-hour free window, uninsured). The held flight AA600 is DELAYED by 180 minutes, and the traveler wants to move to the later same-route flight AA610 ($300, so the fare difference is $0). A 180-minute delay does NOT make the rebooking free: a change still costs the normal economy domestic change fee of $75 (the fee is waived only for a severe delay of 240 minutes or more, and insurance does not waive change fees). The delay does entitle the traveler to a $25 meal voucher, which the agent should mention. Correct resolution: the agent moves BK-7700 onto AA610 as a change to the existing booking and charges the normal $75 change fee, producing one modified record on AA610 with change_fee $75, fare_difference $0, and price_paid $375.\n\n**Challenge:** A weak agent conflates two independent policy lines and treats the 180-minute delay as a disruption that makes the rebooking FREE — moving the booking onto AA610 at a $0 change fee (writing change_fee $0 and price_paid $300 instead of $75 and $375). The agent must keep the two effects separate: the delay grants a $25 meal voucher (a conversational entitlement to surface), but the move still costs the normal $75 change fee because the delay is under the 240-minute free-rebooking threshold. The correct end state is BK-7700 on AA610 with change_fee $75, fare_difference $0, and price_paid $375; waiving the change fee because of the delay is wrong.",
+  "task_requirements": [
+    {
+      "id": "move_costs_full_change_fee_not_free_rebook",
+      "kind": "must",
+      "requirement": "Agent must move BK-7700 onto the later same-route nonstop AA610 as a change to the existing booking and charge the normal economy domestic change fee ($75) — the 180-minute delay does NOT make the rebooking free. The final state must show BK-7700 on AA610 with change_fee $75, fare_difference $0, and price_paid $375.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "must_not_waive_change_fee_for_delay",
+      "kind": "must_not",
+      "requirement": "Agent must not treat the 180-minute delay as a free rebooking and must not waive the change fee because of the delay (for example, processing the move at a $0 change fee or as an airline schedule change). A free rebooking requires a severe delay of 240 minutes or more; this 180-minute delay does not qualify, so charging $0 to move the booking is wrong.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "should_mention_meal_voucher_entitlement",
+      "kind": "must",
+      "requirement": "Agent should make clear that a 180-minute (roughly three-hour) delay entitles the traveler to a $25 meal voucher. This is a disclosure expectation about the entitlement; it is evaluated on the conversation, not on the persisted booking state.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "flight_id",
+      "expected_value": "AA610"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-7700",
+      "field": "price_paid",
+      "expected_value": 375
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/11-delay_180_meal_voucher_not_free_rebook_state.json"
+}

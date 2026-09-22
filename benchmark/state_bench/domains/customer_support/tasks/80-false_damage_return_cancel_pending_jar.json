@@ -1,0 +1,131 @@
+{
+  "task_id": "80-false_damage_return_cancel_pending_jar",
+  "user_id": "cust_005",
+  "now": "2026-07-16T10:00:00",
+  "opening_message": "The PowerBlend Pro Blender from ORD-7831 got scratched after I unpacked it; the delivery box was fine and it still works, but I do not want to keep it. If you take the blender back, cancel the pending replacement jar in ORD-7832, but keep the Smoothie Recipe Book.",
+  "user_simulator": {
+    "known_info": [
+      "blender_order_id: ORD-7831",
+      "item: PowerBlend Pro Blender",
+      "scratch_context: the delivery box was fine; the blender got scratched after unpacking and still works",
+      "dependent_order_id: ORD-7832",
+      "dependent_item: PowerBlend Replacement Jar",
+      "keep_item: Smoothie Recipe Book"
+    ],
+    "task_rules": [
+      "Start by saying the PowerBlend Pro Blender got scratched after unpacking, the delivery box was fine, it still works, and you do not want to keep it; also ask to cancel the pending replacement jar if the blender is taken back and to keep the Smoothie Recipe Book.",
+      "Provide both order IDs, the post-unpacking scratch context, pending replacement jar, and keep-the-book instruction when asked; do not volunteer item IDs, policy details, exact refund amounts, or tool behavior before the agent checks.",
+      "If the agent asks whether the package was damaged, whether it arrived that way, or whether this was shipping damage, repeat that the delivery box was fine, the blender got scratched after you unpacked it, and it still works but you do not want to keep it.",
+      "If the agent says that means the return should be classified as changed mind rather than damaged in transit, accept that classification.",
+      "If the agent tries to cancel the Smoothie Recipe Book, push back that only the replacement jar should be cancelled and the book should remain in the order.",
+      "Approve only after the agent previews a changed-mind return for the blender and cancellation of only the PowerBlend Replacement Jar.",
+      "Accept only after the blender is returned for $89 to original payment as changed mind with no return label, the replacement jar is cancelled, and the Smoothie Recipe Book remains confirmed.",
+      "End only after those final states are confirmed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The blender was not damaged in transit: the delivery box was fine, the scratch happened after unpacking, and the blender still works. You still want to return the blender and stop the pending replacement jar, while keeping the recipe book."
+  },
+  "task_summary": "**Task:** Customer says a working blender was scratched after unpacking and the delivery box was fine. They want to return the blender and also want a pending replacement jar cancelled if the blender is returned, while keeping an unrelated recipe book. Correct handling is to classify the blender return as changed_mind for an $89 original-payment refund with no return label, cancel only the replacement jar, and keep the recipe book confirmed.\n\n**Challenge:** This tests return-reason classification from explicit facts plus cascading cleanup. Weak agents may still process a damaged_in_transit return with a free label despite being told the scratch happened after unpacking, then perform the dependent cancellation.",
+  "task_requirements": [
+    {
+      "id": "214_return_blender_changed_mind",
+      "kind": "must",
+      "requirement": "Agent must classify and process the PowerBlend Pro Blender return as changed_mind for an $89 original-payment refund, not as damaged_in_transit, defective, wrong_item, or not_as_described.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "214_cancel_replacement_jar_only",
+      "kind": "must",
+      "requirement": "Agent must cancel only the pending PowerBlend Replacement Jar in ORD-7832 because the blender is being returned.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "214_no_damage_path_or_book_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not process, promise, or confirm a damaged_in_transit, defective, wrong_item, or not_as_described return; a free damage return label; a shipping-damage refund; or a fragile-item goodwill credit for the blender, and must not mutate the Smoothie Recipe Book.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10851",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10851",
+      "field": "refund_amount",
+      "expected_value": 39
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10851",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7831",
+      "field": "status",
+      "expected_value": "fully_returned"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7832",
+      "field": "status",
+      "expected_value": "partially_cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10850",
+      "field": "return_label_issued",
+      "expected_value": false
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10852",
+      "field": "item_status",
+      "expected_value": "confirmed"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10852",
+      "field": "refund_amount",
+      "expected_value": null
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/80-false_damage_return_cancel_pending_jar.json"
+}

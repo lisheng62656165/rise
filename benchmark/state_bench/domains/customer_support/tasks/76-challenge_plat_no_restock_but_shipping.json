@@ -1,0 +1,80 @@
+{
+  "task_id": "76-challenge_plat_no_restock_but_shipping",
+  "user_id": "cust_001",
+  "now": "2026-06-20T10:00:00",
+  "opening_message": "Hi, I want to return the ProBook Laptop from order ORD-7107. I changed my mind. As a Platinum member, I believe the restocking fee should be waived.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7107",
+      "item: laptop",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the ProBook Laptop from ORD-7107 for changed mind, while expecting the Platinum restocking-fee waiver to apply.",
+      "Provide the order ID, item, changed-mind reason, and Platinum status when needed, but do not volunteer refund amounts, policy thresholds, or shipping adjustment details before the agent checks them.",
+      "If the agent includes a restocking fee or treats the return as non-Platinum, remind them once that you are Platinum and ask them to verify the waiver.",
+      "If the agent says there are no deductions because of Platinum status, ask whether returning the laptop affects the original free-shipping threshold.",
+      "If the agent includes a shipping deduction, ask why it is separate from the Platinum restocking-fee waiver; accept it only when explained as the $8 free-shipping threshold clawback.",
+      "Before agreeing to the return, require a preview that returns only the laptop, uses changed_mind as the reason, waives the restocking fee, applies only the $8 shipping clawback, and leaves a $491 original-payment refund.",
+      "Push back on previews that omit the shipping clawback, apply any restocking fee, change the refund away from $491, return the book, or use a reason other than changed mind.",
+      "End only after the agent confirms the laptop return has been processed with no restocking fee, the $8 shipping clawback, and a $491 refund."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are returning a laptop as a Platinum member and come in already believing the restocking fee should be waived. You are less aware that a separate shipping consequence could still exist. If there is still a deduction despite your status, you want the agent to explain why it is different from restocking."
+  },
+  "task_summary": "**Task:** A Platinum customer is returning a laptop, so the restocking fee is waived, but the order also loses free shipping once the return drops the remaining subtotal below the threshold. The correct handling is to honor the Platinum restocking waiver while still applying the separate $8 shipping clawback, producing the $491 refund.\n\n**Challenge:** The customer benefit is narrower than it first appears. Weak agents assume Platinum means no deductions of any kind, miss the free-shipping reversal, or let the waived restocking fee obscure the need for a separate shipping adjustment.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "76_challenge_plat_no_restock_but_shipping_agent_must_explain_shipping_clawback",
+      "kind": "must",
+      "requirement": "Agent must explain that the $8 deduction is a free-shipping clawback and that the Platinum restocking-fee waiver does not exempt it."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "76_challenge_plat_no_restock_but_shipping_agent_must_check_free_shipping_policy",
+      "kind": "must",
+      "requirement": "Agent must either call get_policies with topic \"return\" and account for its free-shipping clawback rule, or explicitly explain that the original free-shipping order falls below the $100 threshold after the laptop return."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10130",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10130",
+      "field": "refund_amount",
+      "expected_value": 491
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10130",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10130",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10130",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7107",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/76-challenge_plat_no_restock_but_shipping.json"
+}

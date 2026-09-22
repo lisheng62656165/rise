@@ -1,0 +1,97 @@
+{
+  "task_id": "40-hard_in_transit_cancel_fee_approval_tablet",
+  "user_id": "cust_005",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "Please cancel ORD-7517 before it gets here. I ordered the SlateTab by mistake.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7517",
+      "items: SlateTab Pro 11-inch and SoundMax Wireless Headphones",
+      "reason: ordered by mistake"
+    ],
+    "task_rules": [
+      "Ask to cancel ORD-7517 before delivery; provide the order ID and item when asked.",
+      "Do not volunteer shipping status, cancellation fee, refund amount, or policy rules; let the agent check the order and policy.",
+      "IF the agent previews or explains an in-transit cancellation with a $20 total intercept fee and $828 refund, THEN explicitly approve the fee and cancellation.",
+      "IF the agent asks for confirmation before disclosing whether there is a fee and the refund amount, THEN ask to see those details first.",
+      "IF the agent says cancellation is free or confirms cancellation without first disclosing the $20 total fee, THEN push back that you did not agree to a fee-bearing cancellation yet.",
+      "Accept only after the fee-bearing preview is shown and you have approved it.",
+      "END only after the order is cancelled with an $828 original-payment refund after the $20 total intercept fee."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want the shipped-but-not-delivered order stopped, but you expect to approve any fee after the agent explains it. You do not know the cancellation policy until the agent checks."
+  },
+  "task_summary": "**Task:** Customer wants to cancel a two-item in-transit order. Policy permits cancellation, but a $10 intercept fee applies per item, so the total fee is $20. Correct handling is to preview/disclose the fee and refund, get approval, then confirm.\n\n**Challenge:** Reuses task 148's reliable failure pattern where agents confirm a fee-bearing cancellation before obtaining informed approval.",
+  "task_requirements": [
+    {
+      "id": "164_disclose_fee_before_approval",
+      "kind": "must",
+      "requirement": "Agent must disclose the $20 total in-transit intercept fee and $828 refund before asking for or relying on the customer's approval to cancel.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "164_get_explicit_fee_approval",
+      "kind": "must",
+      "requirement": "Agent must obtain explicit customer approval after disclosing the $20 total fee and before confirming the cancellation; the opening request to cancel or stop the shipment does not count as fee approval.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "164_process_fee_cancellation",
+      "kind": "must",
+      "requirement": "Agent must cancel both items in ORD-7517 for an $828 original-payment refund after the $20 total intercept fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "164_no_confirm_before_fee_approval",
+      "kind": "must_not",
+      "requirement": "Agent must not confirm the cancellation before the customer has approved the disclosed $20 total intercept fee; the customer's opening cancellation request is not enough.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10517",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10517",
+      "field": "refund_amount",
+      "expected_value": 589
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10517",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10523",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10523",
+      "field": "refund_amount",
+      "expected_value": 239
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10523",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7517",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "cancel_order",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/40-hard_in_transit_cancel_fee_approval_tablet.json"
+}

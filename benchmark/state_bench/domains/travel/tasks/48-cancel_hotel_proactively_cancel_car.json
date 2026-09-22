@@ -1,0 +1,102 @@
+{
+  "task_id": "48-cancel_hotel_proactively_cancel_car",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My Miami trip is off. Please cancel hotel reservation HR-182. My user ID is user_005.",
+  "user_simulator": {
+    "personality": "Practical traveler canceling a trip; cooperative and appreciates related cleanup.",
+    "user_sim_context": "Your Miami trip is off. You remember the hotel and assume the agent will check whether anything else is tied to the same trip.",
+    "known_info": [
+      "Hotel reservation HR-182 is for the canceled Miami trip."
+    ],
+    "unknown_info": [
+      "Whether there are other matching Miami reservations, including any car rental or flight booking IDs."
+    ],
+    "task_rules": [
+      "Open by asking to cancel hotel reservation HR-182 because the Miami trip is off. The agent already has your opening message.",
+      "Do not bring up the car rental or flight yourself. If the agent mentions matching Miami car or flight reservations for the same dates, confirm that they should be canceled too.",
+      "Do not ask to cancel unrelated reservations.",
+      "If the agent says the hotel cancellation is done and does not mention checking related reservations, accept that and end with [TASK_DONE].",
+      "If the agent discovers the matching car rental and flight, end only after the hotel, car, and flight are canceled; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "User asks to cancel Miami hotel HR-182 because the Miami trip is off. A related Miami car rental CR-182 and Miami flight booking BK-182 exist for the same dates. Agent should proactively discover the related reservations and cancel all three trip components after confirmation. Correct end state: HR-182, CR-182, and BK-182 are cancelled.",
+  "task_requirements": [
+    {
+      "id": "proactively_discover_related_trip_components",
+      "kind": "must",
+      "requirement": "Agent must proactively inspect the user's related reservations and surface both CR-182 and BK-182 tied to the same canceled Miami trip.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "cancel_full_miami_trip",
+      "kind": "must",
+      "requirement": "Agent must cancel HR-182, CR-182, and BK-182 after confirmation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "must_not_cancel_unrelated",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel unrelated reservations beyond the Miami hotel, car, and flight for the canceled trip.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-182",
+      "field": "cancellation_fee",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-182",
+      "field": "refund_amount",
+      "expected_value": 210
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-182",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-182",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-182",
+      "field": "refund_amount",
+      "expected_value": 165
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-182",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-182",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-182",
+      "field": "refund_amount",
+      "expected_value": 540
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-182",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/48-cancel_hotel_proactively_cancel_car.json"
+}

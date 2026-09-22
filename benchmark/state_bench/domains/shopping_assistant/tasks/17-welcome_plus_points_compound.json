@@ -1,0 +1,86 @@
+{
+  "task_id": "17-welcome_plus_points_compound",
+  "user_id": "shop_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi! I'd like to get the SlimBook Air 13 — adding it to my cart please.",
+  "user_simulator": {
+    "user_sim_context": "You are buying your first item from this store. You do NOT know anything about welcome discounts, loyalty point programs, or promotions. You will not ask about discounts or points — you assume the listed price is final unless told otherwise.",
+    "known_info": [
+      "You want one SlimBook Air 13 (SP-1001).",
+      "This is your first purchase from this store.",
+      "You are a Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to add one SlimBook Air 13 (SP-1001) to your cart; do not ask for gift wrap, bundles, promos, checkout, shipping, or other products.",
+      "If the agent asks for account details you know, provide that you are Jordan Lee, customer shop_002, a first-time Standard-tier customer.",
+      "Do not volunteer that this is your first purchase, your Standard tier, welcome discounts, loyalty points, or promotions unless the agent asks for those account details or explains them first.",
+      "When the agent presents the cart summary, acknowledge any welcome-discount or loyalty-points information they include, but do not ask about either benefit if one or both are missing.",
+      "If the agent asks for confirmation before adding the laptop, agree only to adding one SP-1001 SlimBook Air 13 with no gift wrap.",
+      "Push back if the agent proposes a different product, gift wrap, promo-code entry, checkout, shipping selection, loyalty redemption, or unrelated account change.",
+      "End only after the SlimBook Air 13 has been added to the cart and the agent has given a final cart summary.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A first-time Standard customer (shop_002) adds SP-1001 SlimBook Air 13 ($849). Two profile-driven policies apply: welcome_discount (5%, ~$42) and loyalty_points (Standard: 1 pt/$, ~800+ points). No promo codes in env.\n\n**Challenge:** Tests stacked proactive disclosure. Pitfall: agent surfaces one of the two policies and silently drops the other, OR misses both. Customer is silent on both topics. Correct: agent calls get_customer_account, sees first-time + Standard tier, consults both welcome_discount and loyalty_points policies, and reports both at cart summary with specific numbers (5% / ~$42 welcome, ~800+ pts loyalty).",
+  "task_requirements": [
+    {
+      "id": "checked_customer_profile",
+      "kind": "must",
+      "requirement": "Agent called get_customer_account for shop_002 to determine first-time status and tier before discussing pricing/discounts/points.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "disclosed_welcome_eligibility",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned the first-time welcome discount with a specific number (5%, ~$42, or both). Generic 'you may qualify for promotions' fails — welcome must be named explicitly with a number.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "disclosed_loyalty_points",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned loyalty points earned on this purchase, with a specific point total (e.g. '807 points' or '849 points' depending on whether the agent computed pre- or post-welcome). Generic 'you'll earn points' without a number fails. Agent must also be using the Standard rate (1 pt/$), not Gold (2) or Platinum (3).",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_product_added",
+      "kind": "must",
+      "requirement": "Agent added SP-1001 SlimBook Air 13, quantity 1, no gift wrap.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_002",
+      "field": "subtotal",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_002",
+      "field": "total",
+      "expected_value": 849
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_002",
+        "product_id": "SP-1001",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/17-welcome_plus_points_compound.json"
+}

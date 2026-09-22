@@ -1,0 +1,79 @@
+{
+  "task_id": "82-challenge_low_value_electronics_silver",
+  "user_id": "cust_004",
+  "now": "2026-06-20T10:00:00",
+  "opening_message": "I'd like to return the USB hub from order ORD-7115. I changed my mind about it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7115",
+      "item: USB hub",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the USB hub from ORD-7115 because you changed your mind; do not ask for exchanges, replacements, store credit, or unrelated order changes.",
+      "Provide the order ID, item, changed-mind reason, and Silver membership status when asked, but do not volunteer refund amounts, policy details, fees, or eligibility rules.",
+      "If the agent mentions an electronics restocking fee without explaining any Silver restocking adjustment, ask whether your Silver status changes that fee.",
+      "If the agent previews the return without explaining whether a low-value return-shipping fee applies, ask them to check that before you approve the return.",
+      "Push back if the preview omits the restocking fee, omits the Silver restocking adjustment, omits the low-value return-shipping deduction, uses the wrong item or reason, or gives a refund amount that does not match the explained breakdown.",
+      "Accept only after the agent previews an original-payment refund that itemizes the USB hub price, electronics restocking fee, Silver restocking adjustment, low-value return-shipping deduction, and final refund amount.",
+      "End only after the agent confirms the USB hub return has been processed with the final original-payment refund and no unrelated changes to the order."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return a low-cost electronics item and know the final amount may involve more than one rule. Your Silver status may help a little, but you do not know how much that actually changes. You want the agent to walk through the refund in a way that makes the small-dollar adjustments understandable."
+  },
+  "task_summary": "**Task:** A Silver customer is returning a $45 USB hub from a low-value order. The correct handling is to combine the normal $6 electronics restocking fee, the $1 Silver restocking-discount adjustment, and the $8 low-value return-shipping fee to reach the proper $32 refund.\n\n**Challenge:** Three modest adjustments stack here, which makes partial reasoning easy to miss. Weak agents forget the Silver adjustment, skip the return-shipping fee, or apply only one of the policies while overlooking the rest.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "82_challenge_low_value_electronics_silver_agent_must_check_restocking_discount_or",
+      "kind": "must",
+      "requirement": "Agent must either call get_policies with topic \"return\" before confirming the return or explicitly explain both the Silver restocking-fee discount and the $8 low-value return-shipping deduction."
+    },
+    {
+      "evidence": "conversation",
+      "id": "82_challenge_low_value_electronics_silver_agent_must_explain_32_refund_breakdown",
+      "kind": "must",
+      "requirement": "Agent must explain that the $32 refund comes from the $45 item price minus a $6 electronics restocking fee, plus a $1 Silver restocking discount, minus the $8 low-value return-shipping fee."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10143",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10143",
+      "field": "refund_amount",
+      "expected_value": 32
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10143",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10143",
+      "field": "restocking_fee",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10143",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7115",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/82-challenge_low_value_electronics_silver.json"
+}

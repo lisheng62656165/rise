@@ -1,0 +1,146 @@
+{
+  "task_id": "97-challenge_triple_same_category_return",
+  "user_id": "cust_002",
+  "now": "2026-06-20T10:00:00",
+  "opening_message": "I want to return all three clothing items from order ORD-7132 — both shirts and the shoes — and I'd like to do them one at a time in this order: the first shirt, then the second shirt, then the shoes last. I'm keeping just the phone case.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7132",
+      "return order: first shirt, then the second shirt, then the shoes last",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Ask the agent to process the returns ONE AT A TIME and confirm each before the next, in this exact order: first one shirt, then the other shirt, then the shoes last. If the agent offers to do them all at once or wants to return the shoes before both shirts, restate that you want one shirt, then the other shirt, then the shoes processed last.",
+      "Keep the request scoped to returning both shirts and the shoes from ORD-7132 for changed mind, while keeping the phone case.",
+      "If the agent asks for identifying details, provide the order ID and customer information you know; if asked for item IDs, refund amounts, fees, policy rules, or shipping eligibility, ask the agent to check the order and policy records.",
+      "Push back if the agent treats this as a return for only one or two clothing items, includes the phone case in the return, uses a reason other than changed mind, or tries to switch to an exchange, cancellation, store-credit-only, or unrelated path.",
+      "Accept a return preview only after it confirms that both shirts and the shoes are being returned, the phone case is being kept, the second and third clothing returns each have a repeat same-category charge, and the final shoes return also includes any free-shipping clawback.",
+      "If the preview mentions only one repeat surcharge, no repeat surcharge, no shipping adjustment for the shoes, or only a combined refund without itemized effects, ask for an itemized breakdown before agreeing.",
+      "If the agent asks for confirmation before giving the full three-item preview and explaining the fees or adjustments, ask them to show those details first.",
+      "End only after the agent has processed all three requested returns in that order (first shirt, then second shirt, then shoes last) and confirmed both shirts and the shoes were returned while the phone case remains kept."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return all three clothing items from an order and keep only the phone case. To you this is one broad clothing return request, not three separate policy puzzles. If later items in the same category are treated differently, you need the agent to spell that out clearly."
+  },
+  "task_summary": "**Task:** The customer is returning three clothing items from a four-item order. The first item follows the ordinary path, the second clothing item carries a $5 repeat surcharge, and the final shoes return carries both a $5 repeat surcharge and an $8 free-shipping clawback, making the shoes refund $116.\n\n**Challenge:** The agent has to track category repetition and order-level shipping eligibility as each return is confirmed. Weak agents apply the surcharge only once, miss the shipping clawback, or stop after returning only part of the requested set.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "97_challenge_triple_same_category_return_agent_must_apply_10_total_repeat",
+      "kind": "must",
+      "requirement": "Agent must apply $10 total repeat surcharges ($5 + $5)."
+    },
+    {
+      "evidence": "conversation",
+      "id": "97_challenge_triple_same_category_return_agent_must_include_8_shipping_clawback",
+      "kind": "must",
+      "requirement": "Agent must explain that the final shoes return includes an $8 free-shipping clawback, producing a $116 shoes refund."
+    },
+    {
+      "evidence": "conversation",
+      "id": "97_challenge_triple_same_category_return_agent_must_confirm_all_requested_items",
+      "kind": "must",
+      "requirement": "Agent must explicitly confirm that both shirts and the shoes are being returned while the phone case is kept."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10176",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10176",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10176",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10176",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10176",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10177",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10177",
+      "field": "refund_amount",
+      "expected_value": 54
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10177",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10177",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10177",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10178",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10178",
+      "field": "refund_amount",
+      "expected_value": 116
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10178",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10178",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10178",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7132",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/97-challenge_triple_same_category_return.json"
+}

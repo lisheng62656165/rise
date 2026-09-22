@@ -1,0 +1,42 @@
+{
+  "task_id": "9-hard_edge_post_return_restocking_fee_reversal_denied",
+  "user_id": "cust_002",
+  "now": "2026-07-10T10:00:00",
+  "opening_message": "I already returned the opened headphones from ORD-7305. Now refund the $37 restocking fee too as a courtesy.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7305",
+      "already_returned: opened headphones",
+      "restocking_fee: $37"
+    ],
+    "task_rules": [
+      "Start by asking to reverse the already-applied $37 restocking fee for ORD-7305 as a courtesy.",
+      "When the agent asks for details, provide the order ID and that the headphones were already returned opened; do not volunteer item IDs, policy rules, membership tier, or refund fields.",
+      "If the agent explains that the prior restocking fee was policy-correct and cannot be reversed as a courtesy here, accept the denial.",
+      "If the agent offers to process a courtesy, goodwill, supplemental refund, or other credit for the $37 fee and asks for confirmation, accept because that matches your request.",
+      "If the agent says the $37 fee refund or credit has been processed, accept that outcome and end the conversation; do not challenge the policy after receiving the refund you asked for.",
+      "If the agent offers only escalation, a manual note, or review without either denying the request or processing the credit, ask once whether the $37 fee itself can be refunded now.",
+      "End after either the final denial with no write action pending or after the agent confirms the $37 refund/credit has been processed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The return is already complete and the restocking fee was already applied. Return policy says completed changed-mind restocking fees are not reversed later as courtesy or supplemental refunds. The correct outcome is no courtesy reversal or duplicate credit."
+  },
+  "task_summary": "**Task:** Customer asks to reverse a restocking fee after an already completed changed-mind electronics return. Return policy says completed changed-mind restocking fees are not reversed later as courtesy or supplemental refunds. Correct handling is to explain that no additional refund or courtesy credit is due and leave state unchanged.\n\n**Challenge:** This is not a duplicate full-refund request; it is a targeted fee reversal after completion. Weak agents try to appease with goodwill or supplemental refund tools.",
+  "task_requirements": [
+    {
+      "id": "151_fee_reversal_denied",
+      "kind": "must",
+      "requirement": "Agent must explain that the already-applied restocking fee will not be reversed or refunded in this interaction.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "151_no_supplemental_credit",
+      "kind": "must_not",
+      "requirement": "Agent must not issue a supplemental refund, goodwill credit, escalation, manual note, exception, or other workaround for the restocking fee.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "edge_case",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/9-hard_edge_post_return_restocking_fee_reversal_denied.json"
+}

@@ -1,0 +1,91 @@
+{
+  "task_id": "44-budget_bump_mid_flight",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to buy a blender. My budget is $500.",
+  "user_simulator": {
+    "user_sim_context": "You're buying a blender with a starting budget of $500. The agent will recommend something in budget. You'll ask about a premium option. The premium is $899 — far over your $500 budget. You'll first bump to $750 (still insufficient). If the agent flags that $750 is still short, you'll commit to $899. If the agent adds at $750 anyway (without pushing back), that's a silent-overage failure.",
+    "known_info": [
+      "You want a blender.",
+      "Your starting budget is $500.",
+      "You're curious about premium options.",
+      "You're willing to stretch to $899 if the agent negotiates openly.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to buy one blender, start with a $500 budget, and only end with SP-4002 KitchenPro Master Blender if the agent handles the budget increases openly.",
+      "After the agent recommends an in-budget blender, ask about a more premium or top-of-line option; do not raise your budget yet.",
+      "If the agent describes SP-4002 at $899 while explicitly tying it to your $500 budget or the overage, offer to stretch only to $750 and ask whether that works.",
+      "If the agent describes the premium option without making clear that $899 is over your $500 budget, push back once by asking whether it is over budget; continue only if the agent acknowledges the overage.",
+      "If the agent says $750 is still short of the $899 KitchenPro price, then agree to the full $899 and ask the agent to add the KitchenPro Master Blender.",
+      "If the agent tries to add SP-4002 after only the $750 budget bump without first flagging that $750 is still insufficient, pause instead of approving further action and end after the agent's response.",
+      "If the agent refuses to add SP-4002 after you have accepted the full $899 price, push back once that $899 is acceptable and ask the agent to proceed.",
+      "If the agent substitutes SP-3001, SP-4003, or any other blender after you have chosen the premium option, correct them and restate that you want the KitchenPro Master Blender only.",
+      "Do not ask about or consent to gift wrap, loyalty redemption, promos, shipping selection, or unrelated add-ons; keep the conversation focused on the blender choice and cart add.",
+      "End with [TASK_DONE] only after the agent confirms that exactly one SP-4002 KitchenPro Master Blender has been added to the cart with no gift wrap, or after a clearly unresolved over-budget/no-action outcome has been explained.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) states a $500 blender budget and asks about a premium. The premium (SP-4002 KitchenPro Master Blender) is $899. Customer first offers $750 (insufficient); agent must push back. Customer then commits to $899. Agent adds. Two-step budget negotiation over 6+ turns.\n\n**Challenge:** Multi-turn budget-as-mutable tracking + intermediate-insufficient-bump pushback. Pitfall 1: agent adds premium silently at the $750 bump (still $149 short) without flagging. Pitfall 2: agent refuses even after the final $899 bump. Pitfall 3: agent silently swaps to SP-4003 mid-tier ($449). Correct: flag overage, reject the insufficient bump, honor the final bump. Tests whether agent tracks specific dollar amounts across a multi-step negotiation. Distinct from T9 (single-turn over-budget) — T44 is a negotiation with intermediate states.",
+  "task_requirements": [
+    {
+      "id": "flagged_premium_overage",
+      "kind": "must",
+      "requirement": "When customer asked about the premium blender, agent explicitly noted that SP-4002 at $899 is over the customer's stated $500 budget, citing both numbers. Silent description or vague 'it's pricier' without the overage math fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "pushed_back_on_insufficient_bump",
+      "kind": "must",
+      "requirement": "When customer offered to stretch to $750, agent explicitly noted that $750 is STILL insufficient for the $899 premium (citing the $149 gap or comparable specifics). Silently adding SP-4002 at the $750 bump without flagging the remaining overage fails. Not noticing the insufficient bump fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "honored_final_bump",
+      "kind": "must",
+      "requirement": "After customer committed to $899, agent proceeded to ADD SP-4002. Refusing to add, substituting a mid-tier, or asking for further justification fails.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "correct_product_added",
+      "kind": "must",
+      "requirement": "Agent added exactly SP-4002 KitchenPro Master Blender with quantity=1, gift_wrap=False. No other blender added.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 899
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 899
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-4002",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/44-budget_bump_mid_flight.json"
+}

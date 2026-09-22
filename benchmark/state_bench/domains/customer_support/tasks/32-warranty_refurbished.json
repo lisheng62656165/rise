@@ -1,0 +1,63 @@
+{
+  "task_id": "32-warranty_refurbished",
+  "user_id": "cust_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "My refurbished laptop from order ORD-6033 won't boot anymore. I bought it about 3 months ago — is it still covered?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6033",
+      "warranty_id: WRT-4014",
+      "issue: won't boot",
+      "refurbished: yes"
+    ],
+    "task_rules": [
+      "Keep the request scoped to checking warranty coverage for the refurbished ORD-6033 laptop that will not boot.",
+      "Provide the order ID, the boot issue, and that the laptop is refurbished when relevant; provide warranty ID WRT-4014 if the agent asks for it.",
+      "Do not volunteer the warranty length, coverage status, or repair eligibility as facts you know; ask the agent to check the warranty record and refurbished-item terms.",
+      "If the agent applies a standard new-laptop warranty timeline, denies coverage because the item is refurbished, or says the warranty is expired without checking WRT-4014, ask them to verify the refurbished warranty terms for this order.",
+      "Push back if the agent proposes a refund, replacement, paid repair, or no action without first explaining whether a warranty repair is available under the refurbished coverage.",
+      "If the agent asks you to confirm a warranty claim before explaining the refurbished warranty result and repair path, ask for those details first.",
+      "Accept only after the agent explains that the refurbished laptop is covered by the shorter refurbished warranty (3 months / 90 days, ending 2026-06-18), is still active, and can be routed to warranty repair.",
+      "End only after the warranty claim for WRT-4014 has been processed as a repair for the laptop issue."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your refurbished laptop will not boot, and you want to know what warranty coverage still applies to a refurbished purchase. You realize those items can have different terms, but you are not sure where you stand. You need the agent to check the actual coverage instead of assuming it works like a new device."
+  },
+  "task_summary": "**Task:** The customer has a refurbished laptop with a shorter ninety-day warranty, and the issue arises around day eighty-four. The correct handling is to recognize that the refurbished-item terms still cover the claim and route it to repair under that shortened warranty.\n\n**Challenge:** The trap is assuming every laptop follows the standard warranty timeline. Weak agents apply the wrong coverage window, deny the claim because the product is refurbished, or never verify which warranty schedule governs the item.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "32_warranty_refurbished_agent_must_not_deny_claim_for",
+      "kind": "must_not",
+      "requirement": "Agent must not deny claim for refurbished."
+    },
+    {
+      "evidence": "conversation",
+      "id": "32_warranty_refurbished_agent_must_explain_that_the_refurbished",
+      "kind": "must",
+      "requirement": "Agent must explain that the refurbished item is covered by the shorter refurbished warranty (3 months / 90 days, ending 2026-06-18) and is still active."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4014",
+      "field": "claim_count",
+      "expected_value": 1
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4014",
+      "field": "resolution",
+      "expected_value": "repair"
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4014",
+      "field": "status",
+      "expected_value": "claimed"
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/32-warranty_refurbished.json"
+}

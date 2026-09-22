@@ -1,0 +1,75 @@
+{
+  "task_id": "147-spare_compound_warranty_then_price_match",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "In ORD-7279, the shirt is too small and I want Large, and the running shoes are uncomfortable so return those. Handle both, please.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7279",
+      "exchange_item: shirt",
+      "return_item: running shoes",
+      "target_variant: Large shirt"
+    ],
+    "task_rules": [
+      "Keep the request scoped to ORD-7279: exchange the too-small shirt for the Large shirt if available and return the running shoes because they are uncomfortable.",
+      "Provide the order ID, the shirt exchange request, the Large target size, and the running-shoes return request when asked or when needed to keep both parts moving.",
+      "If the agent handles only one part of the compound request, ask once for the missing shirt-exchange decision or shoe-return path before accepting any resolution.",
+      "If the agent says the Large shirt is unavailable or out of stock, accept that the shirt exchange cannot be completed, decline other shirt exchanges or substitutes, and continue with only the running-shoes return.",
+      "Push back if the agent proposes changing, replacing, or refunding the shirt after the Large option is unavailable, or if the agent treats the shoe return as an exchange.",
+      "Accept only after the preview clearly states that no shirt exchange will be made and that the running shoes will be returned with the original-payment refund, no restocking fee, and the applicable return reason.",
+      "If the agent asks for confirmation before giving both the no-exchange shirt decision and the shoe-return preview, ask for those details first.",
+      "End only after the running-shoes return has been processed and the agent confirms the shirt was not exchanged or otherwise changed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7279. Customer wants a shirt size exchange and a shoe return in the same order. The Large shirt variant is out of stock, so agent must not complete that exchange and must still process only the shoe return. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer wants a shirt size exchange and a shoe return in the same order. The Large shirt variant is out of stock, so agent must not complete that exchange and must still process only the shoe return.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "spare_compound_warranty_then_price_match_exchange_unavailable",
+      "kind": "must",
+      "requirement": "Agent must explain that the Large shirt exchange cannot be completed because the target variant is unavailable/out of stock."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10282",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10282",
+      "field": "refund_amount",
+      "expected_value": 121
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10282",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10282",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10282",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7279",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/147-spare_compound_warranty_then_price_match.json"
+}

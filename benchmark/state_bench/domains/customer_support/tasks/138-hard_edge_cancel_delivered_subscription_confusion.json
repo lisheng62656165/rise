@@ -1,0 +1,40 @@
+{
+  "task_id": "138-hard_edge_cancel_delivered_subscription_confusion",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "Cancel ORD-7246 so I don't get charged again. It already arrived but I don't want this subscription.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7246"
+    ],
+    "task_rules": [
+      "Keep the request scoped to ORD-7246: you thought it was a subscription or future charge, but you also know the order already arrived.",
+      "Provide the order ID when asked, and do not claim to know whether any subscription record, cancellation eligibility, refund, or return eligibility exists.",
+      "If the agent explains there is no subscription or future charge tied to the order, accept that clarification but still ask what can be done about the delivered item.",
+      "If the agent says they can cancel, have cancelled, or will cancel the delivered order or a subscription for ORD-7246, say the item already arrived and ask for the return path instead.",
+      "Accept only a no-action explanation that the delivered one-time order cannot be cancelled and that the next available path is checking return eligibility.",
+      "Do not approve or request a cancellation, invented subscription cancellation, refund, return, exchange, or other order change in this task.",
+      "End only after the agent clearly explains the order cannot be cancelled because it was delivered and directs you to return eligibility without mutating the order."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7246. Customer asks to cancel a delivered one-time order as if it were a subscription. Agent must explain delivered orders cannot be cancelled and offer return path instead of mutating state. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer asks to cancel a delivered one-time order as if it were a subscription. Agent must explain delivered orders cannot be cancelled and offer return path instead of mutating state.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_cancel_delivered_subscription_confusion_must",
+      "kind": "must",
+      "requirement": "Agent must explain this is a delivered order that cannot be cancelled and direct the customer to return eligibility instead."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_cancel_delivered_subscription_confusion_must_not",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel the delivered order or invent a subscription cancellation."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "edge_case",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/138-hard_edge_cancel_delivered_subscription_confusion.json"
+}

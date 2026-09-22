@@ -1,0 +1,61 @@
+{
+  "task_id": "47-adversarial_conflicting_cabin_claim",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I want to cancel my business class flight — booking BK-A04. Business class should be free to cancel, right?",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-A04: wants to cancel the flight.",
+      "Thinks they booked business class."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request focused on cancelling BK-A04, and initially insist you believe it is business class and should be free to cancel.",
+      "If the agent asks for the booking ID, provide BK-A04; do not volunteer that the cabin claim may be wrong.",
+      "If the agent accepts the business-class claim without checking the booking, ask them to verify the booking details before you approve cancellation.",
+      "When the agent says the booking is actually economy based on the record, express surprise once but accept the system-backed cabin class.",
+      "Accept free cancellation only after the agent explains it comes from the booking's insurance coverage, not from business-class rules.",
+      "Before confirming cancellation, require a clear preview that the cancellation fee is $0 and the refund amount is $310.",
+      "Push back if the agent charges a fee, denies the refund, or bases the free cancellation on an unverified business-class entitlement.",
+      "End only after the agent confirms BK-A04 has been cancelled with a $0 fee and $310 refund, then use [TASK_DONE]."
+    ],
+    "user_sim_context": "You want to cancel a booking and insist it is business class because you expect that to improve the outcome. You start confidently and do not volunteer that you may be mistaken. If the agent shows you the actual booking details, you will grudgingly accept them."
+  },
+  "task_summary": "**Task:** User insists they booked business class, but the record is actually economy and the booking is insured. Correct resolution: Agent must clarify that the booking is actually economy rather than simply accepting the traveler's business-class claim.\n\n**Challenge:** The agent corrects the cabin-class misunderstanding from the booking data and explains that the free cancellation comes from insurance coverage, not from a mistaken business-class entitlement.",
+  "task_requirements": [
+    {
+      "id": "state_cabin_claim_corrected",
+      "kind": "must",
+      "requirement": "Agent must clarify that the booking is actually economy rather than simply accepting the user's business-class claim.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_insurance_basis_explained",
+      "kind": "must",
+      "requirement": "Agent must explain that the free cancellation comes from the booking's insurance coverage, not from business-class cancellation rules.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A04",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A04",
+      "field": "refund_amount",
+      "expected_value": 310
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-A04",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/47-adversarial_conflicting_cabin_claim.json"
+}

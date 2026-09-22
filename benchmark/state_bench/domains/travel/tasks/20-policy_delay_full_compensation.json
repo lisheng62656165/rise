@@ -1,0 +1,54 @@
+{
+  "task_id": "20-policy_delay_full_compensation",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I just saw that my flight BK-PR05 is massively delayed! What can you do for me?",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-PR05: flight is significantly delayed."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Start by seeking the support and compensation available for BK-PR05's delay, without asking to change or cancel the trip.",
+      "If the agent asks for the booking ID, provide BK-PR05; if asked for the exact delay length or policy details, say you only know the flight is significantly delayed and ask the agent to look it up.",
+      "When the agent identifies the 300-minute or five-hour delay, ask what delay-compensation tier applies and what it includes if those details are not already clear.",
+      "Accept only an explanation that the delay qualifies for the full compensation tier, including free rebooking, a $25 meal voucher, and hotel accommodation if the delay requires an overnight stay; push back if the threshold or package is incomplete.",
+      "Do not authorize any rebooking, cabin upgrade, cancellation, or other booking change in this task.",
+      "If the agent offers to switch flights, upgrade cabins, cancel, or otherwise modify the trip, say you only want the delay-compensation entitlement applied to the current booking and no other changes.",
+      "Before ending, ask for confirmation that the full delay-compensation entitlement has been applied to BK-PR05 without changing the itinerary.",
+      "End with [TASK_DONE] only after the full-compensation entitlement is clearly confirmed and applied to the existing booking."
+    ],
+    "user_sim_context": "Your flight is massively delayed and you want to understand exactly what support or compensation you should expect. You are upset, but you are still asking at the advice level rather than authorizing a change. You want the agent to tell you what you are entitled to without making decisions for you."
+  },
+  "task_summary": "**Task:** A traveler reports a 300-minute delay and wants to know what compensation applies, but does not authorize any trip change. Correct resolution: A 300-minute delay qualifies the booking for the full delay-compensation tier because it is at or above the 240-minute threshold.\n\n**Challenge:** The agent explains the full delay-compensation package triggered at 240 or more minutes and keeps the task focused on applying that entitlement to the current booking rather than executing other travel changes.",
+  "task_requirements": [
+    {
+      "id": "state_full_comp_threshold",
+      "kind": "must",
+      "requirement": "Agent must explain that a 300-minute/five-hour delay qualifies this booking for the full delay-compensation tier, using either the over-four-hour policy wording or the equivalent at-or-above-240-minutes threshold.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_full_comp_package",
+      "kind": "must",
+      "requirement": "Agent must explain that the full delay-compensation package includes free rebooking, a $25 meal voucher, and hotel accommodation if the delay requires an overnight stay.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_other_booking_change",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, rebook, upgrade, or otherwise modify the itinerary beyond applying the delay-compensation entitlement to the current booking.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-PR05",
+      "field": "delay_compensation",
+      "expected_value": "full"
+    }
+  ],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/20-policy_delay_full_compensation.json"
+}

@@ -1,0 +1,87 @@
+{
+  "task_id": "25-compound_intl_sub240_delay_change_not_free_plus_baggage_state",
+  "user_id": "user_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my flight BK-L (JFK to CDG on AF900) is delayed about 210 minutes, so I'd like to move to the later flight AF901 the same day. Also please add 2 checked bags. Keep everything else the same. My user ID is user_005 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Practical international traveler inconvenienced by a delay; cooperative, just wants a better flight and her bags.",
+    "user_sim_context": "Your international flight is delayed about three and a half hours and you'd rather take the later flight the same day. You also want to bring 2 checked bags. You do not know whether the delay makes the change free or what your baggage allowance is; you just want it handled and anything owed on your card.",
+    "known_info": [
+      "Booking BK-L: JFK to CDG on AF900, delayed about 210 minutes.",
+      "You want to move to the later same-day flight AF901.",
+      "You want to add 2 checked bags.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "Whether the delay waives the change fee, or what the change fee is.",
+      "Your loyalty free-checked-bag allowance."
+    ],
+    "task_rules": [
+      "Open by saying your flight BK-L (JFK to CDG on AF900) is delayed about 210 minutes, you want to move to the later flight AF901, and you want to add 2 checked bags. The agent already has your opening message.",
+      "If the agent says the change carries a fee, accept it once explained; you may ask once whether the delay covers it, but accept the agent's policy-grounded answer and do NOT insist the move should be free.",
+      "If the agent asks about checked bags, confirm you want 2 checked bags. Do not claim they are free or paid; you do not know your allowance.",
+      "Do NOT volunteer the change fee, whether the delay waives it, or your baggage allowance.",
+      "If the agent proposes anything unrelated (cabin upgrade, insurance, cancellation, car or hotel add-ons), decline and return to the flight move plus the bags.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving the change: airline, time_range, and max_stops. If the agent has not surfaced enough option detail, ask.",
+      "Booking-stage persisted preferences to verify are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing values.",
+      "Do not try to verify raw flight_id. Your budget is a hard constraint.",
+      "End only after BK-L is moved to AF901 and the 2 bags are handled, with the change fee, bag fee, and total clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_005 (Ava, basic) is on BK-L (JFK to CDG on AF900, economy international), delayed 210 minutes. She wants to move to the later same-day flight AF901 and add 2 checked bags. A 210-minute delay does NOT waive a flight-change fee (only 240+ does), so this is an ordinary international personal change at $100 (>7 days out): change_reason=\"personal\", change_fee=100. As a basic-tier member on economy she gets 1 free checked bag, so of the 2 bags one is free and one is a $35 paid extra: paid_checked_bags=1. Correct end state: BK-L on AF901, change_fee 100, paid_checked_bags 1.\n\n**Challenge:** The agent must not treat the 210-minute delay as making the flight move free (it carries the $100 international personal change fee), and must handle a partial baggage allowance correctly — basic tier covers only 1 of the 2 checked bags, so exactly one bag is paid ($35). An agent that waives the change fee, or that bills both bags or waives both, persists wrong state. Both are discrete inputs the engine accepts and persists, so previewing does not protect an agent that picks the wrong change reason or the wrong paid-bag count.",
+  "task_requirements": [
+    {
+      "id": "sub240_delay_does_not_waive_intl_change_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that the 210-minute delay does not waive the flight-change fee, so moving to the later flight carries the standard international change fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "change_not_processed_as_free",
+      "kind": "must_not",
+      "requirement": "Agent must not process the flight change as a free or fee-exempt (schedule-change/disruption) move; the 210-minute delay does not make it free.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "partial_baggage_allowance_one_paid",
+      "kind": "must",
+      "requirement": "Agent must apply the baggage allowance correctly: the traveler's basic tier covers one checked bag free, so of the two bags exactly one is a paid extra.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-L",
+      "field": "change_fee",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-L",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-L",
+      "field": "flight_id",
+      "expected_value": "AF901"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-L",
+      "field": "paid_checked_bags",
+      "expected_value": 1
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-L",
+      "field": "price_paid",
+      "expected_value": 655
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/25-compound_intl_sub240_delay_change_not_free_plus_baggage_state.json"
+}

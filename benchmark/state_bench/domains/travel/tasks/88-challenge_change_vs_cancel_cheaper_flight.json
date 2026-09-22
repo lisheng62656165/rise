@@ -1,0 +1,127 @@
+{
+  "task_id": "88-challenge_change_vs_cancel_cheaper_flight",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I want to move my flight BK-1000 to June 28. I see cheaper flights available. Should I change my booking or cancel and rebook? Which is cheaper? My user ID is user_004.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: ORD to SFO on June 19.",
+      "Wants to move to June 28.",
+      "Wants the cheapest option."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask the agent to compare changing BK-1000 to June 28 against canceling and rebooking, and do not commit until both overall costs are explained.",
+      "If the agent asks for identifying details, provide user ID user_004, booking BK-1000, the ORD to SFO route, the June 19 original date, and that you want the cheapest June 28 option.",
+      "Do not volunteer fees, refunds, fare differences, replacement prices, or policy math; ask the agent to look up and compare those details.",
+      "If the agent recommends changing without a cancel-and-rebook comparison, ask for the cancellation fee, refund, replacement fare, and total cost for that path before deciding.",
+      "If the agent presents incomplete, over-budget, or contradictory comparison math, push back once and ask for the full direct-change total and cancel-and-rebook total side by side.",
+      "When the agent explains that direct change totals $600 and canceling plus rebooking totals $525, choose cancel-and-rebook because it is cheaper.",
+      "Before approving any cancellation or replacement booking, require a preview naming the cancellation fee, refund amount, replacement flight DL100 on June 28, rebook price, total current cost, and expected profile booking preferences.",
+      "Reject direct changes, unrelated add-ons, or replacement options above your $600 budget after the comparison is clear.",
+      "Accept only the cancel-and-rebook path for BK-1000 into the Delta afternoon June 28 replacement flight DL100 once the preview is complete and within budget.",
+      "End only after the original booking is confirmed cancelled and the new replacement booking is confirmed with the expected cost and booking preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You are comparing a change against cancel-and-rebook because you noticed cheaper flights for the new date. You are not committed to either path and want the agent to tell you which one is actually better overall. The important thing is a clean economic comparison."
+  },
+  "task_summary": "**Task:** User asks whether changing an existing booking or canceling and rebooking a cheaper replacement flight would cost less overall. Correct resolution: Directly changing the booking would total $600.\n\n**Challenge:** The agent compares both paths with the correct totals, recommends the cheaper cancel-and-rebook option, and does not hand-wave away the comparison.",
+  "task_requirements": [
+    {
+      "id": "state_change_total",
+      "kind": "must",
+      "requirement": "Agent must explain that directly changing the booking would total $600.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_cancel_rebook_total",
+      "kind": "must",
+      "requirement": "Agent must explain that canceling and rebooking would total $525.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_recommend_cancel_rebook",
+      "kind": "must",
+      "requirement": "Agent must recommend canceling and rebooking because it is $75 cheaper than the direct change path.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_not_recommend_change",
+      "kind": "must_not",
+      "requirement": "Agent must not recommend the direct change as the cheaper option after comparing the two paths.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 425
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_004",
+        "flight_id": "DL100",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 450,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "window",
+        "meal_preference": "standard",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "add_wifi": false,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 450,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "DL100",
+        "meal_preference": "standard",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 450,
+        "refund_amount": null,
+        "seat_type": "window",
+        "status": "confirmed",
+        "user_id": "user_004"
+      }
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/88-challenge_change_vs_cancel_cheaper_flight.json"
+}

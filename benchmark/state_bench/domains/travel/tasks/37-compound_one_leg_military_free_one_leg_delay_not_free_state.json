@@ -1,0 +1,91 @@
+{
+  "task_id": "37-compound_one_leg_military_free_one_leg_delay_not_free_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — I need to move two flights. Move my outbound BK-S (ORD to DEN on UA600) to UA601 — I'm being deployed. And move my return BK-T (DEN to ORD on UA610), which is delayed about 210 minutes, to UA611. Keep everything else the same. My user ID is user_004 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Calm military traveler; cooperative, states his deployment and the delay plainly and accepts the fees as explained.",
+    "user_sim_context": "You are being deployed, so you need to move your outbound flight, and separately your return flight is delayed and you want a later one. You do not know which moves are free or what any fees are; you just want both handled and anything owed on your card.",
+    "known_info": [
+      "Outbound BK-S: ORD to DEN on UA600 — move to UA601 because you are being deployed (military).",
+      "Return BK-T: DEN to ORD on UA610, delayed about 210 minutes — move to UA611.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "Which moves are free, or what the change fees are."
+    ],
+    "task_rules": [
+      "Open by asking the agent to move BK-S (ORD to DEN on UA600) to UA601 because you are being deployed, and to move BK-T (DEN to ORD on UA610), which is delayed about 210 minutes, to UA611. The agent already has your opening message.",
+      "If the agent asks the reason for each change, restate plainly: the outbound is a military deployment, the return is because it's delayed. Do not suggest a fee should or should not apply.",
+      "If the agent says the return change carries a fee even though it's delayed, accept it once explained; you may ask once whether the delay covers it, but accept the agent's answer and do NOT insist it should be free.",
+      "Do NOT volunteer the change fees or which moves are free; you do not know these.",
+      "If the agent proposes anything unrelated (cabin upgrade, insurance, cancellation, bags, car or hotel), decline and return to the two flight moves.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless these task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving each change: airline, time_range, and max_stops. If the agent has not surfaced enough detail, ask.",
+      "Booking-stage persisted preferences to verify are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing values.",
+      "Do not try to verify raw flight_id. Your budget is a hard constraint.",
+      "End only after both BK-S and BK-T are moved, with each change fee clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver) has two economy domestic legs: BK-S (ORD to DEN on UA600) and BK-T (DEN to ORD on UA610, delayed 210 minutes). He is being deployed and wants BK-S moved to UA601 — a military change with the fee waived ($0). He wants BK-T moved to UA611, but its 210-minute delay is below the 240-minute waiver, so that move is an ordinary personal change at $75. Correct end state: BK-S on UA601 (change_reason military, change_fee 0), BK-T on UA611 (change_reason personal, change_fee 75).\n\n**Challenge:** The two legs have opposite fee outcomes for different reasons — military (free) versus a sub-240 delay (not free). The agent must apply the free exemption only to the deployment leg and charge the $75 fee on the delayed leg, rather than letting the legitimate free move bleed into the delayed one. An agent that charges $0 on BK-T — treating the delay as a waiver or carrying the military exemption across — persists wrong state on that leg.",
+  "task_requirements": [
+    {
+      "id": "military_leg_is_free",
+      "kind": "must",
+      "requirement": "Agent must treat the deployment (military) move of BK-S as fee-exempt (no change fee).",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "delayed_leg_not_free",
+      "kind": "must_not",
+      "requirement": "Agent must not treat the BK-T move as free; its 210-minute delay is below the waiver threshold, so it carries the standard personal change fee.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-S",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-S",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-S",
+      "field": "flight_id",
+      "expected_value": "UA601"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-T",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-T",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-T",
+      "field": "flight_id",
+      "expected_value": "UA611"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-T",
+      "field": "price_paid",
+      "expected_value": 395
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/37-compound_one_leg_military_free_one_leg_delay_not_free_state.json"
+}

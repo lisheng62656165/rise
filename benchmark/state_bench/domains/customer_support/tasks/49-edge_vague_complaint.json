@@ -1,0 +1,85 @@
+{
+  "task_id": "49-edge_vague_complaint",
+  "user_id": "cust_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Something is wrong with my order ORD-6050. It's messed up.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6050",
+      "wrong_item: blender instead of phone case",
+      "correct_items: shirt, book"
+    ],
+    "task_rules": [
+      "Keep the request scoped to diagnosing and fixing the vague problem with ORD-6050; do not identify the wrong item until the agent asks what is wrong or asks which item is affected.",
+      "If the agent asks what happened, explain that you received the wrong item; if the agent asks which item, say the phone case was missing and a blender arrived instead.",
+      "If the agent asks about the rest of the order, confirm that the shirt and book are correct and should not be changed.",
+      "If the agent assumes the issue, proposes an action before clarifying, or treats this as changed-mind remorse, push back and explain that the issue is a wrong-item shipment that needs to be scoped before anything is processed.",
+      "If the agent tries to return the whole order, act on the shirt or book, offer a replacement path, or use any reason other than wrong_item for the affected line, restate that only the blender/phone-case mismatch should be handled.",
+      "Before agreeing to the return, require a concrete preview that returns only the wrong-item line, leaves the shirt and book unchanged, issues a return label, charges no restocking fee, and refunds $89 to the original payment method.",
+      "End only after the agent confirms the wrong-item return has been processed for the affected line with the $89 refund, return label, no restocking fee, and the other items left unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are frustrated and open the conversation vaguely because you know something about the order is wrong but do not frame it cleanly at first. You expect the agent to ask the right questions and narrow down the issue with you. Once the problem is identified, you are willing to become more specific."
+  },
+  "task_summary": "**Task:** The customer opens with a vague complaint that the order is 'messed up,' and the agent has to diagnose what actually happened. The correct read is that the customer received a blender when they were supposed to receive a phone case, so the case should be handled as a wrong-item shipment with the $89 refund.\n\n**Challenge:** The agent has to clarify before acting. Weak agents make assumptions without enough information, process the whole order instead of the actual problematic line, or miss that this is a fulfillment error rather than a generic dissatisfaction return.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "49_edge_vague_complaint_agent_must_diagnose_the_blender_was",
+      "kind": "must",
+      "requirement": "Agent must diagnose: the blender was supposed to be a phone case (wrong item shipped)."
+    },
+    {
+      "evidence": "conversation",
+      "id": "49_edge_vague_complaint_agent_must_ask_clarifying_questions",
+      "kind": "must",
+      "requirement": "Agent must ask clarifying questions."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9412",
+      "field": "return_reason",
+      "expected_value": "wrong_item"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-6050",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "edge_case",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/49-edge_vague_complaint.json"
+}

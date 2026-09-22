@@ -1,0 +1,123 @@
+{
+  "task_id": "67-challenge_seasonal_plus_bulk_clawback",
+  "user_id": "cust_002",
+  "now": "2027-01-20T10:00:00",
+  "opening_message": "Hi, I'd like to return the headphones from my November order ORD-7095 first, and once that's done I'll return the shirt too. I know it's been a while but I thought holiday orders had extended return windows?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7095",
+      "return order: headphones first, then the shirt",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Ask the agent to fully process and confirm the headphones return first; only after the headphones return is confirmed do you bring up the shirt return. If the agent offers to handle both at once or starts with the shirt, restate that you want the headphones returned and confirmed first, then the shirt.",
+      "You want to return exactly two items from ORD-7095, the headphones and the shirt, because you changed your mind; do not ask to return the phone case, book, or full order.",
+      "Provide the order ID, the two requested items, and the changed-mind reason when asked, but do not volunteer refund amounts, item IDs, policy details, or discount calculations.",
+      "If the agent says the normal return window has passed or denies the return on timing alone, mention that you thought November and December holiday orders had extended returns until January 31 and ask the agent to check.",
+      "If the agent only handles one requested item, ask once about returning the other requested item before accepting any final resolution.",
+      "If the agent mentions a clawback, fee deduction, reduced refund, or refund recalculation, ask for a brief explanation of which original order benefit is being reversed and accept it only if it is tied to the bulk-discount or free-shipping threshold.",
+      "Before confirming the returns, require a preview that covers both requested items, explains that the seasonal extension keeps them eligible, and states the refund effect for the headphones and the shirt.",
+      "If the preview for both returns does not mention both the $10 bulk clawback and the $8 free-shipping clawback, ask whether returning two of the four items changes the original discount or free-shipping qualification before confirming.",
+      "End only after the agent confirms BOTH returns have been processed in that order (headphones first, then shirt), with the headphones and shirt returned and the expected refund/clawback details applied."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return two items from a holiday-season order and believe the extended season matters. You are not also thinking about how returning those items could change the discount applied to the rest of the order. You need the agent to explain both the timing and the financial consequence together."
+  },
+  "task_summary": "**Task:** A November order with four items and a discount code is still returnable in January only because the seasonal extension applies. The correct handling is to process both requested returns and recognize that the second return drops the order below both the bulk-discount threshold and the free-shipping threshold, so the shirt refund includes a $10 bulk clawback and an $8 free-shipping clawback.\n\n**Challenge:** This is a layered policy case, not a single-rule lookup. Weak agents miss the seasonal extension, process the second return without the state-dependent clawbacks, or complete only one of the two lines.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "67_challenge_seasonal_plus_bulk_clawback_agent_must_not_deny_return_because",
+      "kind": "must_not",
+      "requirement": "Agent must not deny return because normal window has expired — doesn't check seasonal extension."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "67_challenge_seasonal_plus_bulk_clawback_agent_must_explain_that_the_seasonal",
+      "kind": "must",
+      "requirement": "Agent must explain that the seasonal extension keeps this return eligible."
+    },
+    {
+      "evidence": "conversation",
+      "id": "67_challenge_seasonal_plus_bulk_clawback_agent_must_account_for_10_bulk_clawback",
+      "kind": "must",
+      "requirement": "Agent must tell the customer the shirt return includes a $10 bulk purchase clawback because the remaining order drops below three items."
+    },
+    {
+      "evidence": "conversation",
+      "id": "67_challenge_seasonal_plus_bulk_clawback_agent_must_account_for_8_shipping_clawback",
+      "kind": "must",
+      "requirement": "Agent must tell the customer the shirt return includes an $8 free-shipping clawback because the remaining subtotal drops below $100."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10102",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10102",
+      "field": "refund_amount",
+      "expected_value": 199
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10102",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10102",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10102",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10103",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10103",
+      "field": "refund_amount",
+      "expected_value": 38
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10103",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10103",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10103",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7095",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/67-challenge_seasonal_plus_bulk_clawback.json"
+}

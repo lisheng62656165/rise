@@ -1,0 +1,109 @@
+{
+  "task_id": "121-change_flight_cascade_replace_hotel",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Please change booking BK-183 to flight UA183SFO, and keep the ground plans coherent with the new destination. My user ID is user_004.",
+  "user_simulator": {
+    "personality": "Busy traveler who wants the trip kept coherent, not just the flight changed.",
+    "user_sim_context": "You are switching the trip destination from Los Angeles to San Francisco and expect related lodging to be fixed too.",
+    "known_info": [
+      "Booking BK-183 should move to San Francisco flight UA183SFO.",
+      "Keep the hotel dates but make sure the hotel matches the new destination."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Open by asking to change BK-183 to UA183SFO and keep the ground plans coherent. The agent already has your opening message.",
+      "If the agent changes only the flight and ignores the existing LAX hotel, ask whether the hotel still matches the new destination.",
+      "Approve canceling the LAX hotel and booking a comparable SFO hotel for the same dates.",
+      "End only after the flight is changed and the hotel has been moved from LAX to SFO; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "User changes booking BK-183 from arriving at LAX to arriving at SFO, and asks the agent to keep ground plans coherent. Existing hotel HR-183 is in LAX for the old arrival city. Correct cascade: change the flight to UA183SFO, cancel the old LAX hotel, and book HOTEL-SFO-183 for the same hotel dates. The cascading hotel fix is the point of the task.",
+  "task_requirements": [
+    {
+      "id": "flight_change_processed",
+      "kind": "must",
+      "requirement": "Agent must change BK-183 to flight UA183SFO while preserving booking preferences.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "cascade_replace_destination_hotel",
+      "kind": "must",
+      "requirement": "Agent must recognize the existing LAX hotel no longer matches the changed SFO trip, cancel HR-183, and book HOTEL-SFO-183 for the same dates.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-183",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-183",
+      "field": "fare_difference",
+      "expected_value": 40
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-183",
+      "field": "flight_id",
+      "expected_value": "UA183SFO"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-183",
+      "field": "price_paid",
+      "expected_value": 435
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-183",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-183",
+      "field": "refund_amount",
+      "expected_value": 525
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-183",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "hotels",
+      "match_fields": {
+        "user_id": "user_004",
+        "hotel_id": "HOTEL-SFO-183",
+        "check_in": "2026-08-10",
+        "check_out": "2026-08-13",
+        "status": "confirmed",
+        "room_type": "standard"
+      },
+      "expected_fields": {
+        "booked_at": "2026-06-15T10:00:00",
+        "cancellation_fee": null,
+        "check_in": "2026-08-10",
+        "check_out": "2026-08-13",
+        "city": "SFO",
+        "hotel_id": "HOTEL-SFO-183",
+        "hotel_name": "SFO Market Street Inn",
+        "nightly_rate": 185,
+        "refund_amount": null,
+        "reservation_id": "HR-0184",
+        "room_type": "standard",
+        "status": "confirmed",
+        "total_price": 555,
+        "user_id": "user_004"
+      }
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/121-change_flight_cascade_replace_hotel.json"
+}

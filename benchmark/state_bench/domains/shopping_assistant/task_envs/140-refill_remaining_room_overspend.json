@@ -1,0 +1,95 @@
+{
+  "products": [
+    {
+      "product_id": "SP-A",
+      "name": "Vantage Pro Laptop",
+      "category": "electronics",
+      "subcategory": "laptop",
+      "brand": "Vantage",
+      "price": 1400,
+      "rating": 4.5,
+      "review_count": 80,
+      "description": "Flagship Vantage laptop.",
+      "specs": {},
+      "compatible_with": [],
+      "in_stock": true,
+      "stock_quantity": 20,
+      "shipping_days": 4,
+      "gift_wrap_available": true,
+      "backorder_available": false,
+      "previous_price": null,
+      "variants": null
+    },
+    {
+      "product_id": "SP-B",
+      "name": "Aurora Tablet",
+      "category": "electronics",
+      "subcategory": "tablet",
+      "brand": "Aurora",
+      "price": 600,
+      "rating": 4.5,
+      "review_count": 80,
+      "description": "Aurora tablet.",
+      "specs": {},
+      "compatible_with": [],
+      "in_stock": true,
+      "stock_quantity": 20,
+      "shipping_days": 4,
+      "gift_wrap_available": true,
+      "backorder_available": false,
+      "previous_price": null,
+      "variants": null
+    }
+  ],
+  "customers": [
+    {
+      "customer_id": "shop_q",
+      "name": "Jordan Vale",
+      "email": "jordan.vale@example.com",
+      "tier": "platinum",
+      "is_first_time": false,
+      "loyalty_points": 20000,
+      "purchase_history": [
+        "SP-OLD1"
+      ]
+    }
+  ],
+  "carts": [
+    {
+      "cart_id": "CART-shop_q",
+      "customer_id": "shop_q",
+      "item_ids": [
+        "CI1",
+        "CI2"
+      ],
+      "subtotal": 2000,
+      "discount_amount": 0,
+      "gift_wrap_fee": 0,
+      "total": 1500,
+      "applied_promo_codes": [],
+      "loyalty_points_redeemed": 50000,
+      "loyalty_discount": 500,
+      "shipping_option": null,
+      "shipping_cost": 0
+    }
+  ],
+  "cart_items": [
+    {
+      "cart_item_id": "CI1",
+      "customer_id": "shop_q",
+      "product_id": "SP-A",
+      "quantity": 1,
+      "gift_wrap": false,
+      "variant_id": null
+    },
+    {
+      "cart_item_id": "CI2",
+      "customer_id": "shop_q",
+      "product_id": "SP-B",
+      "quantity": 1,
+      "gift_wrap": false,
+      "variant_id": null
+    }
+  ],
+  "promotions": []
+}

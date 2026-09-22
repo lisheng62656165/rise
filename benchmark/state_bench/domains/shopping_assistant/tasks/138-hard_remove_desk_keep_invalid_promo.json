@@ -1,0 +1,87 @@
+{
+  "task_id": "138-hard_remove_desk_keep_invalid_promo",
+  "user_id": "shop_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Remove the ErgoLift Standing Desk from my cart. Keep whatever discount still applies and give me the new total.",
+  "user_simulator": {
+    "user_sim_context": "Your cart has an ErgoLift Standing Desk and a LumaDesk Task Lamp with OFFICE20 applied. You want the desk removed and whatever discount remains valid kept on the cart.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "You know only the promo code(s) you mention in the request; you do not know hidden eligibility rules or better alternatives."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask only to remove the desk, keep whatever discount still applies, and provide the new total.",
+      "If the agent removes the desk, drops OFFICE20, applies SAVE10, and gives a $63 final total for the lamp, accept and end with [TASK_DONE].",
+      "If the agent says OFFICE20 still applies after removing the desk or gives a $49 total, accept without correcting them; the agent failed silently.",
+      "If the agent removes the desk but leaves no promo and gives a $69 total, ask once whether any valid remaining discount applies.",
+      "Do not ask about shipping, gift wrap, loyalty, or other products."
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_003 opens with: \"Remove the ErgoLift Standing Desk from my cart. Keep whatever discount still applies and give me the new total.\" Relevant catalog/policy surface: Seeded cart with ErgoLift Standing Desk (SP-H120), LumaDesk Task Lamp (SP-H122), OFFICE20 applied, and SAVE10 available. Correct final state: desk removed, lamp remains, OFFICE20 gone, SAVE10 applied, total is $63.\n\n**Challenge:** Removing the desk invalidates the seeded OFFICE20 discount and requires using the weaker valid fallback promo. Primary pitfall: Trusts stale OFFICE20 state, leaves no fallback discount, or quotes the wrong final total. Correct behavior: Remove SP-H120, validate promo state, apply SAVE10, and quote $63 for the remaining lamp. Novelty: Promo invalidation after removal with final state consequence rather than benefit disclosure. Family: promotions_discounts.",
+  "task_requirements": [
+    {
+      "id": "checked_promo_after_remove",
+      "kind": "must",
+      "requirement": "Agent checked or validated promo eligibility after removing the ErgoLift Standing Desk, rather than trusting the old OFFICE20 cart state.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "removed_invalid_office20",
+      "kind": "must",
+      "requirement": "Agent recognized that OFFICE20 no longer applies after the desk removal because the remaining home-office subtotal is only $69, below the $250 minimum.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "applied_save10_fallback",
+      "kind": "must",
+      "requirement": "Agent applied SAVE10 as the valid remaining discount and left SAVE10 as the only applied promo code.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "quoted_lamp_total_63",
+      "kind": "must",
+      "requirement": "Agent quoted the correct final total of $63 for the remaining LumaDesk Task Lamp with SAVE10, not $49 with stale OFFICE20 or $69 with no fallback discount.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "applied_promo_codes",
+      "expected_value": [
+        "SAVE10"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "discount_amount",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0002"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "subtotal",
+      "expected_value": 69
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_003",
+      "field": "total",
+      "expected_value": 63
+    }
+  ],
+  "task_type": "promotions_discounts",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/138-hard_remove_desk_keep_invalid_promo.json"
+}

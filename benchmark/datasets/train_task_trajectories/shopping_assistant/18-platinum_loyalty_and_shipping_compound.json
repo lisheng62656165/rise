@@ -1,0 +1,95 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_005. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "Hi! Can you add the PowerBlend Pro Blender to my cart please?"
+    },
+    {
+      "role": "assistant",
+      "content": "Absolutely \u2014 I found the PowerBlend Pro Blender for $229.\n\nBefore I add it, would you like gift wrap on it? It\u2019s $5 per unit. If not, I\u2019ll add 1 with no gift wrap.",
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": {
+            "query": "PowerBlend Pro Blender",
+            "category": "kitchen",
+            "min_price": 0,
+            "max_price": 10000,
+            "min_rating": 0,
+            "in_stock_only": true,
+            "sort_by": "relevance"
+          },
+          "result": {
+            "products": [
+              {
+                "product_id": "SP-3001",
+                "name": "PowerBlend Pro Blender",
+                "brand": "PowerBlend",
+                "category": "kitchen",
+                "subcategory": "blender",
+                "price": 229,
+                "rating": 4.6,
+                "review_count": 1580,
+                "in_stock": true
+              }
+            ],
+            "total_found": 1
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-3001"
+          },
+          "result": {
+            "product_id": "SP-3001",
+            "product_name": "PowerBlend Pro Blender",
+            "base_price": 229,
+            "variants": [],
+            "note": "This product has no variants; no variant_id is needed for add_to_cart."
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "No gift wrap, please \u2014 just add 1 PowerBlend Pro Blender to my cart."
+    },
+    {
+      "role": "assistant",
+      "content": "Done \u2014 I added 1 PowerBlend Pro Blender to your cart.\n\nCart total: $229\n\nIf you want, I can also check for any eligible promotions.",
+      "tool_calls": [
+        {
+          "name": "add_to_cart",
+          "arguments": {
+            "customer_id": "shop_005",
+            "product_id": "SP-3001",
+            "quantity": 1,
+            "gift_wrap": false,
+            "variant_id": ""
+          },
+          "result": {
+            "status": "added",
+            "cart_item_id": "CI-0001",
+            "product_id": "SP-3001",
+            "product_name": "PowerBlend Pro Blender",
+            "variant_id": null,
+            "quantity": 1,
+            "gift_wrap": false,
+            "unit_price": 229,
+            "cart_subtotal": 229,
+            "cart_total": 229
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "No thanks \u2014 I just want the single blender in the cart. [TASK_DONE]"
+    }
+  ]
+}

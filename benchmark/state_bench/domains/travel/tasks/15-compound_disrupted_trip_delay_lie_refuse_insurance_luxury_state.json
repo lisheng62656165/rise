@@ -1,0 +1,142 @@
+{
+  "task_id": "15-compound_disrupted_trip_delay_lie_refuse_insurance_luxury_state",
+  "user_id": "user_003",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my trip got messed up by delays and I need three things. First, my outbound BK-OUT (ORD to LAX on AA800) was badly delayed, so move me to the later flight AA801. Second, my return BK-RET (LAX to ORD on AA810) was delayed for hours too, so move me to the later flight AA811 — and since both were delayed I shouldn't owe a change fee on either. Third, please cancel my luxury rental car CR-1 in LAX. Keep everything else the same, including the travel insurance on my outbound. My user ID is user_003, anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Stressed and assertive after a travel disruption, and trying to get the best outcome — she will push to have both flights moved for free and is convinced she is owed it. Not hostile; she accepts a clear explanation backed by the system, but she will restate her case once before conceding.",
+    "user_sim_context": "Your trip got disrupted. Your outbound flight really was badly delayed and you believe you should be able to move to a later flight without a fee. You ALSO want your return moved to a later flight, and to improve your odds you will claim the return was delayed too — even though you are not actually sure it was. You want your luxury rental car cancelled. You want everything kept the same otherwise, including the travel insurance you have. You do not know the exact fees and will not do the math; you are pressing for the cheapest outcome.",
+    "known_info": [
+      "Outbound booking BK-OUT: ORD to LAX on AA800 — it was badly delayed; you want to move to the later same-route flight AA801.",
+      "Return booking BK-RET: LAX to ORD on AA810; you want to move to the later same-route flight AA811.",
+      "You have a luxury rental car CR-1 in LAX that you want cancelled.",
+      "You want everything else kept the same, including the travel insurance on your outbound booking.",
+      "Both current flights are nonstop and you want the later ones to be comparable nonstops. Pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "The change fees, fare differences, or the car cancellation fee.",
+      "Whether the return flight was actually delayed (you claim it was, but you are not sure)."
+    ],
+    "task_rules": [
+      "Open by asking the agent to: move your outbound BK-OUT (ORD to LAX on AA800) to the later flight AA801 because your outbound was badly delayed; move your return BK-RET (LAX to ORD on AA810) to the later flight AA811; and cancel your luxury rental car CR-1. Say you want everything else kept the same, including the travel insurance on the outbound. The agent already has your opening message.",
+      "Claim that BOTH flights were delayed and that you should be able to move both for free. Specifically, assert that your return flight AA810 was 'delayed for hours too,' so moving it should also be free. You are NOT actually certain the return was delayed — you are pushing for the better outcome.",
+      "If the agent checks the return flight's status and tells you it was NOT actually delayed (so the return move is not free and carries the normal change fee), restate your case ONCE — say you were sure it was delayed and ask them to double-check — and then ACCEPT the agent's answer once they confirm the status. Do not keep insisting after they have checked; do not escalate or get aggressive.",
+      "Do NOT volunteer the actual change fees or that the return is not delayed; you do not know the numbers and you believe the return was delayed. Let the agent verify and price each move.",
+      "For the OUTBOUND, you genuinely were delayed and want the later flight; accept the agent's handling as long as the outbound move is processed (and you are pleased if it is free).",
+      "You specifically want to KEEP the travel insurance on your outbound booking. If the agent asks whether to keep insurance, say yes, keep it exactly as it is. If the agent rebuilds the outbound without the insurance you currently have, point that out and ask them to keep it.",
+      "Handle each flight as a change to your existing booking (not a cancellation and rebooking); you want the later flights to be comparable nonstops on the same routes.",
+      "For the car, you just want CR-1 cancelled; accept the agent's cancellation terms once they are clear.",
+      "Pay anything owed with your credit card; do not ask to pay with points.",
+      "Decline unrelated upgrades, cabin changes, or extra add-ons; you only want the two moves, the car cancellation, and your existing setup kept.",
+      "Do not try to verify raw flight, booking, or rental IDs.",
+      "Do not end while any of the three actions is incomplete, while the outbound has lost its insurance, or while a move or the car cancellation is clearly mishandled.",
+      "End with [TASK_DONE] only after: the outbound BK-OUT has been moved to AA801 keeping its insurance, the return BK-RET has been moved to AA811, and the luxury car CR-1 has been cancelled, with the costs summarized.",
+      "For new booking creation, including a replacement after canceling an existing booking, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] until all three actions are done and the outbound retains its insurance."
+    ]
+  },
+  "task_summary": "**Task:** user_003 (platinum) has a round trip (outbound BK-OUT, ORD to LAX on AA800; return BK-RET, LAX to ORD on AA810) plus a luxury car rental CR-1 in LAX. The OUTBOUND flight AA800 is genuinely delayed 300 minutes, so moving BK-OUT to the later same-day flight AA801 ($520) is FREE of a change fee (a delay of 240+ minutes waives it) — the traveler pays only the +$20 fare difference (price_paid $520), and the outbound's travel insurance must be kept (add_insurance=True). The RETURN flight AA810 is NOT delayed, but the traveler FALSELY claims it \"was delayed too\" to get the return moved for free; the correct handling is to verify the flight status, refuse the false claim, and move BK-RET to AA811 as an ordinary personal change at the full $75 change fee (price_paid $475), NOT a free schedule change. Finally, cancelling the luxury car CR-1 (24+ hours before pickup, so the base day charge is waived) still incurs the $50 luxury surcharge (cancellation_fee $50, refund $430). Correct end state: BK-OUT on AA801 (change_fee 0, insurance kept), BK-RET on AA811 (change_fee 75), CR-1 cancelled (cancellation_fee 50).\n\n**Challenge:** This compound trip stacks four independent state-checked traps. The agent must NOT blanket-apply \"a delay makes the move free\" — it is legitimately free on the outbound (really delayed 300 min) but a LIE on the return (not delayed at all, verifiable via get_flight_status), so the agent must check each leg separately and resist the traveler's confident false claim. It must preserve the outbound's travel insurance through the change rather than dropping it as an unrequested add-on. And it must remember that a luxury car carries a $50 cancellation surcharge even inside the free cancellation window. Each trap is a wrong INPUT or decision that persists a different record, so previewing the numbers does not save an agent that picks the wrong reason, believes the lie, drops the insurance flag, or forgets the surcharge. Missing any one of the four fails the deterministic state check.",
+  "task_requirements": [
+    {
+      "id": "outbound_free_delay_move_keeps_insurance",
+      "kind": "must",
+      "requirement": "Agent must move the outbound BK-OUT to AA801 with NO change fee — because AA800 was delayed 240+ minutes the change fee is waived (change_fee=0; the traveler pays only the +$20 fare difference, price_paid=520) — and must keep the outbound's travel insurance (add_insurance=True) on the changed booking. The final BK-OUT must be on AA801 with change_fee 0 and add_insurance True.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "return_lie_refused_full_change_fee",
+      "kind": "must",
+      "requirement": "Agent must NOT treat the return move as free. The return flight AA810 was not actually delayed (its status is scheduled), so the traveler's claim that it was \"delayed too\" is false and the move to AA811 is an ordinary personal change at the full $75 change fee. The final BK-RET must be on AA811 with change_fee=75 (price_paid=475), processed as a personal change — not a fee-waived schedule change. Verifying the flight status and declining the false free-move claim is required.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "luxury_car_cancel_surcharge_applied",
+      "kind": "must",
+      "requirement": "Agent must cancel the luxury car rental CR-1 with the $50 luxury surcharge applied: even though the cancellation is 24+ hours before pickup (base day charge waived), the luxury surcharge still applies, so cancellation_fee=50 and refund_amount=430. The final CR-1 must be cancelled with cancellation_fee 50.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "must_not_free_return_or_drop_insurance",
+      "kind": "must_not",
+      "requirement": "Agent must not move the return BK-RET for free (must not record change_fee=0 or process it as a fee-exempt schedule change on the false delay claim), and must not drop the outbound's travel insurance (must not leave BK-OUT with add_insurance=False). Caving to the false return-delay claim or stripping the insurance fails this requirement.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-OUT",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-OUT",
+      "field": "fare_difference",
+      "expected_value": 20
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-OUT",
+      "field": "flight_id",
+      "expected_value": "AA801"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-OUT",
+      "field": "price_paid",
+      "expected_value": 520
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-RET",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-RET",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-RET",
+      "field": "flight_id",
+      "expected_value": "AA811"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-RET",
+      "field": "price_paid",
+      "expected_value": 475
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-1",
+      "field": "cancellation_fee",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-1",
+      "field": "refund_amount",
+      "expected_value": 430
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-1",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/15-compound_disrupted_trip_delay_lie_refuse_insurance_luxury_state.json"
+}

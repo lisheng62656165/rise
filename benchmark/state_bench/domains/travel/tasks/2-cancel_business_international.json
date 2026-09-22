@@ -1,0 +1,104 @@
+{
+  "task_id": "2-cancel_business_international",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hello, I'd like to cancel my business class flight to London.",
+  "user_simulator": {
+    "known_info": [
+      "Outbound booking BK-1000: JFK to LHR.",
+      "Return booking BK-1003: LHR to JFK.",
+      "Hotel reservation HR-0100: London, June 22-29."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Start with the intent to cancel only the outbound business-class flight to London; do not volunteer the return flight or hotel upfront.",
+      "If the agent asks for a booking ID before finding related reservations, provide only the outbound booking ID.",
+      "If the agent asks about other reservations or trip components, mention the return flight and London hotel you know about.",
+      "Accept cancelling the outbound flight only after the agent previews its specific cancellation fee and refund.",
+      "If the agent surfaces the return flight and hotel as linked parts of the London trip, agree that you also want those cancelled after reviewing their separate cancellation fees and refunds.",
+      "Push back if the agent treats cancelling the outbound flight as the whole trip resolution after the return flight or hotel has been identified.",
+      "Do not ask to keep the return flight or hotel once their cancellation terms are explained; your goal becomes cancelling the whole London trip.",
+      "End only after the outbound flight, return flight, and hotel have all been cancelled and their fee/refund results have been confirmed."
+    ],
+    "user_sim_context": "You want to cancel your business-class flight to London and are initially focused on that outbound leg. In your mind, this is one London trip, but you do not start by listing every related reservation tied to it. If the agent helps you surface the full trip, you are willing to handle the rest as part of the same conversation."
+  },
+  "task_summary": "**Task:** A traveler initially asks to cancel only the outbound London business flight, but the trip also includes a return flight and hotel. Correct resolution: Agent must proactively surface that the traveler also has return booking BK-1003 and a London hotel tied to the same trip.\n\n**Challenge:** The agent proactively uncovers the linked reservations and keeps the outbound business and return economy fee logic distinct instead of collapsing them into one cancellation path.",
+  "task_requirements": [
+    {
+      "id": "state_linked_trip_discovery",
+      "kind": "must",
+      "requirement": "Agent must proactively surface that the user also has return booking BK-1003 and a London hotel tied to the same trip.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_different_fee_logic",
+      "kind": "must",
+      "requirement": "Agent must present the outbound business flight and the return economy flight with their own separate cancellation fees/refunds ($72/$828 and $96/$384 respectively), not a single combined or shared figure.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_not_outbound_only",
+      "kind": "must_not",
+      "requirement": "After the return flight and/or hotel have been identified in the conversation, the agent must not claim or imply the London trip is fully resolved while those linked reservations remain confirmed.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 72
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 828
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1003",
+      "field": "cancellation_fee",
+      "expected_value": 96
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1003",
+      "field": "refund_amount",
+      "expected_value": 384
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1003",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-0100",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-0100",
+      "field": "refund_amount",
+      "expected_value": 1540
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-0100",
+      "field": "status",
+      "expected_value": "cancelled"
+    }
+  ],
+  "task_type": "cancellation",
+  "task_env_path": "state_bench/domains/travel/task_envs/2-cancel_business_international.json"
+}

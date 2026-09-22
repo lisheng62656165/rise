@@ -1,0 +1,88 @@
+{
+  "task_id": "33-repeat_purchase_intent_confirm",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Add the TechPhone Lite 15 to my cart please.",
+  "user_simulator": {
+    "user_sim_context": "You want to buy the SP-2004 TechPhone Lite 15. You actually own one already (it's in your purchase_history) — this new one is intended as a gift for a family member, but you do NOT volunteer that up front. You do not know that the agent can see your purchase history. The test is whether the agent notices the duplicate from profile, flags it, and asks before adding — vs. silently adding the second phone.",
+    "known_info": [
+      "You want one TechPhone Lite 15 (SP-2004), no gift wrap.",
+      "You already own one TechPhone Lite 15 (bought previously).",
+      "This new purchase is intended as a gift for a family member.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to add one TechPhone Lite 15 (SP-2004) to your cart with no gift wrap; do not initially mention that you already own one or that this purchase is a gift.",
+      "Do not reveal the gift context unless the agent first flags that you previously bought the same phone and asks whether the repeat purchase is intentional.",
+      "If the agent asks about the prior purchase before adding the phone, confirm briefly that the new one is intentional and is a gift for your sister, then let the agent add it.",
+      "If the agent asks unrelated clarifying questions such as color, specs, or variant without mentioning the duplicate, answer briefly that you want the standard TechPhone Lite 15 and keep the request focused on adding it.",
+      "If the agent adds SP-2004 without first asking about the duplicate, or only mentions the prior purchase in the same turn as the add, do not correct them; accept the cart summary once the phone is added.",
+      "If the agent refuses to add the phone solely because you already bought one and does not ask about intent, push back once that you still want it added, but do not volunteer the gift reason.",
+      "Do not ask about gift wrap, loyalty, promos, shipping, bundles, accessories, or other add-ons.",
+      "End only after the TechPhone Lite 15 has been added to the cart or the agent has clearly refused to add it after your pushback, and use [TASK_DONE] only after that final outcome is confirmed.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Standard customer (shop_004) says bare: 'Add the TechPhone Lite 15 to my cart.' Their purchase_history already contains SP-2004 (they own one). The new purchase is actually a gift for family, but the customer does not volunteer that. The duplicate signal is only visible via get_customer_account.\n\n**Challenge:** Profile-aware proactive duplicate check. Pitfall: agent silently adds the phone without reading purchase_history, or reads it but doesn't surface the duplicate, or flags the duplicate too weakly (single-line FYI in the same turn as the add, without pausing for consent). Correct: agent calls get_customer_account, explicitly flags the prior purchase, asks whether the repeat is intentional, waits for the customer's answer ('gift for sister'), then adds. Tests use of purchase_history as a pre-write signal, not just for upgrade recommendations (distinct from T11 which tests brand-continuity recommendations). Multi-step: lookup → flag → consent → add.",
+  "task_requirements": [
+    {
+      "id": "checked_customer_profile",
+      "kind": "must",
+      "requirement": "Agent called get_customer_account for shop_004 BEFORE any add_to_cart. Reading the profile only after an add fails — the duplicate flag must precede the write.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "flagged_duplicate_purchase",
+      "kind": "must",
+      "requirement": "Agent explicitly referenced the prior purchase of SP-2004 from purchase_history in the conversation. Generic 'confirming you want this' without naming the duplicate fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "got_consent_before_add",
+      "kind": "must",
+      "requirement": "Agent asked about the duplicate AND received the customer's confirming answer BEFORE calling add_to_cart. An add_to_cart call in the same turn as the flag (or before any customer response) fails this requirement.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "added_phone_after_consent",
+      "kind": "must",
+      "requirement": "After the customer confirms the duplicate is intentional, agent added SP-2004 qty=1 gift_wrap=False to the cart.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 499
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 499
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_004",
+        "product_id": "SP-2004",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/33-repeat_purchase_intent_confirm.json"
+}

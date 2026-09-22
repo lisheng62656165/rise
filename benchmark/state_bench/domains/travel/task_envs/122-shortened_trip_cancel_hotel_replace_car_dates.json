@@ -1,0 +1,134 @@
+{
+  "flights": [],
+  "bookings": [],
+  "users": [
+    {
+      "user_id": "user_001",
+      "name": "Emma Smith",
+      "email": "emma.smith@example.com",
+      "loyalty_tier": "gold",
+      "loyalty_points": 75000,
+      "budget": 1500,
+      "preferences": {
+        "meal_preference": "kosher",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false
+      }
+    },
+    {
+      "user_id": "user_002",
+      "name": "Liam Johnson",
+      "email": "liam.johnson@example.com",
+      "loyalty_tier": "basic",
+      "loyalty_points": 5000,
+      "budget": 800,
+      "preferences": {
+        "meal_preference": "vegetarian",
+        "seat_type": "window",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": false
+      }
+    },
+    {
+      "user_id": "user_003",
+      "name": "Olivia Williams",
+      "email": "olivia.williams@example.com",
+      "loyalty_tier": "platinum",
+      "loyalty_points": 120000,
+      "budget": 2000,
+      "preferences": {
+        "meal_preference": "standard",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": true
+      }
+    },
+    {
+      "user_id": "user_004",
+      "name": "Noah Brown",
+      "email": "noah.brown@example.com",
+      "loyalty_tier": "silver",
+      "loyalty_points": 15000,
+      "budget": 600,
+      "preferences": {
+        "meal_preference": "standard",
+        "seat_type": "window",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": true
+      }
+    },
+    {
+      "user_id": "user_005",
+      "name": "Ava Garcia",
+      "email": "ava.garcia@example.com",
+      "loyalty_tier": "basic",
+      "loyalty_points": 12000,
+      "budget": 700,
+      "preferences": {
+        "meal_preference": "vegan",
+        "seat_type": "aisle",
+        "add_wifi": true,
+        "add_extra_legroom": false,
+        "add_insurance": false
+      }
+    }
+  ],
+  "hotel_inventory": [],
+  "hotels": [
+    {
+      "reservation_id": "HR-184",
+      "user_id": "user_001",
+      "hotel_name": "SEA Inn",
+      "city": "SEA",
+      "check_in": "2026-09-12",
+      "check_out": "2026-09-13",
+      "room_type": "standard",
+      "nightly_rate": 190,
+      "total_price": 190,
+      "hotel_id": null,
+      "status": "confirmed",
+      "booked_at": "2026-06-07T10:00:00",
+      "cancellation_fee": null,
+      "refund_amount": null
+    }
+  ],
+  "car_inventory": [
+    {
+      "car_id": "CAR-SEA-184-SHORT",
+      "company": "Enterprise",
+      "pickup_location": "SEA",
+      "dropoff_location": "SEA",
+      "pickup_date": "2026-09-10",
+      "dropoff_date": "2026-09-12",
+      "car_class": "midsize",
+      "daily_rate": 70,
+      "total_price": 140,
+      "insurance_included": false
+    }
+  ],
+  "car_rentals": [
+    {
+      "rental_id": "CR-184",
+      "user_id": "user_001",
+      "company": "Enterprise",
+      "pickup_location": "SEA",
+      "dropoff_location": "SEA",
+      "pickup_date": "2026-09-10",
+      "dropoff_date": "2026-09-13",
+      "car_class": "midsize",
+      "daily_rate": 70,
+      "total_price": 210,
+      "car_id": null,
+      "status": "confirmed",
+      "insurance_included": false,
+      "booked_at": "2026-06-07T10:00:00",
+      "cancellation_fee": null,
+      "refund_amount": null
+    }
+  ]
+}

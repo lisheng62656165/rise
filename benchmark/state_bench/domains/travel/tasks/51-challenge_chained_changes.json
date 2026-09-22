@@ -1,0 +1,147 @@
+{
+  "task_id": "51-challenge_chained_changes",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move two of my flights and I want to keep the total extra cost low. Booking BK-1000 to London needs to move to June 21 — I have a medical reason. And booking BK-1001 to San Francisco needs to move to June 25 for personal reasons. Put any charges on my credit card (I'm not using points for this), and my total budget for both moves combined is $220. What's the cheapest way to do both?",
+  "user_simulator": {
+    "known_info": [
+      "Booking A BK-1000: London, June 19; move to June 21 for a genuine medical reason.",
+      "Booking B BK-1001: San Francisco, June 22; move to June 25 for a personal reason.",
+      "You want BOTH moves done, and you want the lowest total added cost.",
+      "Pay for everything with your credit card — you are NOT using loyalty points for this.",
+      "Total budget for both moves combined: $220."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want BOTH bookings moved — BK-1000 to London on June 21 (medical) and BK-1001 to San Francisco on June 25 (personal) — for the lowest possible total added cost, and the combined added cost must stay within your $220 budget.",
+      "Pay for any fees or new bookings with your credit card; if the agent asks about or proposes using loyalty points, decline and say to use the credit card.",
+      "If the agent asks for booking details, reasons, dates, or budget information, provide the matching known facts for both bookings and do not add unrelated trip preferences.",
+      "When the agent prices the moves, ask for the additional cost of each booking and the combined additional cost before approving anything.",
+      "Do not propose any specific method yourself (do not mention changing, canceling, or rebooking) — your job is to state the goal and budget and let the agent work out the cheapest way; only react to what the agent proposes.",
+      "If the agent presents a plan whose combined added cost is over your $220 budget, push back: say that is more than you want to spend and ask whether there is a cheaper way to accomplish both moves.",
+      "If the agent only changes both flights in place (about $280 total) and treats that as the answer, do not accept it — say it is over budget and ask the agent to find a cheaper way to do both, without telling the agent what that cheaper way is.",
+      "Only accept a plan once the agent has laid out the per-booking and combined added cost, the combined cost is within $220, and the agent has explained why that plan is cheaper than simply changing both in place.",
+      "Approve executing the agreed plan only after the selected flights, fees, fare differences or refunds, and preserved or profile booking preferences are clear.",
+      "End only after both moves have actually been carried out, the final cost is within $220, and the agent has confirmed the resulting bookings for both trips.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You need to move two different trips and you care most about the total cost — you want both done as cheaply as possible within a hard shared budget. You do not know the airline's fee mechanics, so you cannot tell the agent how to make it cheaper; you are relying on the agent to find the lowest-cost way to accomplish both moves and to explain why it is cheaper before you approve."
+  },
+  "task_summary": "**Task:** User wants to move BOTH bookings to new dates while keeping the combined added cost within a $220 budget. Correct resolution: the London medical change costs $150 ($100 discounted fee + $50 fare difference). For San Francisco, the obvious in-place change costs $130 (a flat $150 change fee minus a $20 cheaper fare), but canceling that booking and rebooking the same $380 flight fresh costs only $40 (a $60 cancellation fee against the $400 paid, then $380 rebooked), because cancel-and-rebook avoids the $150 change fee entirely. The cheapest way to do both is London change + San Francisco cancel-and-rebook = $190, which fits the $220 budget; doing both as in-place changes costs $280 and busts it.\n\n**Challenge:** The straightforward path (just change both flights in place) is NOT the cheapest and exceeds the budget. The agent must recognize that for the San Francisco booking, canceling and rebooking is materially cheaper than an in-place change, dig out that option, and use it to bring both moves in under budget.",
+  "task_requirements": [
+    {
+      "id": "state_sf_cancel_rebook_cheaper_than_change",
+      "kind": "must",
+      "requirement": "Agent must convey that, for the San Francisco booking, canceling and rebooking is materially cheaper than an in-place change — in substance, that an in-place change is roughly $130 (around a $150 change fee, lightly offset by a cheaper fare) while canceling and rebooking the same flight nets only about $40 (a roughly $60 cancellation fee, then the ~$380 ticket against the ~$340 refund), because cancel-and-rebook avoids the change fee. Accept the requirement if the agent makes this cheaper-by-cancel-and-rebook comparison clear with substantially correct figures (the cancel-and-rebook ~$40 and the conclusion that it beats the in-place change); the agent need not recite every intermediate number or the exact $130 in those words, as long as both options are priced and the cheaper one is identified.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_cheapest_combo_within_budget",
+      "kind": "must",
+      "requirement": "Agent must conclude that the cheapest way to do both moves is the London medical change (about $150) plus canceling and rebooking San Francisco (about $40) for roughly $190 total, and that this total fits within the $220 budget. Accept the requirement as long as the agent identifies this combined ~$190 cheapest plan and says it is within budget, with substantially correct figures. The agent does NOT need to separately spell out the cost of the rejected \"change both in place\" alternative here — that contrast is covered by the cancel-vs-change requirement and by the agent's chosen actions — so do not fail this requirement merely because the ~$280 both-in-place figure was not restated.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_both_moves_executed_cheapest_path",
+      "kind": "must",
+      "requirement": "Agent must actually carry out both moves via the cheapest path: change BK-1000 to the June 21 London flight (medical) in place, and cancel BK-1001 and rebook the June 25 San Francisco flight as a fresh booking, rather than changing the San Francisco booking in place.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "BA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 1050
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "cancellation_fee",
+      "expected_value": 60
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "refund_amount",
+      "expected_value": 340
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_001",
+        "flight_id": "UA101",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 380,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "aisle",
+        "meal_preference": "kosher",
+        "add_wifi": true,
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": true,
+        "add_insurance": false,
+        "add_wifi": true,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1002",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 380,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "UA101",
+        "meal_preference": "kosher",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 380,
+        "refund_amount": null,
+        "seat_type": "aisle",
+        "status": "confirmed",
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/51-challenge_chained_changes.json"
+}

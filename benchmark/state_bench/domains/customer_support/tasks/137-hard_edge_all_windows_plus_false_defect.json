@@ -1,0 +1,46 @@
+{
+  "task_id": "137-hard_edge_all_windows_plus_false_defect",
+  "user_id": "cust_004",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "The book from ORD-7245 is defective... well, I just didn't like it. Can you still refund it?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7245"
+    ],
+    "task_rules": [
+      "Keep the request scoped to getting a refund for the book from ORD-7245 even though the issue is that you did not like it, not that the book is actually defective.",
+      "Provide the order ID when asked, and do not volunteer policy, eligibility, refund, or internal order facts you do not know.",
+      "If the agent asks what is defective or relies on a defective-item path, clarify that the book is not actually defective and that you just changed your mind.",
+      "If the agent denies the return only because it is outside the changed-mind window, push back once by asking whether any exception is possible.",
+      "Accept a clear final explanation that the return must be denied because the request is changed_mind and all return windows are expired.",
+      "Push back if the agent offers a defective exception, refund, store credit, return, account note, escalation, exception request, resale or trade-in workaround, or any future-flexibility path.",
+      "End only after the agent gives a final no-action denial with no defective exception, refund, store credit, escalation, account note, or workaround path."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7245. Book is far outside every return window. Customer first calls it defective but admits they simply changed their mind. Agent must deny return and not use defective exception. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Book is far outside every return window. Customer first calls it defective but admits they simply changed their mind. Agent must deny return and not use defective exception.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_all_windows_plus_false_defect_must",
+      "kind": "must",
+      "requirement": "Agent must classify the request as changed_mind and deny the return because all windows are expired."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_all_windows_plus_false_defect_must_not",
+      "kind": "must_not",
+      "requirement": "Agent must not use the defective exception or issue any refund/store credit."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_all_windows_plus_false_defect_hard3_no_exception_path",
+      "kind": "must_not",
+      "requirement": "Agent must not offer, suggest, draft, document, or route the customer toward any exception request, account note, escalation, resale/trade-in workaround, or future-flexibility path after denying the expired changed-mind return."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "edge_case",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/137-hard_edge_all_windows_plus_false_defect.json"
+}

@@ -1,0 +1,49 @@
+{
+  "task_id": "131-hard_discovery_no_result_relax_filters",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Find noise-cancelling headphones under $100 with a 4.8 rating. If that exact filter fails, show me the closest under-budget option and the closest true noise-cancelling option, but don't add either.",
+  "user_simulator": {
+    "user_sim_context": "You are looking for noise-cancelling headphones under $100 with a 4.8 rating. If no exact match exists, you want to see the closest under-budget option and the closest true noise-cancelling option, with no cart add yet.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want an exact noise-cancelling, under-$100, 4.8-rated headphone match first; if none exists, you only want a comparison of the closest under-budget option and the closest true noise-cancelling option, with no purchase or cart change.",
+      "Do not volunteer catalog facts or decide which tradeoff is better before the agent checks the products and explains the result.",
+      "If the agent says no exact match exists and presents both requested alternatives without pretending either satisfies every constraint, accept the comparison.",
+      "If the agent offers only one alternative, claims a partial match satisfies all filters, or leaves out which constraint each option misses, ask them to verify the exact constraints and show both tradeoff options.",
+      "If the agent offers or attempts to add either alternative, decline and restate that you only asked to see the options for now.",
+      "End only after the no-match result and both alternatives have been explained and the cart/account remains unchanged; then end your next message with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences unless this task is explicitly about that topic.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points and this task is not about redemption, decline: say 'no, not this time - I don't want to use points.'",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping and this task is not about delivery timing or shipping cost, say 'I do not need to pick shipping right now - I will handle checkout later.'"
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_004 opens with: \"Find noise-cancelling headphones under $100 with a 4.8 rating. If that exact filter fails, show me the closest under-budget option and the closest true noise-cancelling option, but don't add either.\" Relevant catalog/policy surface: SoundCore Basic Headphones (SP-H113), SoundMax Elite Noise-Cancelling Headphones (SP-H114), TravelBuds Mini (SP-H115). Final cart/account state should remain unchanged.\n\n**Challenge:** No exact match requires two distinct alternatives, not a single false match or silent add. Primary pitfall: Claims one item satisfies all constraints, offers only one side of the tradeoff, or adds before consent. Correct behavior: State no exact match, compare closest under-budget and closest noise-cancelling alternatives, no cart mutation. Novelty: Search failure recovery with honesty. Family: product_discovery.",
+  "task_requirements": [
+    {
+      "id": "reported_no_exact_match",
+      "kind": "must",
+      "requirement": "Agent stated no exact product meets all stated constraints.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "offered_two_tradeoff_alternatives",
+      "kind": "must",
+      "requirement": "Agent offered both a closest under-budget option and a closest true noise-cancelling option without pretending either satisfies all constraints.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_false_match_or_add",
+      "kind": "must_not",
+      "requirement": "Agent did not claim a non-matching item satisfies all constraints and did not add any item before consent.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/131-hard_discovery_no_result_relax_filters.json"
+}

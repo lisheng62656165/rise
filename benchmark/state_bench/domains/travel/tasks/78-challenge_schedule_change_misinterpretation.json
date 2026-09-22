@@ -1,0 +1,76 @@
+{
+  "task_id": "78-challenge_schedule_change_misinterpretation",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My work schedule just changed and I can no longer make my flight on June 20. I need to move BK-1000 to June 25 instead. My user ID is user_004.",
+  "user_simulator": {
+    "known_info": [
+      "Booking: BK-1000 (ORD to DEN, June 20)",
+      "Change request: work schedule conflict; wants June 25."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request focused on moving BK-1000 from June 20 to June 25 because your work schedule changed.",
+      "Do not volunteer a personal-versus-airline schedule-change clarification unless the agent asks about it or treats the request as an airline-initiated schedule change.",
+      "If the agent asks whether the airline changed the itinerary, say the airline did not change anything and that your own work schedule changed.",
+      "Push back if the agent says the change is free because of an airline schedule-change waiver; clarify that this is your work conflict and ask them to handle it as a personal change.",
+      "If the agent proposes June 25 options, choose the ORD-to-DEN option that matches the requested date and stays within your $600 budget, with ordinary personal-change fees applied.",
+      "Accept the change only after the agent previews the selected June 25 flight, the $150 personal change fee, the $20 fare difference, and the total additional cost.",
+      "End only after the booking has been changed to June 25 and the final change fee, fare difference, total, and preserved booking preferences are confirmed.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You say your schedule changed, meaning your own work schedule, not the airline's. To you that phrasing feels perfectly ordinary, but you realize it could be misunderstood. You need the agent to listen closely to what changed before applying any special logic."
+  },
+  "task_summary": "**Task:** The user says that their schedule changed, but the phrase refers to their own work schedule rather than to an airline-initiated schedule change. Correct resolution: Agent must treat this as the traveler's personal schedule conflict rather than as an airline schedule-change exemption.\n\n**Challenge:** The agent does not turn that wording into the free schedule-change exemption and instead keeps the reasoning on the ordinary personal-change path.",
+  "task_requirements": [
+    {
+      "id": "user_schedule_change_is_personal",
+      "kind": "must",
+      "requirement": "Agent must treat this as the traveler's personal schedule conflict rather than as an airline schedule-change exemption.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "must_not_quote_free_airline_schedule_change",
+      "kind": "must_not",
+      "requirement": "Agent must not tell the user that this change is free because of a schedule-change waiver unless the conversation establishes that the airline changed the itinerary.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 150
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 20
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "UA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 520
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/78-challenge_schedule_change_misinterpretation.json"
+}

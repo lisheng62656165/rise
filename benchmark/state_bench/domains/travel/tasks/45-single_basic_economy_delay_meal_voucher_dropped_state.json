@@ -1,0 +1,46 @@
+{
+  "task_id": "45-single_basic_economy_delay_meal_voucher_dropped_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My flight BK-1 (JFK to LHR on BA300) is delayed about 180 minutes. I'm keeping the flight, but I'd like whatever the delay entitles me to. My user ID is user_004.",
+  "user_simulator": {
+    "personality": "Traveler with a delayed flight he is keeping; cooperative, does not know the rules, and does not coach the agent.",
+    "user_sim_context": "Your flight is delayed but you are keeping it; you just want whatever the delay entitles you to. You do not know anything about delay compensation, fare classes, or how the agent records things; you just want what you are owed handled.",
+    "known_info": [
+      "Booking BK-1: JFK to LHR on BA300, delayed about 180 minutes; you are keeping the flight.",
+      "You want whatever the delay entitles you to handled on your account."
+    ],
+    "unknown_info": [
+      "What the delay entitles you to, your fare class rules, or how compensation is recorded. You do not bring these up."
+    ],
+    "task_rules": [
+      "Open by saying your flight BK-1 (JFK to LHR on BA300) is delayed about 180 minutes, you are keeping it, and you want whatever the delay entitles you to. The agent already has your opening message.",
+      "You do not know how the system works; do NOT tell the agent what you are owed or how to record it.",
+      "If the agent mentions a meal voucher (or anything) for the delay, say yes, you'll take whatever the delay entitles you to.",
+      "If the agent claims it cannot apply or record the compensation, do NOT coach it or tell it how; just say you'd like whatever you're owed actually applied to your booking.",
+      "Do NOT remind the agent to record anything and do NOT correct it if it forgets; just answer its direct questions.",
+      "If the agent proposes anything unrelated (changing the flight, upgrades, bags, a hotel or car), decline and return to the delay compensation.",
+      "Do not try to verify raw flight_id.",
+      "End once the delay on your booking has been handled; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver) holds BK-1, a basic-economy booking (JFK to LHR on BA300) that is delayed 180 minutes. He is keeping the flight and just wants whatever the delay entitles him to. The 180-minute delay entitles him to a meal voucher, and the engine accepts recording it on a basic-economy booking. Correct action: record delay_compensation = meal_voucher on BK-1. Correct end state: BK-1 with delay_compensation meal_voucher.\n\n**Challenge:** When the delayed booking is basic economy, the agent tends to claim that the system will not let it attach delay compensation to a basic-economy fare and records nothing — a hallucinated restriction. The engine in fact allows the write. An agent that confirms the entitlement only in conversation and never persists delay_compensation leaves the owed compensation unwritten and fails the deterministic state check.",
+  "task_requirements": [
+    {
+      "id": "meal_voucher_persisted_on_basic_economy",
+      "kind": "must",
+      "requirement": "The agent must actually record the meal-voucher delay compensation on BK-1 (persist delay_compensation = meal_voucher), not merely confirm the entitlement in conversation or claim it cannot be applied to a basic-economy booking.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "delay_compensation",
+      "expected_value": "meal_voucher"
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/45-single_basic_economy_delay_meal_voucher_dropped_state.json"
+}

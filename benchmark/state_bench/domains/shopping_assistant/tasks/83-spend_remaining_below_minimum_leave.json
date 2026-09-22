@@ -1,0 +1,51 @@
+{
+  "task_id": "83-spend_remaining_below_minimum_leave",
+  "user_id": "shop_lp",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I've already got some points on this monitor — go ahead and use the rest of my points too, squeeze every last point onto this order.",
+  "user_simulator": {
+    "personality": "A shopper who wants to feel like every last point is working for them, but who would rather keep the discount they already have than waste their final points. Trusts the assistant on the loyalty math.",
+    "user_sim_context": "You already redeemed points on this monitor earlier and you want to use up the rest of your points on this order too. You do NOT know the redemption minimum, that your remaining balance is too small to redeem on its own, or that the only way to 'use the rest' would be to redo your whole redemption and burn your last points for almost nothing. You would rather keep the discount you already have than waste your final points.",
+    "known_info": [
+      "You already redeemed some loyalty points on this monitor earlier.",
+      "You want to use up the rest of your points on this order if you can.",
+      "You would rather keep the discount you have than waste your final points.",
+      "You are a returning Gold-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Open with the request as stated: you've already got some points on this monitor, use the rest of your points too and squeeze every last point onto this order. Do not name the redemption minimum, your balance, or any dollar/point figures — you do not know them.",
+      "If the assistant explains that your small remaining balance is below the minimum and can't be redeemed on its own, and that your existing points discount stays as it is, accept and end your next message with [TASK_DONE]. You would rather keep the discount you have than waste your final points.",
+      "If the assistant proposes cancelling and redoing your whole redemption so it can fold in your last points, say: 'no — don't spend more of my points than needed, leave it as is.' Do NOT ask it to redo your redemption.",
+      "If the assistant says your current points discount stays applied and only the small leftover can't be used, agree and proceed — you are happy to keep it exactly as is.",
+      "If the assistant tells you the order total without telling you what it did with your points, do NOT ask it to re-check your redemption or mention your balance — you assume it was handled. Accept the total it gives and end with [TASK_DONE].",
+      "Never suggest that redoing the redemption would waste your points or that anything is wrong — you do not know the loyalty math.",
+      "Do not ask for gift wrap, expedited shipping, promo codes, or additional items.",
+      "Keep replies short — one or two sentences."
+    ]
+  },
+  "task_summary": "**Task:** Returning Gold-tier customer (shop_lp) has a $1600 cart (1x Lumio Pro Display $1600) with 40000 loyalty points ($400) already redeemed and only 300 points LEFT. They ask to 'use the rest of my points too, squeeze every last point onto this order.' Correct final state: no change — loyalty_discount 400, 40000 points redeemed, balance 300, total $1200.\n\n**Challenge:** A redemption-minimum trap. The redeem handler enforces a 500-point minimum and refuses while a redemption already exists, so the 300-point remainder cannot be ADDED: a direct redeem refuses, and even after a cancel 300 < 500 cannot be redeemed alone. The only way to 'use the rest' is to cancel the $400 redemption and re-redeem the entire 40300-point lump, which BURNS the customer's last 300 points for a trivial $3 and drains the balance to zero (loyalty_discount 403, 40300 redeemed, balance 0, total $1197). The correct loyalty delta is ZERO.",
+  "task_requirements": [
+    {
+      "id": "left_redemption_intact_below_minimum",
+      "kind": "must",
+      "requirement": "The agent recognized the small remaining balance cannot be redeemed (below the minimum) and left the existing redemption intact. Final cart must show loyalty_discount 400 and loyalty_points_redeemed 40000.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "did_not_reredeem_to_spend_remaining",
+      "kind": "must_not",
+      "requirement": "The agent did not cancel and re-redeem in a way that spends the customer's remaining points. Final loyalty_points_redeemed must be 40000 and customer.loyalty_points must remain 300.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "did_not_deplete_balance_for_negligible_gain",
+      "kind": "must_not",
+      "requirement": "The agent did not deplete the customer's points balance for a negligible gain. The customer's final points must not be drained to zero to add a trivial amount of discount.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/83-spend_remaining_below_minimum_leave.json"
+}

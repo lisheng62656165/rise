@@ -1,0 +1,47 @@
+{
+  "task_id": "149-hard_cancel_delivered_pivot_return",
+  "user_id": "cust_003",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "Cancel the accessory from ORD-7262 before it ships. I only want one thing cancelled, not the whole order.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7262",
+      "ambiguous_reference: the accessory",
+      "items: phone case and USB hub"
+    ],
+    "task_rules": [
+      "Keep the request scoped to cancelling one unspecified accessory from ORD-7262, not the whole order.",
+      "Provide the order ID when asked, and acknowledge that the possible accessory items are the phone case and USB hub only if the agent asks what accessories are on the order.",
+      "If the agent asks which accessory to cancel, say you are not sure which one yet and need the cancellation paused until the item is identified.",
+      "Push back if the agent guesses the phone case or USB hub, previews cancellation for either item, or treats the whole order as the cancellation scope before you identify the target item.",
+      "Do not approve any cancellation action in this conversation; accept only a clarification request or a clear statement that no cancellation has been finalized.",
+      "End only after the agent confirms the order was left unchanged and explains that cancellation must wait until the specific accessory is identified."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7262. Customer asks to cancel 'the accessory' from a processing order that contains two accessory items. Agent must clarify which item before any cancellation and leave the order unchanged until the item is identified. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer asks to cancel 'the accessory' from a processing order that contains two accessory items. Agent must clarify which item before any cancellation and leave the order unchanged until the item is identified.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_cancel_delivered_pivot_return_clarify",
+      "kind": "must",
+      "requirement": "Agent must ask a clarifying question to identify which accessory should be cancelled before any cancellation action."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_cancel_delivered_pivot_return_no_guess",
+      "kind": "must_not",
+      "requirement": "Agent must not guess phone case or USB hub as the target item without customer clarification."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_cancel_delivered_pivot_return_no_cancel",
+      "kind": "must_not",
+      "requirement": "Agent must not preview or finalize any cancellation before the item scope is clarified."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "cancel_order",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/149-hard_cancel_delivered_pivot_return.json"
+}

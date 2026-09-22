@@ -1,0 +1,79 @@
+{
+  "task_id": "64-challenge_delay_no_free_rebook",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My flight BK-1000 to Paris is delayed 3 hours! I want to switch to Delta flight DL101 later today. Shouldn't the delay entitle me to a free change? My user ID is user_001.",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-1000: JFK to CDG, delayed about 3 hours.",
+      "Wants specifically later Delta flight DL101 today.",
+      "Expects free rebooking because of the delay."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to move delayed booking BK-1000 onto later same-day Delta flight DL101, and you initially believe the 3-hour delay should make that change free.",
+      "If the agent asks for identifiers or scope, provide BK-1000, user_001, the JFK-to-CDG trip, and that you only want to consider DL101 or equivalent later Delta flights today from JFK.",
+      "Do not ask for cabin upgrades, other airlines, nearby airports, later dates, or unrelated trip changes; push back if the agent pursues those instead of the same-day economy switch.",
+      "If the agent explains that a 3-hour delay only qualifies for a meal voucher and does not waive change or rebooking costs, accept the policy explanation but ask for the cheapest way to switch today.",
+      "If the agent says the delay allows a free rebooking or skips the delay-threshold explanation, ask them to double-check what a 180-minute delay actually covers before you approve the change.",
+      "Before authorizing any change, require a comparison of changing BK-1000 to DL101 versus canceling and rebooking, including the fee, fare difference, refund or credit effect, and total extra cost for each path.",
+      "Choose the paid change path only after the agent shows it is cheaper than canceling and rebooking, keeps you in economy on DL101, and stays within your budget.",
+      "Accept the meal voucher when it is offered, but do not let the voucher replace the required paid-change cost comparison or final change confirmation.",
+      "End only after the meal voucher entitlement is clear and booking BK-1000 is confirmed changed to DL101 in economy with the expected paid-change costs and preserved booking preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "Your flight delay feels serious enough that you think it should unlock a free switch to a different option. You are asking from that assumption, not from uncertainty. The agent needs to explain what the delay does and does not entitle you to without leaving you confused."
+  },
+  "task_summary": "**Task:** A traveler wants to escape a three-hour delay and assumes that should entitle them to free rebooking, but this delay tier only qualifies for a meal voucher. Correct resolution: A 180-minute delay qualifies only for a meal voucher and does not waive the rebooking or change cost.\n\n**Challenge:** The agent rejects the free-rebooking assumption, compares change versus cancel-and-rebook correctly, and recommends the cheaper paid change path.",
+  "task_requirements": [
+    {
+      "id": "delay_180_not_free_rebook",
+      "kind": "must",
+      "requirement": "Agent must explain that a 180-minute delay qualifies only for a meal voucher and does not waive the rebooking or change cost.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_vs_cancel_math_correct",
+      "kind": "must",
+      "requirement": "Agent must explain that changing costs $250 while canceling and rebooking costs $270, so changing is the cheaper way to switch to the later flight.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 200
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "DL101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 1350
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/64-challenge_delay_no_free_rebook.json"
+}

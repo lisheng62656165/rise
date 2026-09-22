@@ -1,0 +1,33 @@
+{
+  "task_id": "18-cancel_already_cancelled",
+  "user_id": "cust_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Can you cancel my order ORD-6021 please?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6021"
+    ],
+    "task_rules": [
+      "You are trying to cancel ORD-6021 because you believe it is still active; do not request any other order changes.",
+      "Give the order ID when asked, but do not volunteer internal status, refund, policy, or item details you do not know.",
+      "If the agent says the order is already cancelled, acknowledge that this is new information and ask whether any further action is needed if that is unclear.",
+      "Push back if the agent tries to cancel the order again, create a new refund, or process any duplicate order activity.",
+      "If the agent raises refund status first, ask only whether anything remains for you to do; accept a clear no-action-needed answer.",
+      "End only after the agent clearly says ORD-6021 is already cancelled and no further cancellation action is needed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are asking to cancel an order that you believe is still active. If it has already been cancelled, that is news to you. You expect the agent to check the status and tell you plainly what has already happened."
+  },
+  "task_summary": "**Task:** The customer asks to cancel an order that is already in a cancelled state. The right handling is simply to explain that no further action is needed and avoid creating any duplicate cancellation or refund activity.\n\n**Challenge:** This is a restraint check. Weak agents try to cancel it again, imply that additional work is required, or speak imprecisely about the order status instead of closing the loop cleanly.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "18_cancel_already_cancelled_agent_must_inform_customer_gracefully_no",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that order ORD-6021 is already cancelled and that no further cancellation action is needed."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "cancel_order",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/18-cancel_already_cancelled.json"
+}

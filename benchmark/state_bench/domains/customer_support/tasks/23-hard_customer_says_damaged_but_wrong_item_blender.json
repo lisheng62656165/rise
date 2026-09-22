@@ -1,0 +1,99 @@
+{
+  "task_id": "23-hard_customer_says_damaged_but_wrong_item_blender",
+  "user_id": "cust_002",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "The appliance from ORD-7513 arrived damaged. It is a PowerBlend blender, but I ordered a BrewPerfect coffee maker. I want this fixed.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7513",
+      "ordered_item: BrewPerfect Coffee Maker",
+      "received_item: PowerBlend Pro Blender",
+      "preferred_resolution: refund to original payment (only reveal if asked refund versus replacement/reship)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to ORD-7513, where the ordered coffee maker line was fulfilled with a blender instead.",
+      "Provide the order ID, ordered coffee maker, and received blender facts when asked or when needed; do not volunteer item IDs, refund amounts, or policy rules.",
+      "If the agent focuses on damaged_in_transit, push back that the bigger issue is that the item received is a blender, not the coffee maker in the order record.",
+      "If the agent asks whether you want refund or replacement/reship for the wrong-item fulfillment issue, choose refund to original payment.",
+      "If the agent proposes or starts a refund, replacement, reship, or return before asking what remedy you prefer, push back once that you want to choose the remedy and then choose refund to original payment.",
+      "Push back if the agent previews or processes damaged_in_transit, changed_mind, warranty, or any path that treats the blender as the ordered item.",
+      "Accept only after the agent classifies the ordered coffee-maker line as wrong_item, previews a $149 original-payment refund with no restocking fee and a free return label, and leaves no separate blender order line to change.",
+      "End only after the wrong_item return/refund for the coffee-maker line is processed with those details."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You describe the shipment as damaged because the received appliance is wrong and unusable to you. The agent must map the received blender back to the ordered coffee-maker line and use wrong_item, not damaged_in_transit."
+  },
+  "task_summary": "**Task:** Customer says an appliance arrived damaged, but the concrete facts show a wrong-item fulfillment error: coffee maker ordered, blender received. Correct handling is a wrong_item return/refund on the coffee-maker order line.\n\n**Challenge:** Reuses the task-121 failure pattern where agents follow the customer’s damaged framing or choose a remedy without asking the customer which wrong-item resolution they want.",
+  "task_requirements": [
+    {
+      "id": "161_classify_wrong_item",
+      "kind": "must",
+      "requirement": "Agent must classify the issue as wrong_item for the ordered coffee-maker line because the customer received a blender instead.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "161_process_coffee_line_refund",
+      "kind": "must",
+      "requirement": "Agent must process the coffee-maker order line as a wrong_item return/refund for $149 to original payment, with no restocking fee and a free return label.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "161_ask_wrong_item_resolution",
+      "kind": "must",
+      "requirement": "Before selecting, previewing as chosen, or processing a specific wrong-item remedy, agent must ask which valid resolution the customer wants. Offering concrete valid options while asking the customer to choose is acceptable.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "161_no_wrong_path",
+      "kind": "must_not",
+      "requirement": "Agent must not preview or process the return as damaged_in_transit, changed_mind, warranty, or a return on a separate blender order line.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "refund_amount",
+      "expected_value": 149
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10513",
+      "field": "return_reason",
+      "expected_value": "wrong_item"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7513",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/23-hard_customer_says_damaged_but_wrong_item_blender.json"
+}

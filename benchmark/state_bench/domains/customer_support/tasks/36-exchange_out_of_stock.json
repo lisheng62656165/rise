@@ -1,0 +1,78 @@
+{
+  "task_id": "36-exchange_out_of_stock",
+  "user_id": "cust_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I'd like to exchange the shirt from order ORD-6037 for a pair of running shoes instead.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6037",
+      "want: running shoes"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging the shirt from ORD-6037 for running shoes, and do not ask for a different replacement unless the agent says the shoes are unavailable.",
+      "Provide the order ID and the desired replacement item when asked, but do not claim to know stock, policy, refund amount, or store-credit details before the agent checks them.",
+      "If the agent says the running shoes are out of stock, ask what alternatives are available instead of continuing to demand that exact exchange.",
+      "Push back if the agent says the running-shoes exchange was completed, that replacement shoes will ship, or that the unavailable shoes can still be selected.",
+      "If the agent offers an original-payment refund, says there is no alternative, or skips the policy-backed alternative, ask whether the out-of-stock exchange policy allows store credit for the original shirt.",
+      "Accept only after the agent explains that the running shoes are out of stock and previews store credit for the original shirt as the available resolution.",
+      "End only after the agent confirms the original shirt has been handled for store credit and no replacement shoes will ship."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to exchange your shirt for running shoes, but you are not sure whether the replacement item is even available. You are open to alternatives if the exact swap cannot happen. You need the agent to tell you what your realistic options are instead of forcing a dead-end exchange."
+  },
+  "task_summary": "**Task:** The customer wants to exchange a shirt for running shoes, but the requested replacement is out of stock. The correct handling is to stop short of completing the exchange and instead offer the available alternative: store credit for the original item.\n\n**Challenge:** The agent has to respond to inventory reality without inventing a successful exchange. Weak agents complete an exchange into unavailable stock, fail to present the alternatives, or get stuck once the preferred replacement cannot be fulfilled.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "36_exchange_out_of_stock_agent_must_offer_store_credit_or",
+      "kind": "must",
+      "requirement": "Agent must tell the customer the requested running shoes are out of stock and that store credit for the original shirt is the available resolution."
+    },
+    {
+      "evidence": "conversation",
+      "id": "36_exchange_out_of_stock_agent_must_offer_alternatives",
+      "kind": "must_not",
+      "requirement": "Agent must not tell the customer that the out-of-stock running-shoes exchange was completed or that replacement shoes will ship."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9265",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9265",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9265",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9265",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9265",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-6037",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/36-exchange_out_of_stock.json"
+}

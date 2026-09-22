@@ -1,0 +1,65 @@
+{
+  "task_id": "128-basic_economy_add_bag_succeeds_but_delay_voucher_dropped_state",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My flight BK-1 (LAX to LHR on DL400) is delayed about 230 minutes. I'm keeping the flight, but please add one checked bag, and I'd like whatever the delay entitles me to. My user ID is user_002; put anything owed on my card.",
+  "user_simulator": {
+    "personality": "Traveler with a delayed flight who wants to add a bag and get what he's owed; cooperative, does not know the rules, and does not coach the agent.",
+    "user_sim_context": "Your flight is delayed and you are keeping it; you want to add one checked bag and get whatever the delay entitles you to. You do not know anything about delay compensation, baggage allowances, fare classes, or how the agent records things.",
+    "known_info": [
+      "Booking BK-1: LAX to LHR on DL400, delayed about 230 minutes; you are keeping the flight.",
+      "Add one checked bag.",
+      "You want whatever the delay entitles you to handled on your account."
+    ],
+    "unknown_info": [
+      "Whether the bag costs anything, what the delay entitles you to, your fare class rules, or how compensation is recorded. You do not bring these up."
+    ],
+    "task_rules": [
+      "Open by saying your flight BK-1 (LAX to LHR on DL400) is delayed about 230 minutes, you are keeping it, you want to add one checked bag, and you want whatever the delay entitles you to. The agent already has your opening message.",
+      "You do not know how the system works; do NOT tell the agent what you are owed or how to record anything.",
+      "If the agent mentions a meal voucher (or anything) for the delay, say yes, you'll take whatever the delay entitles you to.",
+      "If the agent claims it cannot apply or record the compensation, do NOT coach it or tell it how; just say you'd like whatever you're owed actually applied to your booking.",
+      "Do NOT remind the agent to record anything and do NOT correct it if it forgets; just answer its direct questions.",
+      "If the agent proposes anything unrelated (changing the flight, upgrades, a hotel or car), decline and return to the bag and the delay compensation.",
+      "Do not try to verify raw flight_id.",
+      "End once the bag is added and the delay has been handled; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_002 (Liam, basic) holds BK-1, a basic-economy booking (LAX to LHR on DL400) delayed 230 minutes. He wants to add one checked bag and get whatever the delay entitles him to. Basic economy includes no free checked bag, so the bag is paid (paid_checked_bags 1, +$35, price_paid $635). The 230-minute delay entitles him to a meal voucher. Correct end state: BK-1 with paid_checked_bags 1 (price_paid $635) and delay_compensation recorded as meal_voucher.\n\n**Challenge:** The agent adds the checked bag to the basic-economy booking fine, but then tends to claim it cannot attach the delay compensation to a basic-economy fare and records no meal voucher — a hallucinated restriction, contradicted by the bag write it just made to the same booking. An agent that confirms the voucher only in conversation and never persists delay_compensation leaves the owed compensation unwritten and fails the deterministic state check.",
+  "task_requirements": [
+    {
+      "id": "checked_bag_added",
+      "kind": "must",
+      "requirement": "The agent must add the one paid checked bag to BK-1.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "meal_voucher_persisted_on_basic_economy",
+      "kind": "must",
+      "requirement": "The agent must actually record the meal-voucher delay compensation on BK-1 (persist delay_compensation = meal_voucher), not merely confirm the entitlement or claim it cannot be applied to a basic-economy booking.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "delay_compensation",
+      "expected_value": "meal_voucher"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "paid_checked_bags",
+      "expected_value": 1
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "price_paid",
+      "expected_value": 35
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/128-basic_economy_add_bag_succeeds_but_delay_voucher_dropped_state.json"
+}

@@ -1,0 +1,106 @@
+{
+  "task_id": "77-challenge_mixed_cabin_change_fees",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to change two flights. BK-1000 to London needs to move to June 26, and BK-1001 to Paris needs to move to June 28. Both personal reasons. What will the total fees be? My user ID is user_001.",
+  "user_simulator": {
+    "known_info": [
+      "Booking A BK-1000: JFK to LHR, June 20, economy.",
+      "Booking B BK-1001: JFK to CDG, June 22, business class.",
+      "Both changes are for personal reasons."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request focused on changing both BK-1000 to London on June 26 and BK-1001 to Paris on June 28 for personal reasons, with a clear combined additional cost before approval.",
+      "If the agent asks for booking details, provide the two booking IDs, destinations, current dates, requested new dates, cabin classes, and personal-change reasons from what you know.",
+      "Do not volunteer preferences or add-ons; if asked about booking-stage preferences for these changes, ask to keep each existing booking's preferences unchanged.",
+      "When the agent presents costs, expect separate treatment for the economy London booking and the business-class Paris booking, including change fee, fare difference, and per-booking additional total.",
+      "Push back if the agent applies the same change fee to both bookings, omits the cabin-class reason, omits fare differences, or gives a combined additional total other than $350.",
+      "Accept the changes only after the agent makes clear that the London economy booking has a $200 change fee plus a $50 fare difference, the Paris business-class booking has a $0 change fee plus a $100 fare difference, and the combined additional total is $350.",
+      "Reject unrelated upgrades, cancellations, new bookings, or add-ons unless the agent explains that a replacement booking is required to complete the requested changes within budget.",
+      "End only after both requested changes are completed and the final confirmation preserves the two destinations, new dates, cabin classes, and $350 combined additional total.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget applies to incremental out-of-pocket cost for the change, not the final total fare already paid into the booking.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ],
+    "user_sim_context": "You need to change two international bookings for personal reasons and want the total fees explained. Because both are long-haul trips, you might expect them to behave similarly. The agent needs to show you where the bookings diverge instead of flattening them into one answer."
+  },
+  "task_summary": "**Task:** User needs to change two bookings in one conversation, but the two bookings sit in different cabin classes and therefore have different change-fee rules. Correct resolution: The London booking is in economy and therefore carries a $200 change fee on this itinerary.\n\n**Challenge:** The agent does not collapse them into one shared fee policy, assigns the economy booking the $200 fee, keeps the business booking at $0 change fee, and gets the combined additional total right.",
+  "task_requirements": [
+    {
+      "id": "economy_booking_has_200_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that the London booking is in economy and therefore carries a $200 change fee on this itinerary.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "business_booking_has_no_change_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that the Paris booking is in business class and therefore has no change fee here.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "combined_total_is_350",
+      "kind": "must",
+      "requirement": "Agent must explain or otherwise make clear that the combined additional cost for the two changes is $350 total.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 200
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "BA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 1050
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "change_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "fare_difference",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "flight_id",
+      "expected_value": "AF101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1001",
+      "field": "price_paid",
+      "expected_value": 2100
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/77-challenge_mixed_cabin_change_fees.json"
+}

@@ -1,0 +1,109 @@
+{
+  "task_id": "31-warranty_recurring_defect",
+  "user_id": "cust_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "My phone from order ORD-6004 is having the same screen flickering issue again. This is the third time! I've had it repaired twice already.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6004",
+      "warranty_id: WRT-4001",
+      "issue: screen flickering",
+      "prior_repairs: 2"
+    ],
+    "task_rules": [
+      "Keep the request focused on a warranty resolution for the recurring screen flickering on the phone from ORD-6004; you want the repeat-repair history considered, not a routine first repair.",
+      "Provide WRT-4001 if the agent asks for the warranty ID, and provide that there have already been 2 prior repairs if the agent asks about the history.",
+      "Do not volunteer policy details or internal eligibility facts; ask the agent to check the warranty and claim history records before deciding the resolution.",
+      "If the agent treats this as an ordinary repair, offers another repair, or skips the prior-claim history, push back by reminding them this is the third occurrence of the same issue and ask them to verify the recurring-defect replacement path.",
+      "Accept only a full replacement path that is tied to the two prior repairs and the current repeated screen flickering issue; decline refunds, unrelated exchanges, goodwill credits, or out-of-scope order changes.",
+      "Before agreeing to submit the warranty claim, make sure the preview is for WRT-4001 or the phone item, says the resolution is a full replacement at no repair cost, and does not add an extra goodwill credit or refund.",
+      "End only after the agent confirms the warranty claim has been processed as a full replacement for the phone and the recurring-defect reason is clear."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your phone is having the same problem again after multiple prior repairs, and your patience is gone. From your perspective this is no longer a one-off malfunction. You want the agent to recognize the repeated history and explain the stronger resolution you should now get."
+  },
+  "task_summary": "**Task:** The customer's phone has already been repaired twice, and this third warranty claim triggers the recurring-defect replacement rule. The right outcome is a full replacement, with the agent making clear that the repeat-failure history is what changes the resolution from repair to replacement.\n\n**Challenge:** Claim history is the deciding factor. Weak agents treat this like another routine repair, fail to check the prior claims, or recognize the recurrence without actually moving the case to the required replacement path.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "31_warranty_recurring_defect_agent_must_acknowledge_this_is_a",
+      "kind": "must",
+      "requirement": "Agent must acknowledge this is a recurring issue and explain automatic replacement policy."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "31_warranty_recurring_defect_agent_must_not_offer_repair_instead",
+      "kind": "must_not",
+      "requirement": "Agent must not offer repair instead of replacement."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "31_warranty_recurring_defect_agent_must_check_claim_history",
+      "kind": "must",
+      "requirement": "Agent must call get_warranty_status for ITEM-9030 or explicitly verify that WRT-4001 has 2 prior claims before processing the warranty claim."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9030",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-6004",
+          "product_id": "PROD-2030",
+          "quantity": 1,
+          "unit_price": 999,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4001",
+      "field": "claim_count",
+      "expected_value": 3
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4001",
+      "field": "resolution",
+      "expected_value": "full_replacement"
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4001",
+      "field": "status",
+      "expected_value": "claimed"
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-6004",
+        "product_id": "PROD-2030",
+        "quantity": 1,
+        "unit_price": 999,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-6004",
+        "product_id": "PROD-2030",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 999
+      }
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/31-warranty_recurring_defect.json"
+}

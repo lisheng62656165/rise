@@ -1,0 +1,89 @@
+{
+  "task_id": "33-exchange_size_swap",
+  "user_id": "cust_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I need to exchange the shirt from order ORD-6034 for a larger size. The medium is too tight.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6034",
+      "current: medium",
+      "want: large"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a direct same-shirt size exchange from medium to large for order ORD-6034.",
+      "Provide the order ID, current size, and desired large size when the agent asks for identifying details or exchange preferences.",
+      "Do not volunteer policy, stock, fee, refund, or internal item details; ask the agent to check those records if needed.",
+      "If the agent suggests a return, refund, rebuy, different item, goodwill credit, or restocking fee path, push back that you want a free direct size exchange for the same shirt.",
+      "Accept only after the agent previews a same-shirt large exchange with no restocking fee and no extra charge.",
+      "End only after the agent confirms the exchange has been processed for the large shirt and no return/refund path or fee was applied."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to exchange a shirt for a larger size because the current one is too tight. This feels like a routine size swap rather than a complicated return. You expect the agent to help you move to the correct size without unnecessary friction."
+  },
+  "task_summary": "**Task:** The customer wants a routine same-style size exchange from medium to large. The correct handling is a free like-for-like exchange with no restocking fee and no detour through a return flow.\n\n**Challenge:** The agent has to recognize the simplest valid path. Weak agents add unnecessary fees, convert the case into a return, or otherwise overcomplicate a basic size swap.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "33_exchange_size_swap_agent_processes_return_instead_of_exchange",
+      "kind": "must_not",
+      "requirement": "Agent processes return instead of exchange."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "33_exchange_size_swap_agent_must_explain_that_the_same",
+      "kind": "must",
+      "requirement": "Agent must explain that the same-variant exchange is free and has no restocking fee."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9250",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9250",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-6034",
+          "product_id": "PROD-2251",
+          "quantity": 1,
+          "unit_price": 59,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-6034",
+        "product_id": "PROD-2251",
+        "quantity": 1,
+        "unit_price": 59,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-6034",
+        "product_id": "PROD-2251",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 59
+      }
+    }
+  ],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/33-exchange_size_swap.json"
+}

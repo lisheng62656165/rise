@@ -1,0 +1,34 @@
+{
+  "split_version": "train_test",
+  "split": "test",
+  "num_runs": 5,
+  "domains": [
+    "travel",
+    "customer_support",
+    "shopping_assistant"
+  ],
+  "official_model": "gpt-5.4",
+  "simulator": {
+    "model": "gpt-5.4",
+    "prompt_hashes": {
+      "travel/user_sim_base.md": "6a94abedb77e2ec3f3b94a149291bc42a6aeacd5691ef0cb69862b9af923ae3c",
+      "customer_support/user_sim_base.md": "0b58e108ac16469926ee210774e6e3275049d898d35ea23ef40c13ddfbe829d8",
+      "shopping_assistant/user_sim_base.md": "70a546fce5108cb4381c6c6c6ea0adccd6e3d91b99b90a14f1c09d1b1f2bc5fc"
+    }
+  },
+  "judge": {
+    "model": "gpt-5.4",
+    "reasoning_effort": "high",
+    "prompt_hashes": {
+      "travel/judge_task_requirements.md": "dd4abe82eedb4873cfa015708df99f59cfbfeaa85ac090b01bd1d75eb0500487",
+      "travel/judge_ux_quality.md": "b04009d159fb477c3a215f30f10793c4e0a5587e578d07fcd2bfc7d719f90598",
+      "travel/judge_ux_quality_user.md": "5a6e9fa444fb5da4bd06991f907845a3023a8bb449dbb7c0994f4624fad67b94",
+      "customer_support/judge_task_requirements.md": "246c76f59f3cd0e736da35b9beb985088778ff233287454b8bae674285718c72",
+      "customer_support/judge_ux_quality.md": "8b6ecae22872ab860d4a54f37e5bd4a6a160033b833cd1b0de6a3673640d7067",
+      "customer_support/judge_ux_quality_user.md": "5a6e9fa444fb5da4bd06991f907845a3023a8bb449dbb7c0994f4624fad67b94",
+      "shopping_assistant/judge_task_requirements.md": "558947b2ce0b5d90a633e7d44e8599c329a96ac5ed9e43c9d37ffb5e6cf3c055",
+      "shopping_assistant/judge_ux_quality.md": "0234643a8dcf766c390aff2dc11b2f74f0e13ef7a38b29df70165bd333b82656",
+      "shopping_assistant/judge_ux_quality_user.md": "5a6e9fa444fb5da4bd06991f907845a3023a8bb449dbb7c0994f4624fad67b94"
+    }
+  }
+}

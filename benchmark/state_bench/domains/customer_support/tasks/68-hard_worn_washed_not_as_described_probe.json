@@ -1,0 +1,95 @@
+{
+  "task_id": "68-hard_worn_washed_not_as_described_probe",
+  "user_id": "cust_002",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "The cotton shirt from ORD-7491 is not as described. The fabric feels totally different from the listing, so I want to return it as a product issue.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7491",
+      "item: Premium Cotton Shirt",
+      "claimed_issue: fabric feels different from listing",
+      "usage: wore it twice and washed it once (only reveal if asked)",
+      "actual_resolution: still wants return if classified as changed_mind"
+    ],
+    "task_rules": [
+      "IF the agent asks for the order or item, THEN provide ORD-7491 and the Premium Cotton Shirt.",
+      "IF the agent asks what is different from the listing, THEN say the fabric felt softer online but feels rougher now.",
+      "IF the agent asks whether you wore, used, washed, altered, or laundered the shirt, THEN say you wore it twice and washed it once before deciding you did not like the texture.",
+      "IF the agent asks whether the shirt arrived damaged, torn, stained, wrong size, or a different product, THEN say no; the shirt arrived intact and is the item you ordered.",
+      "IF the agent says the worn-and-washed facts make this a changed-mind return rather than not_as_described or defective, THEN accept that classification as long as the return can proceed.",
+      "IF the agent previews or processes a not_as_described, defective, wrong_item, damaged_in_transit, no-fee product-fault, or free-return-label path before asking about usage, THEN push back once that they should ask whether it was worn or washed before classifying it.",
+      "IF the agent asks for confirmation before showing the changed-mind preview, THEN ask for the return reason, refund amount, refund method, fees, and return-shipping/label terms first.",
+      "Accept only after the agent previews a changed_mind return for the shirt with a $59 refund to original payment and no restocking fee.",
+      "END only after the changed_mind return is processed and the agent confirms the final refund details."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You believe the shirt was not as described because the fabric texture disappointed you after wearing and washing it. You do not know policy details. The agent needs to ask enough context to classify the return correctly."
+  },
+  "task_summary": "**Task:** Customer labels a shirt return as not-as-described because the fabric texture disappointed them, but the shirt was worn twice and washed once before the decision. Correct handling is to ask about use/laundering before classification, then process the return as changed_mind for a $59 original-payment refund.\n\n**Challenge:** This reuses the proven issue-classification failure pattern from tasks 53 and 91 with a fresh clothing scenario. Weak agents accept the customer's product-fault label at face value, skip usage probing, and preview or process a not_as_described/product-fault return even though the fuller facts support changed_mind.",
+  "task_requirements": [
+    {
+      "id": "158_probe_usage_before_classification",
+      "kind": "must",
+      "requirement": "Agent must ask whether the shirt was worn, used, washed, altered, or laundered before classifying or previewing the return.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "158_changed_mind_after_wash",
+      "kind": "must",
+      "requirement": "After learning the shirt was worn twice and washed once, agent must explain that the return is treated as changed_mind rather than not_as_described, defective, wrong_item, or another product-fault reason.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "158_process_changed_mind_return",
+      "kind": "must",
+      "requirement": "Agent must process ITEM-10491 as a changed_mind return for a $59 original-payment refund.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "158_no_fault_classification",
+      "kind": "must_not",
+      "requirement": "Agent must not preview, process, or describe the return as not_as_described, defective, wrong_item, damaged_in_transit, no-fee product fault, or a free-return-label product-fault path.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10491",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10491",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10491",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10491",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10491",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7491",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/68-hard_worn_washed_not_as_described_probe.json"
+}

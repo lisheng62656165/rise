@@ -1,0 +1,98 @@
+{
+  "task_id": "121-hard_shipping_wrong_item_customer_says_damaged",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "ORD-7224 is damaged in the sense that you sent the wrong kitchen item. I ordered a blender and this is not it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7224",
+      "item: PowerBlend Pro Blender",
+      "shipping_status: delivered",
+      "preferred_resolution: refund to original payment (only reveal if the agent asks)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to resolving ORD-7224 because the delivered package contained the wrong kitchen item instead of the PowerBlend Pro Blender.",
+      "When the agent asks about the problem, clarify that the item itself is not broken; the issue is that the wrong item was delivered.",
+      "Do not volunteer your preferred resolution; if the agent asks what you want, choose a refund to your original payment method and decline replacement or exchange paths.",
+      "If the agent proposes, previews, or processes a resolution before asking what you want, push back that you wanted to be asked first, then choose the original-payment refund when asked.",
+      "If the agent treats this as damaged_in_transit, correct them once that this is a wrong-item claim because the item is not broken.",
+      "Accept only after the agent previews a wrong_item return/refund to your original payment method with no restocking fee and a return label.",
+      "End only after the wrong-item return has been processed and the agent confirms the original-payment refund."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7224. Customer says the delivery is 'damaged' because the box contains the wrong kitchen item. Correct classification is wrong_item, not damaged_in_transit. You want your money back to your original payment method, not a replacement — but don't volunteer this preference unprompted; let the agent ask. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer says the delivery is 'damaged' because the box contains the wrong kitchen item. Correct classification is wrong_item, not damaged_in_transit.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "hard_shipping_wrong_item_customer_says_damaged_ask_resolution",
+      "kind": "must",
+      "requirement": "Agent must ask the customer which resolution they would prefer before proposing or processing one — rather than unilaterally picking and executing a remedy. Asking the customer to choose (e.g. between a refund and a replacement, or by open-endedly asking how they would like it resolved) satisfies this; the agent does not need to enumerate any specific fixed set of options verbatim. Immediately proposing or processing a single remedy without inviting the customer's preference fails."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_shipping_wrong_item_customer_says_damaged_shipping",
+      "kind": "must",
+      "requirement": "Agent must explain or otherwise make clear that the issue is being handled as a wrong-item claim, not as damage in transit."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "goodwill_credit",
+      "expected_value": 8
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10226",
+      "field": "return_reason",
+      "expected_value": "wrong_item"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7224",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/121-hard_shipping_wrong_item_customer_says_damaged.json"
+}

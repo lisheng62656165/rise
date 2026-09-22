@@ -1,0 +1,41 @@
+{
+  "task_id": "37-exchange_no_price_protection",
+  "user_id": "cust_002",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to exchange my headphones from order ORD-6038. I see they're now $199 — I paid $249. Can I get the difference back with the exchange?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6038",
+      "paid: $249",
+      "current_price: $199"
+    ],
+    "task_rules": [
+      "Keep the request scoped to whether an exchange for the ORD-6038 headphones can credit the $50 price drop; do not ask to start a separate return or refund path yourself.",
+      "Provide the order ID and the paid/current price details when the agent asks for identifying or price information.",
+      "If the agent says exchanges do not include price protection, push back once by asking why the lower current price cannot be credited through the exchange.",
+      "Push back if the agent offers a $50 exchange adjustment, processes an exchange as a price match, or starts a return-and-rebuy flow without your explicit agreement.",
+      "Accept only after the agent clearly explains that the exchange policy has no price protection and presents return-and-rebuy as a separate option; say you will consider that option but do not want to initiate a return now.",
+      "End only after the final no-action outcome is clear and no exchange, refund, or return has been started."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to exchange your headphones and are also thinking about the fact that the price has dropped since you bought them. From your perspective, it is natural to wonder whether the lower price should help you here. You want the agent to explain how an exchange interacts with that price change."
+  },
+  "task_summary": "**Task:** The customer bought headphones at $249, sees that they now cost $199, and tries to use the exchange flow to get the $50 difference back. Because exchange policy does not provide price protection, the correct response is to deny the exchange-based adjustment and suggest the separate return-and-rebuy path if the customer wants to pursue the lower price.\n\n**Challenge:** The request sounds reasonable, but the policy line is clear. Weak agents issue the $50 refund anyway, pretend an exchange can function as a price adjustment, or never check the no-price-protection rule before answering.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "37_exchange_no_price_protection_agent_must_deny_and_suggest_return",
+      "kind": "must",
+      "requirement": "Agent must deny the exchange-based price adjustment and explain that exchange policy has no price protection for the $50 drop."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "37_exchange_no_price_protection_agent_must_check_exchange_policy_for",
+      "kind": "must",
+      "requirement": "Agent must check exchange policy for no_price_protection rule."
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "exchange_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/37-exchange_no_price_protection.json"
+}

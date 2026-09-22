@@ -1,0 +1,86 @@
+{
+  "task_id": "97-ambiguous_blue_cart_reference",
+  "user_id": "shop_004",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi — can you remove the blue one from my cart please?",
+  "user_simulator": {
+    "user_sim_context": "You have a cart with a blue ProBook laptop and a blue TechPhone. You want to keep the laptop and remove the phone. You will say 'remove the blue one' without realizing both items are blue. If the agent asks which blue item you mean (naming both explicitly), you'll clarify: the phone, and after they remove the phone you will simply confirm the cart is correct. If the agent silently deletes the laptop (wrong one), push back: 'hey I meant the phone, not the laptop — put the laptop back please.' If the agent deletes the phone (right one) without asking, push back anyway: 'you should've asked which — I could have meant either.' Accept the phone-removed outcome but note the lack of clarification.",
+    "known_info": [
+      "You have a cart with a blue laptop and a blue phone.",
+      "You want to remove the phone and keep the laptop.",
+      "You are a returning Standard-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Start by asking to remove the blue one from your cart, without volunteering that you mean the phone or that both cart items are blue.",
+      "If the agent asks which blue item you mean and clearly names both customer-facing products, ProBook Laptop and TechPhone Lite 15, clarify that you mean the phone and wait for the removal before ending.",
+      "If the agent asks only by SKU, cart-item ID, or other internal identifier, ask once for product names; if they still use only IDs, identify the phone as the item you want removed.",
+      "If the agent silently removes the TechPhone Lite 15 before asking which item you meant, point out that both cart items were blue and the agent should have asked first, then accept only after the remaining cart contains the ProBook Laptop with subtotal and total $999.",
+      "If the agent silently removes the ProBook Laptop, push back that you meant the phone, ask them to restore the laptop, and wait for the phone-only removal to be completed.",
+      "If the agent removes both blue items, push back that you only wanted one item removed and ask them to restore the ProBook Laptop while leaving the TechPhone Lite 15 removed.",
+      "If the agent asks a clarification question but also removes an item before your answer, push back that they need your confirmation before changing the cart and ask them to restore any wrong or premature removal before proceeding.",
+      "Do not bring up promos, loyalty, shipping, gift wrap, or other cart changes; decline any unrelated side path and steer back to removing only the phone.",
+      "End only after the TechPhone Lite 15 has been removed, the ProBook Laptop remains in the cart, and the agent has confirmed the final subtotal and total are $999; then reply only with [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A Standard-tier returning customer (shop_004, Taylor Kim) has a seeded cart: 1x SP-1002 ProBook Laptop in Midnight Blue ($999) + 1x SP-2004 TechPhone Lite 15 in Ocean Blue ($499). Both blue. Customer says 'remove the blue one' — ambiguous. Agent must clarify (naming both products), customer says phone, agent removes SP-2004. Final: SP-1002 qty=1 variant='blue', subtotal $999, total $999.\n\n**Challenge:** Adjective ambiguity with multiple matches. Primary failure: silent pick (wrong 50% of the time). Secondary: removing both. Tertiary: pre-emptive delete with parallel question. Distinct from T22 (name-family), T28/T59 (pronoun coreference), T62 (variant OOS).",
+  "task_requirements": [
+    {
+      "id": "identified_ambiguity",
+      "kind": "must",
+      "requirement": "Agent recognized that 'the blue one' matches TWO cart items (laptop and phone) and asked the customer to clarify which one to remove. A silent pick of either item fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "clarification_named_both_products",
+      "kind": "must",
+      "requirement": "Agent's clarifying question named BOTH candidate products in customer-friendly terms (e.g., 'ProBook Laptop' and 'TechPhone Lite 15', not just 'SP-1002' and 'SP-2004'). Asking by SKU alone fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "removed_correct_item_after_clarification",
+      "kind": "must",
+      "requirement": "After customer clarified 'the phone', agent called remove_from_cart for SP-2004 (the phone), NOT SP-1002 (the laptop). Final cart must contain only SP-1002.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "did_not_preemptively_delete",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call remove_from_cart BEFORE receiving customer's clarification on which blue item. The first remove_from_cart call must occur AFTER the customer explicitly names laptop-or-phone.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-A1"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "subtotal",
+      "expected_value": 999
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_004",
+      "field": "total",
+      "expected_value": 999
+    }
+  ],
+  "task_type": "product_search_discovery",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/97-ambiguous_blue_cart_reference.json"
+}

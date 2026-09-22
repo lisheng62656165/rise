@@ -1,0 +1,111 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_004. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "I already have two USB hubs in my cart. Check the cap and current stock, but do not change the quantity unless I explicitly confirm a new final quantity."
+    },
+    {
+      "role": "assistant",
+      "content": "You currently have 2x 7-Port USB-C Hub in your cart.\n\n- Cart quantity: 2\n- Per-cart cap: 3 units of the same product\n- Current stock: 50 units available\n- Variants: none\n\nSo you\u2019re under the cap and could increase by at most 1 more if you want. I have not changed anything.",
+      "tool_calls": [
+        {
+          "name": "get_cart",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "cart_id": "CART-shop_004",
+            "customer_id": "shop_004",
+            "items": [
+              {
+                "cart_item_id": "CI-0001",
+                "product_id": "SP-H111",
+                "product_name": "7-Port USB-C Hub",
+                "quantity": 2,
+                "gift_wrap": false,
+                "unit_price": 49,
+                "line_total": 98
+              }
+            ],
+            "subtotal": 98,
+            "discount_amount": 0,
+            "gift_wrap_fee": 0,
+            "loyalty_discount": 0,
+            "loyalty_points_redeemed": 0,
+            "shipping_option": null,
+            "shipping_cost": 0,
+            "total": 98,
+            "applied_promo_codes": []
+          }
+        },
+        {
+          "name": "get_product_details",
+          "arguments": {
+            "product_id": "SP-H111"
+          },
+          "result": {
+            "product_id": "SP-H111",
+            "name": "7-Port USB-C Hub",
+            "category": "electronics",
+            "subcategory": "hub",
+            "brand": "PortPro",
+            "price": 49,
+            "rating": 4.2,
+            "review_count": 1550,
+            "description": "7-Port USB-C Hub from PortPro. Electronics accessory.",
+            "specs": {},
+            "compatible_with": [
+              "SlimBook Air 13",
+              "ProBook Laptop 13",
+              "TechPhone Pro 16"
+            ],
+            "in_stock": true,
+            "stock_quantity": 50,
+            "shipping_days": 2,
+            "gift_wrap_available": true,
+            "backorder_available": false,
+            "previous_price": null,
+            "variants": null,
+            "shipping_estimate": "2 business days (standard)"
+          }
+        },
+        {
+          "name": "get_policies",
+          "arguments": {
+            "topic": "quantity_limit"
+          },
+          "result": {
+            "topic": "quantity_limit",
+            "summary": "Anti-hoarding: maximum 3 units of the same product per cart.",
+            "rules": [
+              "Limit: 3 units of the same product per cart.",
+              "Enforcement: applies to total quantity in cart (existing + new).",
+              "No exceptions regardless of tier, promo, or reason."
+            ]
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-H111"
+          },
+          "result": {
+            "product_id": "SP-H111",
+            "product_name": "7-Port USB-C Hub",
+            "base_price": 49,
+            "variants": [],
+            "note": "This product has no variants; no variant_id is needed for add_to_cart."
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Thanks, that\u2019s all I needed. Please leave the cart as-is. [TASK_DONE]"
+    }
+  ]
+}

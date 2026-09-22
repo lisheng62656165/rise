@@ -1,0 +1,80 @@
+{
+  "task_id": "92-challenge_seasonal_restock_shipping_triple",
+  "user_id": "cust_004",
+  "now": "2027-01-15T10:00:00",
+  "opening_message": "I want to return the headphones from order ORD-7125. Got them in December.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7125",
+      "item: headphones",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the headphones from ORD-7125 for changed mind; do not ask to return the book or change any other order item.",
+      "Provide the order ID, item, and changed-mind reason when asked, but ask the agent to check records or policy for exact eligibility, refund amount, fees, discounts, and shipping effects.",
+      "If the agent says the normal return window is expired or denies the return on timing alone, ask them to check whether the December holiday return extension applies.",
+      "If the agent mentions an electronics restocking fee without accounting for membership, ask whether Silver status changes the fee.",
+      "If the agent previews the return without mentioning shipping, ask whether returning the headphones affects the remaining order's free-shipping eligibility.",
+      "Push back on previews that deny the return, omit the Silver restocking-fee discount, omit the free-shipping clawback, apply the wrong item, or propose a non-return alternative.",
+      "Accept only after the preview explains the seasonal eligibility, the electronics restocking fee, the Silver restocking-discount credit, the free-shipping clawback, and the final net refund.",
+      "End only after the agent has processed the headphones return and confirmed the final refund and that ORD-7125 is partially returned."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return headphones from a December order and assume the seasonal timing should keep the door open. Beyond that, you suspect your Silver status may matter, but you are not certain how all the pieces interact. You need the agent to explain the eligibility, the membership effect, and any shipping consequence clearly."
+  },
+  "task_summary": "**Task:** A Silver customer is returning headphones in January from a December order, so the seasonal extension is what makes the return possible. The correct handling is to process the return, apply the $9 Silver restocking-discount adjustment against the normal electronics fee, and also apply the $8 shipping clawback tied to the remaining order.\n\n**Challenge:** This case combines timing, membership, and order-threshold effects. Weak agents deny the return because they miss the seasonal rule, notice the return but miss the Silver adjustment, or forget the shipping clawback once the other adjustments are in view.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "92_challenge_seasonal_restock_shipping_triple_agent_must_not_deny_the_request",
+      "kind": "must",
+      "requirement": "Agent must explain that the seasonal holiday extension makes the December order return-eligible through January 31."
+    },
+    {
+      "evidence": "conversation",
+      "id": "92_challenge_seasonal_restock_shipping_triple_agent_must_explain_refund_breakdown",
+      "kind": "must",
+      "requirement": "Agent must explain that the $213 net refund includes a $37 electronics restocking fee, a $9 Silver restocking-fee discount, and an $8 free-shipping clawback because the remaining order falls below the free-shipping threshold."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10160",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10160",
+      "field": "refund_amount",
+      "expected_value": 213
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10160",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10160",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10160",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7125",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/92-challenge_seasonal_restock_shipping_triple.json"
+}

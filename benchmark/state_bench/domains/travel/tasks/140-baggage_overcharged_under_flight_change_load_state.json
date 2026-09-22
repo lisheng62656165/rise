@@ -1,0 +1,72 @@
+{
+  "task_id": "140-baggage_overcharged_under_flight_change_load_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Two things on my booking BK-1 (JFK to ORD on UA800): I need to move it to the next available later flight for a medical appointment, and please add 2 checked bags. My user ID is user_001; put anything owed on my card.",
+  "user_simulator": {
+    "personality": "Traveler making two quick changes — a date move and a couple of bags; cooperative, does not know her baggage allowance, and does not check the charge.",
+    "user_sim_context": "You want to move your flight to a later date and add 2 checked bags. You do not know your checked-bag allowance or that your status might make the bags free; you just want the new date and the 2 bags on the booking.",
+    "known_info": [
+      "Booking BK-1: JFK to ORD on UA800.",
+      "Move it to a later date for a medical appointment (the next available later flight is fine).",
+      "Add 2 checked bags."
+    ],
+    "unknown_info": [
+      "Your checked-bag allowance, whether the bags are free, or the change fee. You do not bring these up."
+    ],
+    "task_rules": [
+      "Open by saying you need to move BK-1 (JFK to ORD on UA800) to a later date for a medical appointment and add 2 checked bags. The agent already has your opening message.",
+      "If the agent asks which later date, say the next available later flight is fine.",
+      "If the agent asks about preferences for the change, say to keep the booking's existing preferences; you are only changing the date.",
+      "You do not know your allowance; do NOT mention your loyalty status or that the bags should be free.",
+      "If the agent says the bags are included free with your status, acknowledge that's good.",
+      "Do NOT correct the agent if it charges you for the bags or the change; just answer its direct questions.",
+      "If the agent proposes anything unrelated (upgrades, a hotel or car), decline and return to the move and the bags.",
+      "Do not try to verify raw flight_id.",
+      "End once the flight is moved and the 2 bags are handled; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_001 (Emma, gold) holds BK-1 (economy, JFK to ORD on UA800) and wants to move it to a later date and add 2 checked bags. The move is for a medical appointment, a 50%-discounted change ($37 fee); in economy her checked-bag allowance is 3 free (base 1 + gold bonus 2), so the 2 bags are free. Correct end state: BK-1 moved to the later flight with change_fee 37 and no paid bags (paid_checked_bags 0).\n\n**Challenge:** The agent handles free baggage correctly when bags are the only ask, but here the concurrent flight change absorbs its attention so it reverts to the common-sense \"$35 per bag\" prior and charges for the 2 bags (recording paid_checked_bags 2, +$70) instead of recognizing they are within the 3-bag free allowance. The engine trusts the bag count, so the overcharge sticks. An agent that charges for free bags persists an unexpected state change and fails the deterministic check.",
+  "task_requirements": [
+    {
+      "id": "flight_moved_medical_change",
+      "kind": "must",
+      "requirement": "The agent must move BK-1 to the later flight with the correct medical (50%-discounted) change fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "bags_recognized_free_not_overcharged",
+      "kind": "must",
+      "requirement": "The agent must recognize that the 2 checked bags are within the traveler's free allowance (economy plus gold = 3 free) and not charge for them or record paid checked bags.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "change_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "flight_id",
+      "expected_value": "UA801"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1",
+      "field": "price_paid",
+      "expected_value": 337
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/140-baggage_overcharged_under_flight_change_load_state.json"
+}

@@ -1,0 +1,92 @@
+{
+  "task_id": "3-hard_voluntary_store_credit_return_method_update",
+  "user_id": "cust_003",
+  "now": "2026-07-15T10:00:00",
+  "opening_message": "I want to return the running shoes from ORD-7563 because they don't fit my feet well. I'd rather get store credit so I can buy a different pair later.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7563",
+      "item: SprintMax Running Shoes",
+      "reason: changed mind / fit preference, not defective",
+      "preferred_refund_method: store_credit"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the running shoes from ORD-7563 for store credit.",
+      "Provide the order ID, item, and fit-preference reason when asked; do not claim the shoes are defective, damaged, wrong, or not as described.",
+      "If the agent says the default return refund goes to original payment, repeat that you voluntarily want store credit instead.",
+      "If the agent processes or previews only an original-payment return and does not explain how store credit will be recorded, ask once whether the refund method can be changed to store credit before completion.",
+      "If the agent tries to process a gift return, outside-window grace return, exchange, cancellation, warranty claim, or goodwill credit, push back that this is a normal changed-mind return and you are choosing store credit voluntarily.",
+      "Accept only after the return is previewed for $121 and the agent confirms the final refund method will be store credit, not original payment.",
+      "End only after the shoes are returned and the refund method has been recorded as store credit."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are choosing store credit even though the return is recent and could default to original payment. A perfect agent should process the return, then use the allowed refund-method update so the final state records store credit."
+  },
+  "task_summary": "**Task:** A Gold customer wants to return recently delivered running shoes for changed mind and explicitly chooses store credit even though the normal return would default to original payment. Correct handling is to preview the $121 changed-mind return, get explicit approval, process the return, and then update the refund method to store credit using the refund tool.\n\n**Challenge:** This tests a less common refund-destination workflow. Weak agents ignore the customer's requested destination, finalize the return before approval, leave the refund as original payment, misuse gift/outside-window rules, or add unnecessary exchange/cancellation/goodwill actions.",
+  "task_requirements": [
+    {
+      "id": "173_acknowledge_voluntary_store_credit",
+      "kind": "must",
+      "requirement": "Agent must acknowledge that the customer is voluntarily choosing store credit for a normal changed-mind return, not because gift or outside-window policy requires it.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "173_process_return_as_store_credit",
+      "kind": "must",
+      "requirement": "Agent must process ITEM-10563 as a changed-mind return for $121 and record the final refund method as store_credit.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "173_get_approval_before_confirm",
+      "kind": "must",
+      "requirement": "Agent must preview or explain the $121 store-credit return outcome and obtain explicit customer approval before confirming the return or refund-method update.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "173_no_original_payment_final_or_wrong_workflow",
+      "kind": "must_not",
+      "requirement": "Agent must not leave the final refund method as original_payment, confirm the return before approval, or process an exchange, cancellation, warranty claim, gift return, outside-window grace return, or goodwill credit.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10563",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10563",
+      "field": "refund_amount",
+      "expected_value": 121
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10563",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10563",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10563",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7563",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/3-hard_voluntary_store_credit_return_method_update.json"
+}

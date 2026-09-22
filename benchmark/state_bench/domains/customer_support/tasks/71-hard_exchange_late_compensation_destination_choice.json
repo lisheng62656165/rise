@@ -1,0 +1,109 @@
+{
+  "task_id": "71-hard_exchange_late_compensation_destination_choice",
+  "user_id": "cust_004",
+  "now": "2026-07-10T10:00:00",
+  "opening_message": "ORD-7342 arrived three days late, and the size 10 running shoes are too tight. I need size 11 and compensation for the delay.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7342",
+      "exchange: size 11 running shoes",
+      "late: 3 days",
+      "preferred_compensation_destination: original payment card (only reveal if the agent asks where to put any compensation)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to exchanging the size 10 running shoes from ORD-7342 for size 11 and receiving separate compensation for the three-day delivery delay.",
+      "Provide the order ID, late-arrival timing, and size-11 exchange preference when asked or when needed; do not volunteer the compensation destination unless the agent asks where to issue it.",
+      "If the agent handles only the exchange or only the delay compensation, ask once for the missing part of the resolution.",
+      "If the agent asks where to issue the late-delivery compensation, choose the original payment card; if compensation is issued as store credit or to any destination without that question, push back once and ask for it on the card instead.",
+      "Push back on return, cancellation, wrong-size refund-only, store-credit-only, or replacement paths that do not process the requested size-11 exchange and separate delay compensation.",
+      "Accept only after the agent previews both actions: the exchange to size 11 and the separate $15 late-delivery compensation to the original payment method.",
+      "End only after the agent confirms the size exchange has been processed and the separate original-payment compensation has been issued."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7342. The size 10 shoes arrived three days late and are too tight. The agent must process a size exchange to size 11 and separately issue late-delivery compensation. You want any delay compensation back to your original payment method, not store credit, but do not volunteer this preference unless the agent asks. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "**Task:** A Silver customer received size-10 running shoes three days late and needs a size-11 exchange plus separate late-delivery compensation. The correct compensation is $15 to original payment for the three-day delay, but the agent must ask where to issue that separate compensation before choosing the destination.\n\n**Challenge:** This reuses the proven destination-choice failure pattern from task 142 with different product data. Weak agents perform the exchange and refund but skip the customer-control step before choosing original payment or store credit for the separate compensation.",
+  "task_requirements": [
+    {
+      "id": "152_ask_compensation_destination",
+      "kind": "must",
+      "requirement": "Agent must ask the customer where to issue the separate late-delivery compensation, such as original payment versus store credit, before issuing it.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "152_process_exchange_and_compensation",
+      "kind": "must",
+      "requirement": "Agent must process the size-11 exchange and the separate $15 late-delivery compensation.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "152_no_refund_only_resolution",
+      "kind": "must_not",
+      "requirement": "Agent must not resolve the too-tight shoes as a return, cancellation, refund-only path, or store-credit-only path instead of the requested size exchange.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10342",
+      "field": "item_status",
+      "expected_value": "exchanged"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10342",
+      "field": "refund_amount",
+      "expected_value": 15
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10342",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10342",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7342",
+          "product_id": "PROD-4343",
+          "quantity": 1,
+          "unit_price": 129,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7342",
+        "product_id": "PROD-4343",
+        "quantity": 1,
+        "unit_price": 129,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7342",
+        "product_id": "PROD-4343",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 129
+      }
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/71-hard_exchange_late_compensation_destination_choice.json"
+}

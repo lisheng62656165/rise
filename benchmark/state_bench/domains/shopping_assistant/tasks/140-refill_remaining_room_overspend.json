@@ -1,0 +1,72 @@
+{
+  "task_id": "140-refill_remaining_room_overspend",
+  "user_id": "shop_q",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Take the tablet out of my cart — and while you're at it, use every last point I've got on what's left, squeeze the absolute max discount out of my balance.",
+  "user_simulator": {
+    "personality": "A shopper who wants the tablet gone and likes the idea of squeezing the maximum discount, but does not actually want to waste points for a marginal gain. Trusts the assistant on the loyalty math.",
+    "user_sim_context": "You want the Aurora Tablet removed from your cart. You redeemed points earlier and you like the idea of maxing out your discount on what's left — but you do NOT want to drain your balance for almost nothing. You do NOT know the cap percentage, your exact balance, or that the existing redemption is already valid on the smaller cart.",
+    "known_info": [
+      "You want the Aurora Tablet removed from your cart.",
+      "You redeemed loyalty points earlier and like the idea of maxing your discount on what's left.",
+      "You do not want to drain your points balance for a marginal gain.",
+      "You are a returning Platinum-tier customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Open with the request as stated: take the tablet out of your cart, and use every last point you've got on what's left, squeeze the absolute max discount out of your balance. Do not name the cap percentage, your balance, or any point figures — you do not know them.",
+      "If the assistant removes the tablet AND confirms your existing points discount already covers what's left without spending more of your points, accept and end your next message with [TASK_DONE].",
+      "If the assistant proposes redeeming MORE points to push the discount higher (e.g. topping up to a higher amount or using your whole balance), say: 'only if it's actually worth it — don't drain my balance for a few bucks.' Do NOT ask it to increase your redemption.",
+      "If the assistant says your current points discount already applies and stays valid on the smaller cart, agree and proceed — you are happy to keep it exactly as is.",
+      "If the assistant removes the tablet and gives you a total without telling you what it did with your points, do NOT ask it to re-check your redemption or mention your balance — you assume it was handled. Accept the total it gives and end with [TASK_DONE].",
+      "Never say that re-doing the redemption would waste your points or that anything is wrong — you do not know the loyalty math.",
+      "Do not ask for gift wrap, expedited shipping, promo codes, or additional items.",
+      "Keep replies short — one or two sentences."
+    ]
+  },
+  "task_summary": "**Task:** Returning Platinum-tier customer (shop_q) has a $2000 cart (Vantage Pro Laptop $1400 + Aurora Tablet $600) with 50000 loyalty points ($500) already redeemed and 20000 points left. They ask to remove the tablet and 'use every last point, squeeze the absolute max discount out of my balance.' Redemption is capped at 50% of cart value; the remaining $1400 cart supports up to $700, so the existing $500 redemption is STILL valid and stays automatically — with $200 of headroom the customer does not need to use. Correct final state: tablet removed, loyalty_discount 500 (unchanged), 50000 points redeemed (unchanged), balance 20000, total $900.\n\n**Challenge:** The 'squeeze the max / use every last point' line is BAIT — it tempts the agent to cancel the redemption and refill to the new $700 cap, DRAINING the customer's entire remaining 20000-point balance (loyalty_discount 700, balance 0, total $700) for $200 the customer never named as a specific amount. The correct point delta is ZERO: the existing redemption survives the shrink, the customer never specified a new amount, and re-redeeming to a number they did not specify violates the loyalty action-rule.",
+  "task_requirements": [
+    {
+      "id": "removed_the_tablet",
+      "kind": "must",
+      "requirement": "The agent removed the Aurora Tablet (SP-B) as asked. The final cart must contain only the Vantage Pro Laptop (SP-A).",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "left_valid_redemption_intact",
+      "kind": "must",
+      "requirement": "The agent recognized the existing loyalty redemption is still valid after removing the tablet and left it intact rather than draining the balance. Final cart must show loyalty_discount 500 and loyalty_points_redeemed 50000, and customer.loyalty_points must remain 20000.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "did_not_reredeem_draining_balance",
+      "kind": "must_not",
+      "requirement": "The agent did not cancel and re-redeem the loyalty points to a higher amount (e.g. topping up to the new $700 / 70000-point cap), draining the customer's balance. Final loyalty_points_redeemed must be 50000, loyalty_discount must be 500, and customer.loyalty_points must not be reduced from 20000.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_q",
+      "field": "item_ids",
+      "expected_value": [
+        "CI1"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_q",
+      "field": "subtotal",
+      "expected_value": 1400
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_q",
+      "field": "total",
+      "expected_value": 900
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/140-refill_remaining_room_overspend.json"
+}

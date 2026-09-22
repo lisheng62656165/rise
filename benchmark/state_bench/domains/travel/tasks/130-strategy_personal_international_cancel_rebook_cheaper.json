@@ -1,0 +1,130 @@
+{
+  "task_id": "130-strategy_personal_international_cancel_rebook_cheaper",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move booking BK-1000 to June 28 for personal reasons. Please tell me whether changing it or canceling and rebooking is cheaper overall.",
+  "user_simulator": {
+    "user_sim_context": "You are moving an international economy trip for a plain personal reason and want the agent to reason from the total economics rather than from habit.",
+    "known_info": [
+      "Booking BK-1000: ORD to CDG on 2026-06-21; move to 2026-06-28.",
+      "Reason: personal."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request focused on moving BK-1000 to June 28 by whichever valid strategy is cheaper, and do not authorize any cancellation, rebooking, or direct change until both strategies have been compared.",
+      "If the agent asks for booking details or the reason, provide BK-1000, the June 28 target date, and the personal reason; do not volunteer new travel preferences, cancellation math, replacement fares, or policy mechanics.",
+      "If the agent compares only one path, jumps straight to execution, or gives a recommendation without showing both direct-change costs and cancel-and-rebook costs, ask them to compare the change fee, fare difference, cancellation fee, refund, and replacement fare first.",
+      "If the agent omits the ordinary international personal-change fee or recommends direct change as cheaper, push back once and ask them to recheck the international personal-change total against the cancellation loss plus replacement fare.",
+      "Accept the cancel-and-rebook path only after the agent recaps both strategies, identifies it as the cheaper valid option, confirms the net out-of-pocket cost after refund is within budget, and asks for a final explicit go-ahead.",
+      "For the replacement booking, use your profile booking preferences and ask for enough option detail to verify the route, date, airline, timing, stops, cabin, total cash cost, and no unwanted add-ons before approving the new booking.",
+      "If the agent tries to add upgrades, extras, a different trip change, or an unrelated booking action, decline and keep the request limited to the cheaper valid June 28 replacement for BK-1000.",
+      "End only after BK-1000 has been cancelled, the June 28 replacement booking has been created with the expected profile preferences, and the agent summarizes the cancellation fee, refund, new booking details, and net cost outcome.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget applies to net out-of-pocket cost after any cancellation refund.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "Traveler wants the cheaper valid way to move an existing booking to 2026-06-28 and explicitly asks the agent to compare direct change versus cancel-and-rebook. Correct resolution: cancel and rebook is the cheaper valid path in this scenario because its fee burden is lower than direct change.\n\nChallenge: The agent must recognize that the ordinary international personal change fee can make cancel-and-rebook the cheaper path even on a long-haul booking.",
+  "task_requirements": [
+    {
+      "id": "strategy_personal_international_cancel_rebook_cheaper_compare_both_paths",
+      "kind": "must",
+      "requirement": "Agent must compare the direct-change path against the cancel-and-rebook path before recommending or executing, using the direct-change fee and fare difference on one side and the cancellation fee, refund, and replacement fare on the other side.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_international_cancel_rebook_cheaper_choose_correct_strategy",
+      "kind": "must",
+      "requirement": "Agent must recommend cancel and rebook as the cheaper valid option for this booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_international_cancel_rebook_cheaper_avoid_wrong_strategy",
+      "kind": "must_not",
+      "requirement": "Agent must not frame direct change as the cheaper valid option for this scenario.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_international_cancel_rebook_cheaper_international_fee_reasoning",
+      "kind": "must",
+      "requirement": "Agent must explain the ordinary international personal-change fee as part of the strategy comparison.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "strategy_personal_international_cancel_rebook_cheaper_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not cancel, create, or update any booking before comparing both paths and identifying the cheaper valid strategy.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "cancellation_fee",
+      "expected_value": 192
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "refund_amount",
+      "expected_value": 768
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "bookings",
+      "match_fields": {
+        "user_id": "user_004",
+        "flight_id": "AA101",
+        "status": "confirmed",
+        "payment_method": "credit_card",
+        "cash_amount": 820,
+        "points_used": 0,
+        "cabin_class": "economy",
+        "seat_type": "window",
+        "meal_preference": "standard",
+        "add_wifi": false,
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "paid_checked_bags": 0
+      },
+      "expected_fields": {
+        "add_extra_legroom": false,
+        "add_insurance": true,
+        "add_wifi": false,
+        "booked_at": "2026-06-15T10:00:00",
+        "booking_id": "BK-1001",
+        "cabin_class": "economy",
+        "cancellation_fee": null,
+        "cash_amount": 820,
+        "change_fee": null,
+        "delay_compensation": null,
+        "fare_difference": null,
+        "flight_id": "AA101",
+        "meal_preference": "standard",
+        "paid_checked_bags": 0,
+        "payment_method": "credit_card",
+        "points_used": 0,
+        "price_paid": 820,
+        "refund_amount": null,
+        "seat_type": "window",
+        "status": "confirmed",
+        "user_id": "user_004"
+      }
+    }
+  ],
+  "task_type": "strategy_compare_paths",
+  "task_env_path": "state_bench/domains/travel/task_envs/130-strategy_personal_international_cancel_rebook_cheaper.json"
+}

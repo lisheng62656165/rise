@@ -1,0 +1,71 @@
+{
+  "task_id": "78-hard_reuse_oos_backorder_loyalty_compound",
+  "user_id": "shop_001",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I want to buy the GameForce Pro 16 2027 Edition.",
+  "user_simulator": {
+    "user_sim_context": "You want the SP-2050 GameForce Pro 16 2027 Edition. You do NOT know it's out of stock. You do NOT know your Platinum loyalty rate (3 pts/$) or how many points this purchase earns. You would be willing to backorder if asked, but you would NOT accept a silent substitute (different model) because you want THIS specific laptop. The test is whether the agent (a) detects OOS, (b) proactively offers backorder with deposit + timeline specifics, (c) mentions loyalty points earned at Platinum rate with a specific number.",
+    "known_info": [
+      "You want one SP-2050 GameForce Pro 16 2027 Edition.",
+      "You are a returning customer.",
+      "(Internal: Platinum tier, 52k loyalty points, willing to backorder if offered, but you don't volunteer any of this.)"
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want one GameForce Pro 16 2027 Edition, and you are only willing to proceed with that exact laptop or a backorder for it.",
+      "Do not volunteer your Platinum tier, point balance, willingness to backorder, or any questions about promos, gift wrap, shipping, or accessories.",
+      "If the agent asks for identifying details about the product, provide the model name or SKU SP-2050; if the agent asks about your account, provide only details from your identity.",
+      "If the agent proposes a different laptop before offering a backorder for the 2027 Edition, refuse the substitute and ask once whether the requested model can be reserved or backordered.",
+      "If the agent offers backorder but omits either the 10% deposit or the 2-4 week restock timeline, do not ask for the missing term; you may accept the backorder path once it is presented.",
+      "If the agent gives the out-of-stock status and full backorder terms but does not mention earned Platinum loyalty points with a specific point amount, do not ask about loyalty; you may accept the backorder path.",
+      "If the agent tries to add the laptop to the cart and reports that the add failed because it is out of stock, let the agent recover once; if no backorder path is then offered, acknowledge the no-action outcome and end.",
+      "Accept the backorder only after the agent has made clear it is for the GameForce Pro 16 2027 Edition; if the agent also gives the out-of-stock status, 10% or $219 deposit, 2-4 week timeline, and about 6,597 earned Platinum points, simply agree to proceed with the backorder.",
+      "End with [TASK_DONE] only after the agent confirms the verbal backorder path or clearly explains that no backorder or other action will be taken for the requested laptop.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Platinum customer (shop_001) asks by name for SP-2050 GameForce Pro 16 2027 Edition ($2199), which is OOS but backorder_available=True. Agent must proactively surface backorder per policy (10% deposit = $219, 2-4 weeks restock) AND mention Platinum loyalty points earned on the full purchase (~6597 pts at 3 pts/$).\n\n**Challenge:** Compound proactive disclosure on OOS + backorder + loyalty. Pitfall: agent silently substitutes an in-stock laptop, or offers backorder without the deposit/timeline specifics, or forgets loyalty disclosure on a premium purchase. Correct: three disclosures — OOS status, full backorder terms, Platinum loyalty total. No cart write (backorder is conversational in current env).",
+  "task_requirements": [
+    {
+      "id": "identified_oos",
+      "kind": "must",
+      "requirement": "Agent explicitly informed the customer that SP-2050 GameForce Pro 16 2027 Edition is out of stock. Silent pivot to alternatives without naming OOS fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "offered_backorder_with_terms",
+      "kind": "must",
+      "requirement": "Agent offered backorder as an option AND cited BOTH (a) the 10% deposit (or the specific $219 number), AND (b) the 2-4 week restock timeline. Offering backorder without either specific fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "disclosed_platinum_loyalty_points",
+      "kind": "must",
+      "requirement": "Agent mentioned loyalty points that would be earned on the $2199 purchase at the Platinum 3 pts/$ rate, with a specific number (~6597 pts, or 'about 6,500 points'). Wrong tier rate or generic 'you'll earn points' fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_silent_substitute",
+      "kind": "must_not",
+      "requirement": "Agent must NOT recommend or add a different in-stock laptop (e.g. SP-1102 GameForce Pro 16 current edition, SP-1101 ProBook Laptop 15-inch, etc.) as a silent substitute for the requested 2027 Edition. Offering alternatives is OK ONLY after backorder has been presented as the primary path.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "checked_customer_profile",
+      "kind": "must",
+      "requirement": "Agent called get_customer_account for shop_001 to read tier before discussing loyalty benefits. Stating Platinum rate without lookup fails (should be verified).",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/78-hard_reuse_oos_backorder_loyalty_compound.json"
+}

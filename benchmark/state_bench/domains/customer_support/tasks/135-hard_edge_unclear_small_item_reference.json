@@ -1,0 +1,77 @@
+{
+  "task_id": "135-hard_edge_unclear_small_item_reference",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "I want to return the small accessory from ORD-7243. Can you just do it?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7243"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the small accessory from ORD-7243, but do not identify the item until the agent asks which item you mean.",
+      "If the agent asks for identifying information, provide the order ID and, once asked to clarify the item, say you meant the phone case.",
+      "If the agent guesses an item, previews a return, or tries to process any return or refund before clarifying which accessory you meant, push back that they need to clarify the item first and then identify the phone case.",
+      "Accept policy explanations only after the agent has clarified that the phone case is the item being returned.",
+      "Accept a return preview only if it is for the phone case, uses changed_mind as the reason, refunds $35 to the original payment method, and has no restocking fee.",
+      "If the preview is for the USB hub, the whole order, or any item other than the phone case, push back and restate that you only meant the phone case.",
+      "End only after the agent confirms the phone-case return has been processed with the expected refund details and no other ORD-7243 item changed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7243. Customer says only 'the small accessory' in a multi-item order. Agent must clarify which item before any write action. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Customer says only 'the small accessory' in a multi-item order. Agent must clarify which item before any write action.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_unclear_small_item_reference_must",
+      "kind": "must",
+      "requirement": "Agent must ask a clarifying question to identify the item before taking any write action."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_edge_unclear_small_item_reference_must_not",
+      "kind": "must_not",
+      "requirement": "Agent must not guess an item or process any return/refund before clarification."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10243",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10243",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10243",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10243",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10243",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7243",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "edge_case",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/135-hard_edge_unclear_small_item_reference.json"
+}

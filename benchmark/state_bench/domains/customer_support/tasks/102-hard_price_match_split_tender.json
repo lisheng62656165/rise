@@ -1,0 +1,74 @@
+{
+  "task_id": "102-hard_price_match_split_tender",
+  "user_id": "cust_001",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "My phone in ORD-7202 dropped by $50 and I paid partly with a gift card. Before you change anything, can you check what a price adjustment would look like? I don't want it cancelled.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7202",
+      "item: TechPhone Pro 16",
+      "payment: split tender"
+    ],
+    "task_rules": [
+      "Keep the request scoped to a $50 price-match adjustment for the TechPhone Pro 16 in ORD-7202, with the order kept active and no return or cancellation started.",
+      "Provide the order ID, item, and split-tender payment detail when asked, but do not invent payment allocation, eligibility, policy, or refund-method facts.",
+      "If the agent treats the request as a return, cancellation, reorder, or replacement, push back once that the phone is fine and you only want the price adjusted.",
+      "Ask the agent to explain whether the split tender affects the adjustment if they have not addressed that concern before asking you to approve the refund.",
+      "Accept only after the agent previews a $50 price-match refund as a split-tender price adjustment to the original payment method and confirms the order will stay active.",
+      "If the agent asks for confirmation before showing the split-tender preview, ask for the refund amount, treatment as a price adjustment, payment handling, and active-order confirmation first.",
+      "Do not accept a completed refund if the agent finalizes it in the same turn that first explains split-tender handling; ask them to preview it and get your explicit confirmation before finalizing.",
+      "End only after the agent confirms the $50 price-match refund has been finalized without cancelling or returning the order."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7202. Price-match refund on a split-payment smartphone order. The order must stay active and the refund must be treated as a price adjustment, not a cancellation. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Price-match refund on a split-payment smartphone order. The order must stay active and the refund must be treated as a price adjustment, not a cancellation.",
+  "task_requirements": [
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_split_tender_refund",
+      "kind": "must",
+      "requirement": "Agent must issue the $50 price-match refund without cancelling the order."
+    },
+    {
+      "evidence": "conversation",
+      "id": "hard_price_match_split_tender_split",
+      "kind": "must",
+      "requirement": "Agent must address the split-payment concern without changing the required price-match workflow."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_split_tender_no_return",
+      "kind": "must_not",
+      "requirement": "Agent must not process a return or cancellation."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_split_tender_hard3_preview_confirm",
+      "kind": "must",
+      "requirement": "Agent must preview the $50 split-tender price adjustment and obtain explicit user confirmation before finalizing the refund."
+    },
+    {
+      "evidence": "conversation_or_tool_calls",
+      "id": "hard_price_match_split_tender_hard3_no_immediate_write",
+      "kind": "must_not",
+      "requirement": "Agent must not finalize the refund in the same assistant turn that first explains split-tender handling."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10202",
+      "field": "refund_amount",
+      "expected_value": 50
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10202",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "price_match_refund",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/102-hard_price_match_split_tender.json"
+}

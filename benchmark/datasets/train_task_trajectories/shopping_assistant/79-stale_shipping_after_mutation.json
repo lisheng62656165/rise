@@ -1,0 +1,325 @@
+{
+  "conversation": [
+    {
+      "role": "system",
+      "content": "You are a shopping assistant for an online store. Today's date: <REDACTED>. You are currently helping customer shop_004. Use the available tools to help the customer find products, compare options, manage their cart, and apply promotions."
+    },
+    {
+      "role": "user",
+      "content": "Hi \u2014 please add 2 ProBook USB-C docks and 1 PixelShot webcam to my cart. Use standard shipping."
+    },
+    {
+      "role": "assistant",
+      "content": "Done \u2014 I added:\n\n- 2 \u00d7 ProBook USB-C Dock \u2014 $129 each\n- 1 \u00d7 PixelShot Webcam 1080p \u2014 $79\n\nShipping:\n- Standard shipping \u2014 $6\n\nCart total:\n- Subtotal: $337\n- Total: $343\n\nI added them without gift wrap. If you want, I can also check whether any promo codes or loyalty points could lower the total.",
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": {
+            "query": "ProBook USB-C dock",
+            "category": "electronics",
+            "min_price": 0,
+            "max_price": 10000,
+            "min_rating": 0,
+            "in_stock_only": true,
+            "sort_by": "relevance"
+          },
+          "result": {
+            "products": [
+              {
+                "product_id": "SP-2006",
+                "name": "ProBook USB-C Dock",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "accessory",
+                "price": 129,
+                "rating": 4.3,
+                "review_count": 920,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1101",
+                "name": "ProBook Laptop 15-inch",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 1299,
+                "rating": 4.7,
+                "review_count": 1890,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1002",
+                "name": "ProBook Laptop 13-inch",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 999,
+                "rating": 4.6,
+                "review_count": 2180,
+                "in_stock": true
+              },
+              {
+                "product_id": "SP-1106",
+                "name": "ProBook Chromebook 11",
+                "brand": "ProBook",
+                "category": "electronics",
+                "subcategory": "laptop",
+                "price": 329,
+                "rating": 3.9,
+                "review_count": 530,
+                "in_stock": true
+              }
+            ],
+            "total_found": 4
+          }
+        },
+        {
+          "name": "search_products",
+          "arguments": {
+            "query": "PixelShot webcam",
+            "category": "electronics",
+            "min_price": 0,
+            "max_price": 10000,
+            "min_rating": 0,
+            "in_stock_only": true,
+            "sort_by": "relevance"
+          },
+          "result": {
+            "products": [
+              {
+                "product_id": "SP-2005",
+                "name": "PixelShot Webcam 1080p",
+                "brand": "PixelShot",
+                "category": "electronics",
+                "subcategory": "webcam",
+                "price": 79,
+                "rating": 4.1,
+                "review_count": 680,
+                "in_stock": true
+              }
+            ],
+            "total_found": 1
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-2006"
+          },
+          "result": {
+            "product_id": "SP-2006",
+            "product_name": "ProBook USB-C Dock",
+            "base_price": 129,
+            "variants": [],
+            "note": "This product has no variants; no variant_id is needed for add_to_cart."
+          }
+        },
+        {
+          "name": "get_variants",
+          "arguments": {
+            "product_id": "SP-2005"
+          },
+          "result": {
+            "product_id": "SP-2005",
+            "product_name": "PixelShot Webcam 1080p",
+            "base_price": 79,
+            "variants": [],
+            "note": "This product has no variants; no variant_id is needed for add_to_cart."
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": {
+            "customer_id": "shop_004",
+            "product_id": "SP-2006",
+            "quantity": 2,
+            "gift_wrap": false,
+            "variant_id": ""
+          },
+          "result": {
+            "status": "added",
+            "cart_item_id": "CI-0001",
+            "product_id": "SP-2006",
+            "product_name": "ProBook USB-C Dock",
+            "variant_id": null,
+            "quantity": 2,
+            "gift_wrap": false,
+            "unit_price": 129,
+            "cart_subtotal": 258,
+            "cart_total": 258
+          }
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": {
+            "customer_id": "shop_004",
+            "product_id": "SP-2005",
+            "quantity": 1,
+            "gift_wrap": false,
+            "variant_id": ""
+          },
+          "result": {
+            "status": "added",
+            "cart_item_id": "CI-0002",
+            "product_id": "SP-2005",
+            "product_name": "PixelShot Webcam 1080p",
+            "variant_id": null,
+            "quantity": 1,
+            "gift_wrap": false,
+            "unit_price": 79,
+            "cart_subtotal": 337,
+            "cart_total": 337
+          }
+        },
+        {
+          "name": "set_shipping_option",
+          "arguments": {
+            "customer_id": "shop_004",
+            "option": "standard"
+          },
+          "result": {
+            "status": "set",
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "cart_subtotal": 337,
+            "cart_total": 343
+          }
+        },
+        {
+          "name": "get_cart",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "cart_id": "CART-shop_004",
+            "customer_id": "shop_004",
+            "items": [
+              {
+                "cart_item_id": "CI-0001",
+                "product_id": "SP-2006",
+                "product_name": "ProBook USB-C Dock",
+                "quantity": 2,
+                "gift_wrap": false,
+                "unit_price": 129,
+                "line_total": 258
+              },
+              {
+                "cart_item_id": "CI-0002",
+                "product_id": "SP-2005",
+                "product_name": "PixelShot Webcam 1080p",
+                "quantity": 1,
+                "gift_wrap": false,
+                "unit_price": 79,
+                "line_total": 79
+              }
+            ],
+            "subtotal": 337,
+            "discount_amount": 0,
+            "gift_wrap_fee": 0,
+            "loyalty_discount": 0,
+            "loyalty_points_redeemed": 0,
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "total": 343,
+            "applied_promo_codes": []
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Actually, I just realized I need one more of each. Please update it to 3 ProBook USB-C docks and 2 PixelShot webcams total, and keep standard shipping."
+    },
+    {
+      "role": "assistant",
+      "content": "Updated \u2014 your cart now has:\n\n- 3 \u00d7 ProBook USB-C Dock \u2014 $387\n- 2 \u00d7 PixelShot Webcam 1080p \u2014 $158\n\nShipping:\n- Standard shipping \u2014 $6\n\nTotals:\n- Subtotal: $545\n- Total: $551\n\nStandard shipping is still applied.",
+      "tool_calls": [
+        {
+          "name": "update_cart_item",
+          "arguments": {
+            "customer_id": "shop_004",
+            "product_id": "SP-2006",
+            "variant_id": "",
+            "quantity": 3,
+            "gift_wrap": false
+          },
+          "result": {
+            "status": "updated",
+            "cart_item_id": "CI-0001",
+            "product_id": "SP-2006",
+            "variant_id": null,
+            "product_name": "ProBook USB-C Dock",
+            "quantity": 3,
+            "gift_wrap": false,
+            "cart_subtotal": 466,
+            "cart_total": 472
+          }
+        },
+        {
+          "name": "update_cart_item",
+          "arguments": {
+            "customer_id": "shop_004",
+            "product_id": "SP-2005",
+            "variant_id": "",
+            "quantity": 2,
+            "gift_wrap": false
+          },
+          "result": {
+            "status": "updated",
+            "cart_item_id": "CI-0002",
+            "product_id": "SP-2005",
+            "variant_id": null,
+            "product_name": "PixelShot Webcam 1080p",
+            "quantity": 2,
+            "gift_wrap": false,
+            "cart_subtotal": 545,
+            "cart_total": 551
+          }
+        },
+        {
+          "name": "get_cart",
+          "arguments": {
+            "customer_id": "shop_004"
+          },
+          "result": {
+            "cart_id": "CART-shop_004",
+            "customer_id": "shop_004",
+            "items": [
+              {
+                "cart_item_id": "CI-0001",
+                "product_id": "SP-2006",
+                "product_name": "ProBook USB-C Dock",
+                "quantity": 3,
+                "gift_wrap": false,
+                "unit_price": 129,
+                "line_total": 387
+              },
+              {
+                "cart_item_id": "CI-0002",
+                "product_id": "SP-2005",
+                "product_name": "PixelShot Webcam 1080p",
+                "quantity": 2,
+                "gift_wrap": false,
+                "unit_price": 79,
+                "line_total": 158
+              }
+            ],
+            "subtotal": 545,
+            "discount_amount": 0,
+            "gift_wrap_fee": 0,
+            "loyalty_discount": 0,
+            "loyalty_points_redeemed": 0,
+            "shipping_option": "standard",
+            "shipping_cost": 6,
+            "total": 551,
+            "applied_promo_codes": []
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Thanks \u2014 that works for me. [TASK_DONE]"
+    }
+  ]
+}

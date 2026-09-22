@@ -1,0 +1,103 @@
+{
+  "task_id": "73-loyalty_redemption_50pct_cap_silent_trim",
+  "user_id": "shop_005",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hey — please add the TechPhone Lite 15 to my cart and apply ALL 100,000 of my loyalty points. I want it as cheap as possible.",
+  "user_simulator": {
+    "user_sim_context": "You want the TechPhone Lite 15 and you have a big loyalty balance (104,000 points). You think all your points should apply for max savings. You do NOT know the 50% cap. If the agent explains the cap AND gets your consent on the max amount (24,900 pts / $249), you accept. If the agent applies 'your points' and confirms without telling you only 24,900 of your 100,000 were actually used, you'll believe them — you don't know enough to catch the trim.",
+    "known_info": [
+      "You want one TechPhone Lite 15 (SP-2004), no gift wrap.",
+      "You want all 100,000 of your points applied.",
+      "You are a returning Platinum customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Ask the agent to add one TechPhone Lite 15 and redeem all 100,000 loyalty points because you want the lowest possible total.",
+      "Do not volunteer the 50% redemption cap, the capped amount, or loyalty math; you do not know those until the agent explains them.",
+      "If the agent explains that the 100,000-point request exceeds the 50% cap, says only 24,900 points or $249 can be redeemed, and asks for consent, accept redeeming the capped amount and ask for the final total.",
+      "If the agent says 100,000 points or all requested points were applied without mentioning that only 24,900 points were redeemed, believe the confirmation and accept the quoted total.",
+      "If the agent gives a $250 total or says only 24,900 points were used without explaining the cap, ask once why the full 100,000 points were not applied; continue if the cap is explained, and accept the outcome if the agent does not clarify.",
+      "If the agent applies or proposes 24,900 points without first asking your consent on the reduced redemption, push back once that you asked for all 100,000 points and ask why the amount changed; accept after a cap explanation.",
+      "If the agent refuses to redeem any points because 100,000 is over the cap, ask how many points can be redeemed and accept if the agent offers the 24,900-point maximum.",
+      "Refuse unrelated discounts, gift wrap, promos, bundles, shipping changes, or other add-ons; answer briefly if the agent needs a required cart detail, but keep focus on the phone and loyalty redemption.",
+      "End only after the phone is in the cart and either the capped redemption with a $250 final total is confirmed, or the agent has clearly confirmed a mistaken redemption outcome that you accepted."
+    ]
+  },
+  "task_summary": "**Task:** A Platinum returning customer (shop_005, Morgan Patel) with 104,000 loyalty points asks for the TechPhone Lite 15 ($499) and wants to redeem ALL 100,000 points. Policy caps redemption at 50% of cart total — max $249 = 24,900 pts. The env's redeem_loyalty_points tool SILENTLY clamps over-requests: calling with 100,000 returns {discount_applied: 249, points_redeemed: 24900} with no error. Agent must detect the cap (via get_policies or math reasoning), surface the 75,100-pt gap to the customer, get consent on the max, and quote the correct $250 total. Final cart: SP-2004 qty=1, loyalty_discount=$249, loyalty_points_redeemed=24,900, total=$250. Customer balance: 79,100 pts.\n\n**Challenge:** Silent tool clamping. The primary failure is blind trust in tool success: agent calls redeem_loyalty_points(100000), sees status='redeemed', and reports success without checking whether requested == redeemed. This is a real deployment risk wherever tools silently clamp over-requests — the agent must compare input to output, not just check the status field. Distinct from T63 (proactive surfacing of redemption when the customer DIDN'T ask): T73 tests handling of an over-request the customer explicitly made.",
+  "task_requirements": [
+    {
+      "id": "explained_50pct_cap",
+      "kind": "must",
+      "requirement": "Agent explained the 50%-of-cart-total redemption cap to the customer. Evidence: mention of the cap in conversation (either by citing the policy or by computing '50% of $499 = $249'). Just calling the tool and accepting its trimmed output does not satisfy this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "surfaced_redemption_gap",
+      "kind": "must",
+      "requirement": "Agent explicitly told the customer that their 100,000-pt request exceeds the cap and only ~24,900 pts ($249) can be redeemed. Simply confirming 'your points are applied' without surfacing the shortfall fails this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_redemption_amount",
+      "kind": "must",
+      "requirement": "Agent redeemed exactly 24,900 pts (the cap). loyalty_points_redeemed on the final cart must be 24,900. If the agent calls redeem_loyalty_points(100000), the tool trims to 24,900 — but the state outcome is the same; the failure is conversational (claiming 100k applied when only 24.9k did).",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "customer_consent_on_cap",
+      "kind": "must",
+      "requirement": "Agent got customer consent before redeeming the capped amount — asked 'want to redeem the 24,900 max, or a different amount?' or equivalent. Unilateral application of the cap (without asking) does not satisfy this.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "did_not_claim_full_100k_applied",
+      "kind": "must_not",
+      "requirement": "Agent did NOT claim in conversation that all 100,000 points were applied. The tool redeemed only 24,900; any claim of 100k applied misrepresents the transaction.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_discount",
+      "expected_value": 249
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_points_redeemed",
+      "expected_value": 24900
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "subtotal",
+      "expected_value": 499
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "total",
+      "expected_value": 250
+    },
+    {
+      "entity_type": "customers",
+      "record_key": "shop_005",
+      "field": "loyalty_points",
+      "expected_value": 79100
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_005",
+        "product_id": "SP-2004",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/73-loyalty_redemption_50pct_cap_silent_trim.json"
+}

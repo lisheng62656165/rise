@@ -1,0 +1,104 @@
+{
+  "task_id": "113-change_domestic_personal_with_insurance_no_waiver",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I need to move my insured booking BK-1000 to June 26 for personal reasons, but before you change anything I want to know whether the insurance helps and whether there is any lower-cost option that same day.",
+  "user_simulator": {
+    "user_sim_context": "You are making an ordinary personal change on an insured domestic booking and want the agent to tell you plainly whether the insurance helps. The harder part is that you do not want the agent to assume the requested replacement is automatically the best path. You want at least two concrete June 26 options compared first, then a clear statement that insurance does not reduce the personal change fee, and then one final confirmation of the total before you authorize the change.",
+    "known_info": [
+      "Booking BK-1000: ORD to BOS on 2026-06-21, insured.",
+      "Requested change: move to 2026-06-26 for personal reasons.",
+      "You want at least two June 26 options compared before approving any change."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want to change BK-1000 to June 26 for a personal reason only if the agent first explains whether insurance changes the fee and compares lower-cost same-day options.",
+      "If the agent asks for the booking, date, or reason, provide BK-1000, June 26, and personal reasons; do not volunteer policy math or flight prices.",
+      "If the agent discusses only one June 26 replacement, ask for at least one other concrete June 26 option and the total extra amount for each before approving anything.",
+      "Push back if the agent says or implies that insurance waives or reduces the ordinary personal domestic change fee; ask for the personal-change fee to be stated plainly.",
+      "After at least two June 26 options are compared, choose the valid option with the lowest total extra amount within budget, even if it is simply the originally discussed replacement.",
+      "Before approving the change, require a final recap that names the selected June 26 option, confirms insurance does not reduce the personal change fee, and gives the selected option's total extra amount.",
+      "If the agent asks about booking-stage preferences for the changed booking, ask to keep the existing booking's preferences; push back if the completed change shows changed or missing persisted preferences.",
+      "This booking BK-1000 already has travel insurance on it. On this flight change you want add_insurance kept ON (the existing value). Never ask the agent to remove or turn off insurance for this change, and do not treat keeping add_insurance=true as a wrong preference.",
+      "When verifying or correcting booking-stage preferences for this change (including the one-correction-at-a-time rule), treat the existing booking's persisted values as the expected values; for insurance specifically, the expected value is ON, so do not use your profile insurance setting and do not push to set add_insurance to no.",
+      "End only after the agent has updated BK-1000 to the approved June 26 option and confirmed the final cost details and preserved preferences.",
+      "For new booking creation, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a new booking, including a replacement after canceling an existing booking, if the agent asks about one of those booking-stage preferences, answer using your profile preferences.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] for a booking creation or flight change until the final booking has the expected booking-stage preferences for that operation: profile preferences for new bookings, existing persisted preferences for changes."
+    ]
+  },
+  "task_summary": "Traveler needs to move a domestic economy booking for a personal reason. Correct resolution: the change fee is $150 and the requested replacement changes the total by $240 more.\n\nChallenge: The agent must compare two real June 26 options, keep insurance from incorrectly reducing the ordinary personal fee, recommend the lowest-cost valid option, and still wait for explicit final approval after a recap instead of treating the first named replacement as settled.",
+  "task_requirements": [
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_fee_quote",
+      "kind": "must",
+      "requirement": "Agent must explain that the correct change fee for this request is $150.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_delta_quote",
+      "kind": "must",
+      "requirement": "Agent must explain that moving to the requested flight changes the booking total by $240 more, based on the replacement fare and the applicable change fee.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_insurance_rule",
+      "kind": "must",
+      "requirement": "Agent must explain that insurance does not waive or reduce the personal domestic change fee for this request.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_compare",
+      "kind": "must",
+      "requirement": "Agent must compare at least two concrete June 26 options and give the exact total extra amount for each before executing any booking change.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_recommendation",
+      "kind": "must",
+      "requirement": "Agent must identify the lowest-cost valid June 26 option after comparing the same-day alternatives rather than treating the initially discussed replacement as the only path.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "change_domestic_personal_with_insurance_no_waiver_no_premature_write",
+      "kind": "must_not",
+      "requirement": "Agent must not update the booking before the user explicitly approves a specific compared June 26 option after the final recap step.",
+      "evidence": "conversation"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "change_fee",
+      "expected_value": 150
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "fare_difference",
+      "expected_value": 90
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "flight_id",
+      "expected_value": "UA101"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-1000",
+      "field": "price_paid",
+      "expected_value": 540
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/113-change_domestic_personal_with_insurance_no_waiver.json"
+}

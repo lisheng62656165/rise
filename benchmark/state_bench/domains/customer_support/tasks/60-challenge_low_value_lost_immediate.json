@@ -1,0 +1,55 @@
+{
+  "task_id": "60-challenge_low_value_lost_immediate",
+  "user_id": "cust_002",
+  "now": "2026-07-08T10:00:00",
+  "opening_message": "My blender from ORD-7052 is lost in transit. I want you to investigate where it went and find it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7052",
+      "item: blender ($89)",
+      "status: lost"
+    ],
+    "task_rules": [
+      "Start from the lost-blender claim for ORD-7052, but prioritize a quick resolution over a back-end investigation once the agent explains the available policy path.",
+      "Provide the order ID, item, and lost status when needed; do not volunteer policy thresholds, refund amounts, stock, or internal tracking facts you do not know.",
+      "If the agent offers an immediate reship or full refund for the low-value lost shipment, ask once whether an investigation is unnecessary, then accept the immediate path after the agent confirms it is allowed.",
+      "If the agent asks you to choose between an immediate refund and an immediate reship, choose the refund unless the agent has already completed or clearly previewed another acceptable immediate resolution.",
+      "If the agent says an investigation, waiting period, or denial is required, push back once by asking whether that applies to an $89 lost item and state that you prefer the immediate refund or reship option if policy allows it.",
+      "Accept only after the agent previews the action as an immediate full refund or immediate reship for the blender, without an investigation delay or waiting period.",
+      "End only after the agreed refund or reship has been completed, or after the agent clearly explains a final no-action outcome that you accept."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "Your blender appears lost in transit, but you are more interested in getting it resolved quickly than in hearing about back-end investigation steps. From your point of view this should be a simple fix because the item is not especially expensive. You expect the agent to offer an immediate path forward."
+  },
+  "task_summary": "**Task:** A low-value $89 blender is lost in transit. Because the claim is under the $500 threshold, the correct handling is to offer an immediate refund or reship without imposing any investigation delay.\n\n**Challenge:** The temptation is to overgeneralize from the high-value shipping rule. Weak agents start a three-to-five-day investigation anyway, tell the customer to wait when immediate resolution is allowed, or deny relief altogether.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "60_challenge_low_value_lost_immediate_agent_must_not_start_an_investigation",
+      "kind": "must_not",
+      "requirement": "Agent must not start an investigation or impose a waiting period — offer immediate resolution."
+    },
+    {
+      "evidence": "conversation",
+      "id": "60_challenge_low_value_lost_immediate_agent_must_offer_reship_or_full",
+      "kind": "must",
+      "requirement": "Agent must tell the customer they can choose an immediate reship or a full refund for the low-value lost shipment."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10052",
+      "field": "refund_amount",
+      "expected_value": 89
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10052",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/60-challenge_low_value_lost_immediate.json"
+}

@@ -1,0 +1,115 @@
+{
+  "task_id": "95-challenge_gold_repeat_restock_shipping",
+  "user_id": "cust_003",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I want to return the headphones and USB hub from order ORD-7130.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7130",
+      "items: headphones+hub",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning both the headphones and USB hub from ORD-7130 for changed mind; do not switch to a single-item return, exchange, replacement, or store-credit preference.",
+      "Provide the order ID, both item names, customer ID, and changed-mind reason when the agent asks for identifying details; do not volunteer refund amounts, fees, policy rules, or item IDs.",
+      "If the agent discusses restocking fees or membership effects, ask whether the Gold restocking discount applies separately to both returned electronics items.",
+      "Push back if the agent handles only one item, omits either Gold restocking discount, treats the repeat electronics surcharge as optional or unrelated, or ignores the free-shipping clawback for the remaining order.",
+      "Accept the return preview only after the agent itemizes both returned items and explains the headphones Gold discount, the USB hub Gold discount, the USB hub repeat same-category surcharge, the shipping clawback, and the resulting refund handling.",
+      "If the agent asks for confirmation before giving that full breakdown, ask for the per-item and order-level fee explanation before approving the returns.",
+      "End only after both returns have been processed and the final confirmation preserves both electronics as returned for changed mind with the fee and refund details resolved."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return two electronics items from a free-shipping order and know your Gold status should matter, but you are not sure where. Because there are two related items involved, you expect the agent to keep the per-item logic straight. You want the final explanation to make sense across both items and the order as a whole."
+  },
+  "task_summary": "**Task:** A Gold customer is returning both headphones and a USB hub from a free-shipping order. The correct handling is to apply the Gold restocking-discount credit to both electronics lines, add the $5 repeat same-category surcharge to the second item, and also account for the $8 shipping clawback caused by the reduced remaining order.\n\n**Challenge:** The main risk is incomplete item-by-item accounting. Weak agents remember only one of the Gold credits, miss the repeat surcharge, or ignore the shipping clawback once the return logic becomes more complex.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "95_challenge_gold_repeat_restock_shipping_agent_must_include_the_gold_restocking",
+      "kind": "must",
+      "requirement": "Agent must explain the Gold restocking-fee discounts separately for both returned electronics items: $18 for the headphones and $3 for the USB hub."
+    },
+    {
+      "evidence": "conversation",
+      "id": "95_challenge_gold_repeat_restock_shipping_agent_must_include_the_repeat_return",
+      "kind": "must",
+      "requirement": "Agent must explain that the USB hub return is the second electronics return in the order and therefore carries a $5 repeat-category surcharge."
+    },
+    {
+      "evidence": "conversation",
+      "id": "95_challenge_gold_repeat_restock_shipping_agent_must_include_the_shipping_adjustment",
+      "kind": "must",
+      "requirement": "Agent must explain that an $8 free-shipping clawback applies because returning the headphones and USB hub leaves only the $59 shirt, below the free-shipping threshold."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10172",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10172",
+      "field": "refund_amount",
+      "expected_value": 230
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10172",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10172",
+      "field": "restocking_fee",
+      "expected_value": 37
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10172",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10173",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10173",
+      "field": "refund_amount",
+      "expected_value": 29
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10173",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10173",
+      "field": "restocking_fee",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10173",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7130",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/95-challenge_gold_repeat_restock_shipping.json"
+}

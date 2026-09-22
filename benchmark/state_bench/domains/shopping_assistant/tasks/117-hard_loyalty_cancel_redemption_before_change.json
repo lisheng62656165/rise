@@ -1,0 +1,97 @@
+{
+  "task_id": "117-hard_loyalty_cancel_redemption_before_change",
+  "user_id": "shop_005",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "I used points on this cart, but now I want the phone case removed too. First tell me exactly how many points will come back and what stays in the cart, then do it after I confirm.",
+  "user_simulator": {
+    "user_sim_context": "You have already used points on this cart and now want the phone case removed too. Before anything changes, you want to know exactly how many points will come back and what will remain in the cart.",
+    "known_info": [
+      "You know your current request and how you asked for it.",
+      "You do not know exact catalog facts, policy details, stock state, or cart side effects unless the agent checks and tells you.",
+      "Your cart already contains: 1 x ProBook Laptop 13; 1 x ClearGrip Slim Case for iPhone 14.",
+      "Your cart already has a loyalty redemption of 51700 points for $517 off."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "You want the existing loyalty redemption cancelled and only the phone case removed, but only after the agent previews the exact restored points and which cart items will remain.",
+      "If the agent asks what is in your cart or what redemption is active, say the cart has one ProBook Laptop 13, one ClearGrip Slim Case for iPhone 14, and a 51,700-point redemption; do not volunteer other cart, policy, shipping, or catalog facts.",
+      "Consent to cancelling the redemption and removing only the phone case only after the agent says 51,700 points will come back and the ProBook Laptop 13 will stay in the cart.",
+      "If the agent gives only a vague points preview, omits what remains in the cart, or asks for approval before the exact points and laptop-retained scope are clear, ask for that preview before approving any change.",
+      "If the agent cancels points, removes the phone case, removes the laptop, changes shipping, applies promos, or adds anything before your approval, object that only the previewed redemption cancellation and phone-case removal were authorized.",
+      "After you consent to the redemption cancellation and case removal, do not include [TASK_DONE] in that same message; wait for the agent to confirm both actions were completed.",
+      "End only after the redemption has been cancelled, only the phone case has been removed, and the agent confirms the ProBook Laptop 13 remains in the cart.",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences unless this task is explicitly about that topic.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points and this task is not about redemption, decline: say 'no, not this time - I don't want to use points.'",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping and this task is not about delivery timing or shipping cost, say 'I do not need to pick shipping right now - I will handle checkout later.'"
+    ]
+  },
+  "task_summary": "**Task:** Customer shop_005 opens with: \"I used points on this cart, but now I want the phone case removed too. First tell me exactly how many points will come back and what stays in the cart, then do it after I confirm.\" Relevant catalog/policy surface: ProBook Laptop 13 (SP-H102), ClearGrip Slim Case for iPhone 14 (SP-H109). Correct final state: Preview restored points and kept laptop, get consent, cancel loyalty redemption, then remove only the phone case.\n\n**Challenge:** Sequenced loyalty reversal requires a numeric/account preview before mutation. Primary pitfall: Mutates before preview/consent, removes the laptop, or gives vague points narration. Correct behavior: Preview restored points and kept laptop, get consent, cancel loyalty redemption, then remove only the phone case. Novelty: Tests redemption reversal as the primary workflow. Family: loyalty_account.",
+  "task_requirements": [
+    {
+      "id": "previewed_points_and_scope",
+      "kind": "must",
+      "requirement": "Agent previewed the points restoration and stated the laptop would remain before mutating the cart.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "got_consent_before_loyalty_case_change",
+      "kind": "must",
+      "requirement": "Agent got consent after the preview before cancelling points/removing the case.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "cancelled_before_remove",
+      "kind": "must",
+      "requirement": "Agent cancelled the loyalty redemption before removing the phone case.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "removed_case_kept_laptop",
+      "kind": "must",
+      "requirement": "Agent removed only the phone case and kept the ProBook laptop in the cart.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "item_ids",
+      "expected_value": [
+        "CI-0001"
+      ]
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_discount",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "loyalty_points_redeemed",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "subtotal",
+      "expected_value": 999
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_005",
+      "field": "total",
+      "expected_value": 999
+    },
+    {
+      "entity_type": "customers",
+      "record_key": "shop_005",
+      "field": "loyalty_points",
+      "expected_value": 104000
+    }
+  ],
+  "task_type": "loyalty_account",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/117-hard_loyalty_cancel_redemption_before_change.json"
+}

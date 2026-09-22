@@ -1,0 +1,84 @@
+{
+  "task_id": "146-hard_compound_wrong_item_plus_late_comp",
+  "user_id": "cust_003",
+  "now": "2026-07-08T18:00:00",
+  "opening_message": "ORD-7257 came six days late and it's the wrong phone case. I need both issues fixed.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7257",
+      "issue1: wrong item",
+      "issue2: six days late"
+    ],
+    "task_rules": [
+      "Keep the request scoped to fixing both parts of ORD-7257: returning the wrong phone case and receiving separate compensation for the six-day late delivery.",
+      "Provide the order ID and confirm the wrong-item and late-delivery facts when the agent asks or when needed to keep both issues in scope.",
+      "If the agent handles only the wrong-item return or only the late-delivery compensation, ask once for the missing issue to be included before agreeing to a final resolution.",
+      "Push back on replacement-only, store-credit-only, changed-mind, restocking-fee, or single-refund paths that do not treat this as a wrong-item return plus separate late-delivery compensation.",
+      "Accept only after the agent previews both actions: the phone-case wrong-item return with its refund details and a separate late-delivery compensation amount and method.",
+      "If the preview covers both issues correctly, confirm the actions; if either issue, amount, or method is missing, ask the agent to complete the preview before you confirm.",
+      "End only after the wrong-item return has been processed and the separate late-delivery compensation has been issued."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about order ORD-7257. Package arrived six days late and contains the wrong phone case. Agent must process wrong-item return and separately issue late-delivery compensation. Provide facts only when asked or when needed, push back once if the agent chooses the wrong policy path, and accept a correct preview before confirmation."
+  },
+  "task_summary": "Package arrived six days late and contains the wrong phone case. Agent must process wrong-item return and separately issue late-delivery compensation.",
+  "task_requirements": [],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "goodwill_credit",
+      "expected_value": 21
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "goodwill_credit_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "return_label_issued",
+      "expected_value": true
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10261",
+      "field": "return_reason",
+      "expected_value": "wrong_item"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7257",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/146-hard_compound_wrong_item_plus_late_comp.json"
+}

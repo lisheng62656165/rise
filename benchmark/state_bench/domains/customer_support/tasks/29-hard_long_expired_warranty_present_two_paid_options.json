@@ -1,0 +1,111 @@
+{
+  "task_id": "29-hard_long_expired_warranty_present_two_paid_options",
+  "user_id": "cust_004",
+  "now": "2026-07-15T10:00:00",
+  "opening_message": "My headphones from ORD-7562 have stopped holding a charge. The warranty is probably old, but what are my options?",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7562",
+      "item: SoundMax Wireless Headphones",
+      "warranty_id: WRT-4162",
+      "issue: stopped holding a charge",
+      "preferred_option: discounted replacement if both paid repair and discounted replacement are offered"
+    ],
+    "task_rules": [
+      "Keep the request scoped to warranty help for the headphones from ORD-7562.",
+      "Provide the order ID, item, warranty ID, and charging issue when asked; do not volunteer warranty dates, costs, or policy outcomes.",
+      "If the agent denies all help because the warranty is expired, ask once whether any paid repair or discounted replacement option remains.",
+      "If the agent presents only one paid option, ask whether the long-expired warranty policy also provides another option.",
+      "If the agent offers both paid repair and discounted replacement and asks you to choose, choose the discounted replacement option.",
+      "If the agent offers a free repair, free replacement, refund, return, goodwill credit, or escalation, ask whether the actual policy is limited to paid repair or discounted replacement.",
+      "Accept only after the agent presents both paid options, gets your choice of discounted replacement, previews the warranty claim, and asks for confirmation before filing it.",
+      "End only after the warranty claim has been filed and the agent confirms the long-expired-warranty paid-option outcome."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The warranty is long expired. A perfect agent should not deny all help or invent a free exception; it should explain that policy leaves paid repair or discounted replacement, ask you to choose, then file the claim after confirmation."
+  },
+  "task_summary": "**Task:** A headphones warranty expired more than 30 days ago. Policy does not provide free coverage, but it does provide two paid paths: full-price paid repair or 25%-off discounted replacement. Correct handling is to check warranty status and policy, present both paid options, let the customer choose discounted replacement, and only then file the warranty claim.\n\n**Challenge:** This is distinct from recent-expiry discounted repair and max-claims paid repair tasks. Weak agents deny all warranty help after seeing expiry, present only repair, invent a free exception, or file a claim before giving the customer the required choice.",
+  "task_requirements": [
+    {
+      "id": "172_present_two_paid_options",
+      "kind": "must",
+      "requirement": "Agent must present both long-expired warranty options: paid repair and discounted replacement, and must not collapse them into a single option.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "172_get_choice_before_claim",
+      "kind": "must",
+      "requirement": "Agent must ask the customer to choose between the paid options and obtain confirmation before filing the warranty claim.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "172_no_free_or_denial_only",
+      "kind": "must_not",
+      "requirement": "Agent must not deny all help because the warranty expired, promise a free repair/replacement, issue a refund/return, or route to goodwill/escalation as the resolution.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10562",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7562",
+          "product_id": "PROD-4562",
+          "quantity": 1,
+          "unit_price": 249,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4162",
+      "field": "claim_count",
+      "expected_value": 1
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4162",
+      "field": "resolution",
+      "expected_value": "paid_repair_or_discounted_replacement"
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4162",
+      "field": "status",
+      "expected_value": "claimed"
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7562",
+        "product_id": "PROD-4562",
+        "quantity": 1,
+        "unit_price": 249,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7562",
+        "product_id": "PROD-4562",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 249
+      }
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/29-hard_long_expired_warranty_present_two_paid_options.json"
+}

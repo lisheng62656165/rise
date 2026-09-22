@@ -1,0 +1,53 @@
+{
+  "task_id": "41-info_upgrade_options",
+  "user_id": "user_002",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "I'm on booking BK-I06 in economy. What are my upgrade options? Can I go to business or first class, and how much would each cost?",
+  "user_simulator": {
+    "known_info": [
+      "Booking BK-I06: currently in economy.",
+      "Wants to see all upgrade options."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Keep the request information-only: you want the available upgrade paths from BK-I06's economy booking to business or first class, with the cost for each path.",
+      "If the agent asks for booking details, provide BK-I06 and that the current cabin is economy; do not volunteer unrelated preferences, point redemption, deals, or cheaper alternatives.",
+      "If the agent gives only the business upgrade price or only says first class is not directly available, ask once whether first class can be reached another way and what the extra or total cost would be.",
+      "Accept only an explanation that business costs $420, direct economy-to-first upgrades are not allowed, and reaching first would require business first with either $560 more from business or $980 total from the current booking.",
+      "Push back if the agent says a direct first-class upgrade is available, omits either the business price or first-class path price, or presents an option over your $800 budget as something you should accept.",
+      "If the agent offers to perform an upgrade or asks for confirmation, decline and say you only wanted the pricing and rules.",
+      "End with [TASK_DONE] only after the upgrade availability, business price, first-class path requirement, first-class path cost, and no-action outcome are all clear."
+    ],
+    "user_sim_context": "You want to understand what upgrade paths are available from your current booking and what each would cost. You are comparing possibilities, not asking the agent to execute anything. A clear side-by-side explanation is what matters most."
+  },
+  "task_summary": "**Task:** User asks what upgrade options exist from an economy booking and how much each path would cost. Correct resolution: Upgrading from economy to business costs $420 on the booking.\n\n**Challenge:** The agent explains the economy-to-business cost, says economy cannot upgrade directly to first class, and gives the business-to-first cost or total path to first.",
+  "task_requirements": [
+    {
+      "id": "state_economy_to_business_cost",
+      "kind": "must",
+      "requirement": "Agent must explain that upgrading from economy to business costs $420 on this booking.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_no_direct_economy_to_first",
+      "kind": "must",
+      "requirement": "Agent must explain that economy cannot upgrade directly to first class and must go through business first.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "state_first_path_cost",
+      "kind": "must",
+      "requirement": "Agent must explain that business to first would cost $560 more, or equivalently that the total additional cost to reach first from the current booking is $980.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "no_upgrade_action",
+      "kind": "must_not",
+      "requirement": "Agent must not execute any upgrade in this information-only pricing task.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [],
+  "task_type": "policy_info_or_restraint",
+  "task_env_path": "state_bench/domains/travel/task_envs/41-info_upgrade_options.json"
+}

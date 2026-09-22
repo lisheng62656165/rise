@@ -1,0 +1,79 @@
+{
+  "task_id": "96-challenge_seasonal_low_value_silver_electronics",
+  "user_id": "cust_004",
+  "now": "2027-01-12T10:00:00",
+  "opening_message": "I want to return the USB hub from my December order ORD-7131.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7131",
+      "item: USB hub",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the USB hub from ORD-7131 because you changed your mind; provide the order ID, item, reason, and your Silver membership only when useful or when the agent asks.",
+      "Ask the agent to check the records or policy for eligibility, refund amount, fees, and timing details you do not know; do not invent refund math or policy terms yourself.",
+      "If the agent says the normal return window has expired or tries to deny the return on timing alone, ask once whether the December order is covered by the holiday return extension.",
+      "If the agent mentions an electronics restocking fee without Silver treatment, ask whether your Silver status changes that fee.",
+      "Push back on a preview that omits the seasonal eligibility explanation, electronics restocking fee, Silver restocking discount, low-value return-shipping deduction, wrong item, wrong reason, or inconsistent net refund.",
+      "Accept the return only after the agent previews the USB hub return with original-payment refund terms and explains the $32 net refund from the $6 restocking fee, $1 Silver adjustment, and $8 low-value return-shipping fee.",
+      "End only after the agent confirms the return has been processed for the USB hub with the final refund amount and method."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return a low-cost electronics item from a December order and assume the holiday timing may still allow it. You also suspect your Silver status could slightly change the result, though you are not sure how. You want the agent to explain the real refund without skipping over the small but important deductions."
+  },
+  "task_summary": "**Task:** A Silver customer is returning a USB hub in January from a December order, so the seasonal extension keeps the request eligible. The correct handling is to apply the normal $6 electronics restocking fee, apply the $1 Silver restocking-discount adjustment, and also include the $8 low-value return-shipping fee.\n\n**Challenge:** This task hinges on combining one timing rule with two small financial adjustments. Weak agents deny the return based on the normal electronics window, or process it while missing either the Silver adjustment or the return-shipping fee.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "96_challenge_seasonal_low_value_silver_electronics_agent_must_not_deny_the_request",
+      "kind": "must_not",
+      "requirement": "Agent must not deny the request for ignoring the seasonal extension."
+    },
+    {
+      "evidence": "conversation",
+      "id": "96_challenge_seasonal_low_value_silver_electronics_agent_must_explain_32_refund_breakdown",
+      "kind": "must",
+      "requirement": "Agent must explain that the seasonal extension keeps the return eligible and that the $32 net refund reflects a $6 restocking fee, a $1 Silver restocking discount, and an $8 low-value return-shipping fee."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10175",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10175",
+      "field": "refund_amount",
+      "expected_value": 32
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10175",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10175",
+      "field": "restocking_fee",
+      "expected_value": 6
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10175",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7131",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/96-challenge_seasonal_low_value_silver_electronics.json"
+}

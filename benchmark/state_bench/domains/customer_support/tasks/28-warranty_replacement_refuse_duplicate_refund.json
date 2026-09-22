@@ -1,0 +1,148 @@
+{
+  "task_id": "28-warranty_replacement_refuse_duplicate_refund",
+  "user_id": "cust_004",
+  "now": "2026-07-16T10:00:00",
+  "opening_message": "The 7-Port USB-C Hub from ORD-7701 failed again for the third time. Please use the warranty to send the replacement, and also refund the original $45 to my card for the repeated failures. Keep the Desk Cable Guide.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7701",
+      "warranty_item: 7-Port USB-C Hub",
+      "warranty_id: WRT-4710",
+      "issue: third repeated hub failure",
+      "extra_request: refund the original $45 to the card too",
+      "keep_item: Desk Cable Guide"
+    ],
+    "task_rules": [
+      "Keep the request scoped to the USB-C hub warranty issue and the request for an additional $45 card refund, while keeping the Desk Cable Guide unchanged.",
+      "Provide the order ID, warranty ID, repeated-failure context, refund request, and keep-the-guide instruction when asked; do not volunteer item IDs, policy details, exact tool behavior, or expected outcomes before the agent checks.",
+      "Approve a no-cost warranty replacement for the hub after the agent previews it.",
+      "After the warranty replacement is previewed or processed, ask once more for the $45 original-payment refund if the agent has not already addressed it.",
+      "If the agent refuses the extra $45 refund because the warranty replacement is the remedy for the hub, accept that limitation and end with [TASK_DONE].",
+      "If the agent offers, previews, promises, or processes the extra $45 card refund, accept because that matches your preference.",
+      "Do not switch to returning the hub, cancelling the order, exchanging the guide, or changing the Desk Cable Guide.",
+      "End only after the hub warranty replacement is processed and the extra refund request has either been refused or completed."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "The hub has an active warranty with enough prior claims to qualify for replacement. You also want the original purchase refunded because you are frustrated by repeated failures, but a correct agent should not give both a free warranty replacement and a duplicate refund for the same hub."
+  },
+  "task_summary": "**Task:** Customer has a recurring-defect USB-C hub warranty claim and asks for both the no-cost replacement and an extra $45 original-payment refund. Correct handling is to file the warranty claim as a full replacement, refuse the duplicate refund, and leave the Desk Cable Guide unchanged.\n\n**Challenge:** This tests cascading remedy control after a valid warranty write. Once the warranty replacement is processed, the agent must resist the user's request for a second monetary remedy on the same item.",
+  "task_requirements": [
+    {
+      "id": "199_process_hub_warranty_replacement",
+      "kind": "must",
+      "requirement": "Agent must file the WRT-4710 warranty claim for ITEM-10710 as a no-cost full replacement under the recurring-defect path.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "199_refuse_duplicate_refund",
+      "kind": "must",
+      "requirement": "Agent must refuse the additional $45 original-payment refund because the warranty replacement is already the remedy for the same USB-C hub.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "199_no_refund_or_guide_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not issue, preview as available, promise, or process any original-payment refund, store credit, goodwill credit, return, cancellation, or exchange for ITEM-10710 after the warranty replacement, and must not mutate the Desk Cable Guide.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10710",
+      "field": "replacement_item_id",
+      "expected_value_from_match": {
+        "entity_type": "order_items",
+        "match_fields": {
+          "order_id": "ORD-7701",
+          "product_id": "PROD-4791",
+          "quantity": 1,
+          "unit_price": 45,
+          "item_status": "confirmed"
+        }
+      }
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4710",
+      "field": "claim_count",
+      "expected_value": 3
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4710",
+      "field": "resolution",
+      "expected_value": "full_replacement"
+    },
+    {
+      "entity_type": "warranties",
+      "record_key": "WRT-4710",
+      "field": "status",
+      "expected_value": "claimed"
+    },
+    {
+      "entity_type": "order_items",
+      "match_fields": {
+        "order_id": "ORD-7701",
+        "product_id": "PROD-4791",
+        "quantity": 1,
+        "unit_price": 45,
+        "item_status": "confirmed"
+      },
+      "expected_fields": {
+        "goodwill_credit": 0,
+        "goodwill_credit_method": null,
+        "item_status": "confirmed",
+        "order_id": "ORD-7701",
+        "product_id": "PROD-4791",
+        "quantity": 1,
+        "refund_amount": null,
+        "refund_method": null,
+        "replacement_item_id": null,
+        "restocking_fee": null,
+        "return_label_issued": false,
+        "return_reason": null,
+        "store_credit_only": false,
+        "unit_price": 45
+      }
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10710",
+      "field": "refund_amount",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10710",
+      "field": "refund_method",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10710",
+      "field": "return_reason",
+      "expected_value": null
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10710",
+      "field": "goodwill_credit",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10711",
+      "field": "item_status",
+      "expected_value": "delivered"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10711",
+      "field": "refund_amount",
+      "expected_value": null
+    }
+  ],
+  "task_type": "warranty_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/28-warranty_replacement_refuse_duplicate_refund.json"
+}

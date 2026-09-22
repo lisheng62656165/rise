@@ -1,0 +1,81 @@
+{
+  "task_id": "39-compound_intl_delay_not_free_plus_partial_bag_plus_insurance_drop_state",
+  "user_id": "user_004",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — my flight BK-V (JFK to CDG on DL800) is delayed about 200 minutes, so I'd like to move to the later flight DL801 the same day. Please also add 2 checked bags, and keep my travel insurance. Keep everything else the same. My user ID is user_004 and put anything owed on my credit card.",
+  "user_simulator": {
+    "personality": "Practical international traveler inconvenienced by a delay; cooperative, wants a later flight, his bags, and his existing insurance kept.",
+    "user_sim_context": "Your international flight is delayed and you want the later flight the same day. You want to add a couple of checked bags and keep the travel insurance you already have. You do not know whether the delay makes the change free or your baggage allowance; you just want it handled and anything owed on your card.",
+    "known_info": [
+      "Booking BK-V: JFK to CDG on DL800, delayed about 200 minutes.",
+      "You want to move to the later same-day flight DL801.",
+      "You want to add 2 checked bags, and keep your travel insurance.",
+      "Keep everything else the same; pay anything owed with your credit card."
+    ],
+    "unknown_info": [
+      "Whether the delay waives the change fee, or what the fee is.",
+      "Your loyalty free-checked-bag allowance."
+    ],
+    "task_rules": [
+      "Open by saying BK-V (JFK to CDG on DL800) is delayed about 200 minutes, you want to move to the later flight DL801, add 2 checked bags, and keep your travel insurance. The agent already has your opening message.",
+      "If the agent says the change carries a fee, accept it once explained; you may ask once whether the delay covers it, but accept the agent's answer and do NOT insist it be free.",
+      "If the agent asks about checked bags, confirm you want 2 checked bags. Do not claim they are free or paid; you do not know your allowance.",
+      "If the agent asks about insurance or preferences, say to keep your existing booking's preferences, including the travel insurance.",
+      "Do NOT volunteer the change fee, the baggage allowance, or insurance details beyond wanting it kept.",
+      "If the agent proposes anything unrelated (cabin upgrade, cancellation, car or hotel), decline and return to the flight move plus the bags.",
+      "Search-stage preferences to verify before approving the change: airline, time_range, and max_stops. If the agent has not surfaced enough detail, ask.",
+      "Booking-stage persisted preferences to verify are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance; keep the existing values including insurance.",
+      "Do not try to verify raw flight_id. Your budget is a hard constraint.",
+      "End only after BK-V is moved to DL801 with the 2 bags handled and insurance kept, and the change fee, bag fee, and total clear; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "**Task:** user_004 (Noah, silver, insured) is on BK-V (JFK to CDG on DL800, economy international), delayed 200 minutes. He wants to move to the later same-day flight DL801, add 2 checked bags, and keep his insurance. A 200-minute delay does NOT waive the change fee (only 240+ does), so this is an international personal change at $100. As a silver member on economy he gets 2 free checked bags, so both bags are covered (paid_checked_bags=0). His insurance must be preserved through the change (add_insurance stays True). Correct end state: BK-V on DL801, change_fee 100, paid_checked_bags 0, add_insurance True.\n\n**Challenge:** Three independent traps on one change — the agent must not treat the 200-minute delay as making the move free (the $100 international fee applies), must not bill the 2 checked bags that the silver allowance covers, and must preserve the insurance flag rather than dropping it when rewriting the booking. Missing any one — a free change, billed bags, or dropped insurance — fails the deterministic state check; the change preview does not surface the baggage or insurance errors.",
+  "task_requirements": [
+    {
+      "id": "intl_delay_does_not_waive_change_fee",
+      "kind": "must",
+      "requirement": "Agent must make clear that the 200-minute delay does not waive the international change fee, so the move carries the standard fee.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "bags_covered_by_silver_allowance",
+      "kind": "must",
+      "requirement": "Agent must recognize that the 2 checked bags are covered by the traveler's silver free-checked-bag allowance and are not paid extras.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "insurance_preserved_through_change",
+      "kind": "must_not",
+      "requirement": "Agent must not drop the travel insurance on BK-V when changing the flight; it must remain in place.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-V",
+      "field": "change_fee",
+      "expected_value": 100
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-V",
+      "field": "fare_difference",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-V",
+      "field": "flight_id",
+      "expected_value": "DL801"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-V",
+      "field": "price_paid",
+      "expected_value": 820
+    }
+  ],
+  "task_type": "flight_change_policy",
+  "task_env_path": "state_bench/domains/travel/task_envs/39-compound_intl_delay_not_free_plus_partial_bag_plus_insurance_drop_state.json"
+}

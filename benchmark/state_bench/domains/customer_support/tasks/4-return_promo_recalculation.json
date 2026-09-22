@@ -1,0 +1,73 @@
+{
+  "task_id": "4-return_promo_recalculation",
+  "user_id": "cust_003",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi, I want to return the blender from my order ORD-6008. I already have one.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-6008",
+      "item: blender",
+      "reason: already have one"
+    ],
+    "task_rules": [
+      "Your goal is to return only the blender from order ORD-6008 because you already have one; do not ask to return or change the shirt or book.",
+      "If the agent asks for identifying details, provide the order ID, the blender item, and the changed-mind reason from what you know.",
+      "Do not volunteer the SAVE15 promo issue or any refund amount; if asked about refund math, say you do not know and ask the agent to check it.",
+      "If the agent previews returning any item besides the blender, push back that you only want to return the blender and keep the shirt and book.",
+      "If the refund preview does not mention how the SAVE15 promotion affects the blender refund, ask once how the promotion changes the refund before confirming.",
+      "Accept only after the agent previews a blender-only return, explains the SAVE15-adjusted refund, and the return has no unexpected fee or refund-method mismatch.",
+      "End only after the agent confirms the blender return has been processed with the adjusted refund to the original payment method."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return only the blender from a discounted multi-item order because you no longer need it. You are not thinking about how the original promo may have been spread across the order. From your perspective this is a simple one-item return, and you expect the agent to explain anything else that affects the refund."
+  },
+  "task_summary": "**Task:** The customer wants to return the blender from a three-item order that originally used the SAVE15 promotion. The correct handling is to recompute the refund with the promo value redistributed across the remaining order rather than pretending the blender was purchased by itself.\n\n**Challenge:** Return math is the substance of the task. Weak agents ignore the promotion adjustment, quote the wrong refund, or even target the wrong item while trying to unwind the order.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "4_return_promo_recalculation_agent_must_compute_refund_with_proportional",
+      "kind": "must",
+      "requirement": "Agent must explain that the SAVE15 discount was proportionally allocated to the blender return when presenting or breaking down the $59 refund."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9060",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9060",
+      "field": "refund_amount",
+      "expected_value": 59
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9060",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9060",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-9060",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-6008",
+      "field": "status",
+      "expected_value": "partially_returned"
+    }
+  ],
+  "task_type": "return_item",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/4-return_promo_recalculation.json"
+}

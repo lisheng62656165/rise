@@ -1,0 +1,136 @@
+{
+  "task_id": "86-hard_four_path_compound_no_shirt_mutation",
+  "user_id": "cust_003",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "I need several things fixed: the headphones from ORD-7521 never arrived in the box, cancel the laptop from ORD-7527 before it ships, return the old running shoes from ORD-7528, and exchange the shirt from ORD-7529 for Large if you can.",
+  "user_simulator": {
+    "known_info": [
+      "missing_order: ORD-7521 headphones never arrived in delivered box",
+      "cancel_order: ORD-7527 laptop no longer wanted before shipment",
+      "old_return_order: ORD-7528 running shoes changed mind",
+      "exchange_order: ORD-7529 shirt too small, wants Large only"
+    ],
+    "task_rules": [
+      "Keep the request scoped to all four issues: missing headphones, unshipped laptop cancellation, old running-shoes return, and Large-only shirt exchange.",
+      "Provide order IDs and item descriptions when asked; do not volunteer item IDs, product IDs, stock status, refund amounts, refund methods, policy windows, or tool choices.",
+      "For the headphones, accept being made whole for what you paid but push back if asked to return them because you never received them.",
+      "For the laptop, accept cancellation before shipment; push back if the agent tries to return it because you do not have it yet.",
+      "For the running shoes, you prefer a refund but will accept store credit if the agent explains the normal return window has passed and store-credit grace is all policy allows.",
+      "For the shirt, you only want Large; IF the agent says Large is unavailable, THEN accept no exchange and decline substitute sizes, refund, return, or store credit for the shirt.",
+      "IF the agent applies the same workflow to multiple items, THEN ask them to check each item's status and policy separately.",
+      "Accept only after the preview separates a $249 original-payment direct refund for the missing headphones, a $799 credit-card cancellation refund for the laptop, a $121 store-credit changed-mind return for the old shoes, and no state change for the shirt because Large is out of stock.",
+      "END only after those three state-changing actions are processed and the shirt is explicitly left unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You have four unrelated order problems and expect the agent to determine the correct workflow for each. You do not know the policies or exact refund math."
+  },
+  "task_summary": "**Task:** Four issues require different handling: missing delivered headphones need a direct $249 original-payment refund, a not-yet-shipped laptop needs free cancellation with a $799 credit-card refund, old changed-mind shoes need a $121 store-credit return, and a Large-only shirt exchange must be denied with no shirt mutation because the target variant is out of stock.\n\n**Challenge:** Combines state-routing traps from tasks 42 and 147. Weak agents route missing/unshipped items through returns, miss store-credit-only handling, or mutate the shirt after the requested Large exchange is unavailable.",
+  "task_requirements": [
+    {
+      "id": "159_missing_refund",
+      "kind": "must",
+      "requirement": "Agent must resolve the missing headphones with a direct $249 original-payment refund, not a return.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "159_cancel_laptop",
+      "kind": "must",
+      "requirement": "Agent must cancel the not-yet-shipped laptop for a $799 credit-card refund, not return it.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "159_old_shoes_store_credit",
+      "kind": "must",
+      "requirement": "Agent must process the old changed-mind shoes as a $121 store-credit return.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "159_large_shirt_no_mutation",
+      "kind": "must_not",
+      "requirement": "Agent must not return, refund, cancel, exchange, replace, or otherwise mutate the shirt after the requested Large exchange is unavailable.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10524",
+      "field": "refund_amount",
+      "expected_value": 249
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10524",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10534",
+      "field": "item_status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10534",
+      "field": "refund_amount",
+      "expected_value": 799
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10534",
+      "field": "refund_method",
+      "expected_value": "credit_card"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "refund_amount",
+      "expected_value": 121
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "refund_method",
+      "expected_value": "store_credit"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10535",
+      "field": "store_credit_only",
+      "expected_value": true
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7527",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7528",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/86-hard_four_path_compound_no_shirt_mutation.json"
+}

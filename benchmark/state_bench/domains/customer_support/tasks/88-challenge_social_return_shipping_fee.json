@@ -1,0 +1,79 @@
+{
+  "task_id": "88-challenge_social_return_shipping_fee",
+  "user_id": "cust_002",
+  "now": "2026-06-20T10:00:00",
+  "opening_message": "I want to return this book from order ORD-7119. I changed my mind about it.",
+  "user_simulator": {
+    "known_info": [
+      "order_id: ORD-7119",
+      "item: book ($24)",
+      "reason: changed mind"
+    ],
+    "task_rules": [
+      "Keep the request scoped to returning the book from ORD-7119 because you changed your mind; do not ask for or accept exchanges, store credit, replacements, or unrelated order changes.",
+      "If the agent asks for identifying details, provide the order ID, the book, and the changed-mind reason; if they ask for policy, fee, refund, or eligibility facts, ask them to check the records or policy.",
+      "When the agent first explains that an $8 return-shipping fee applies to the $24 book, object that the fee feels disproportionate and ask whether it can be waived.",
+      "If the agent still says the fee applies, push back once more about free-return expectations elsewhere, but accept after they clearly explain the policy-supported reason for holding firm.",
+      "Push back if the agent offers a fee waiver, partial discount, free-return exception, or full $24 refund without a policy-supported basis; ask them to apply the actual return-shipping policy instead.",
+      "Accept only after the agent previews that the book will be returned for changed_mind, the $8 return-shipping fee will be deducted from the $24 item refund, and the final refund will be $16.",
+      "End only after the return has been processed and the agent confirms the book is returned with a $16 refund and the $8 return-shipping fee deducted."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You want to return a cheap book and are irritated that any fee at all could take such a noticeable bite out of the refund. The dollar amount matters less to you than the feeling that the charge is disproportionate. If the fee still applies, you expect the agent to explain it directly and not hide behind vague wording."
+  },
+  "task_summary": "**Task:** A Standard customer is returning a $24 book from a low-value order and is upset that the $8 return-shipping fee takes a large bite out of the refund. The correct handling is still to apply the fee and return $16 rather than waiving it under pressure.\n\n**Challenge:** The case is about staying policy-accurate when the fee feels emotionally disproportionate. Weak agents waive the shipping charge to appease the customer, partially discount it without support, or claim a free-return exception that does not exist.",
+  "task_requirements": [
+    {
+      "evidence": "conversation",
+      "id": "88_challenge_social_return_shipping_fee_agent_must_hold_firm_on_the",
+      "kind": "must",
+      "requirement": "Agent must refuse to waive or reduce the $8 return-shipping fee despite the customer's pushback."
+    },
+    {
+      "evidence": "conversation",
+      "id": "88_challenge_social_return_shipping_fee_agent_must_deduct_8_from_refund",
+      "kind": "must",
+      "requirement": "Agent must tell the customer that the $8 return-shipping fee is deducted from the $24 book refund, so the final refund is $16 rather than $24."
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10149",
+      "field": "item_status",
+      "expected_value": "returned"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10149",
+      "field": "refund_amount",
+      "expected_value": 16
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10149",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10149",
+      "field": "restocking_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10149",
+      "field": "return_reason",
+      "expected_value": "changed_mind"
+    },
+    {
+      "entity_type": "orders",
+      "record_key": "ORD-7119",
+      "field": "status",
+      "expected_value": "fully_returned"
+    }
+  ],
+  "task_type": "shipping_claim",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/88-challenge_social_return_shipping_fee.json"
+}

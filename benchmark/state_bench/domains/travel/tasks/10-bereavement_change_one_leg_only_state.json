@@ -1,0 +1,108 @@
+{
+  "task_id": "10-bereavement_change_one_leg_only_state",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "Hi — there's been a death in my family and I need to move my outbound flight BK-9100 (ORD to MIA on AA600) to the later flight AA610 on the same route. I'll also need to move my return BK-9101 (MIA to ORD on AA700) to the later flight AA710 so the round trip still lines up. Both my current flights are nonstop and I'd like the later ones to be comparable nonstops. My user ID is user_001, and I'd like it done the cheapest valid way.",
+  "user_simulator": {
+    "personality": "Practical and a bit subdued, dealing with a family loss but composed. Cooperative and will accept the agent's recommendation, but cares about not overpaying and wants the trip kept coherent.",
+    "user_sim_context": "A death in your family forces you to move the outbound leg of a round trip to a later flight on the same route, and the return then has to shift too so the trip still lines up. You think of the trip as one whole plan, but the underlying reason — the bereavement — only applies to the outbound leg. You do not know whether the reason affects the fee, what the fees are, or how the two legs should be priced, and you will not do the fee math yourself.",
+    "known_info": [
+      "Outbound booking BK-9100: ORD to MIA on flight AA600; you want to move it to the later flight AA610 (same route). The reason is a death in the family.",
+      "Return booking BK-9101: MIA to ORD on flight AA700; you want to move it to the later flight AA710 (same route), only so the round trip still lines up.",
+      "Both current flights are nonstop and you want the later ones to be comparable nonstops.",
+      "You want it done the cheapest valid way."
+    ],
+    "unknown_info": [
+      "Whether the bereavement reason changes the fee, and by how much.",
+      "The change fee on either booking, or what it would be for a personal change.",
+      "Whether the return leg should be priced the same way as the outbound."
+    ],
+    "task_rules": [
+      "Open by asking the agent to move the OUTBOUND BK-9100 to the later same-route flight AA610 because of a death in the family, and to move the RETURN BK-9101 to the later same-route flight AA710 so the round trip still lines up. Keep the bereavement mention brief and matter-of-fact; do not give graphic or detailed circumstances.",
+      "Do not volunteer that the return change is an ordinary personal rescheduling step or that it should be priced differently from the outbound, unless the agent asks why the return also needs to move or explains that distinction first. You do not know the fee rules.",
+      "Do not propose or insist on a specific fee or mechanism; you do not know whether the bereavement reason affects the fee or how each leg should be priced. Do not volunteer prices, fees, or fare math; you do not know them.",
+      "If the agent asks for details or the reason, provide that BK-9100 is the outbound ORD-to-MIA flight you are moving because of a death in the family, and BK-9101 is the MIA-to-ORD return you are moving only so the round trip still lines up.",
+      "If the agent treats both legs as bereavement and discounts the return too, do not correct the fee issue yourself, and do not introduce that distinction later; continue only after the agent asks for confirmation or completes the proposed changes.",
+      "If the agent charges a full fee on the return and explains that the bereavement discount applies only to the outbound leg, accept that distinction once the selected return flight and added cost are clear.",
+      "Before approving, make sure the agent has surfaced enough detail to confirm each later flight is the comparable nonstop on the same route, and decline unrelated upgrades, add-ons, or itinerary changes.",
+      "Once the agent tells you the costs, take the moves it recommends as long as each leg is handled as a change to your existing booking; you do not need to do the math yourself.",
+      "End with [TASK_DONE] only after both bookings have been moved to AA610 (outbound) and AA710 (return) as changes to your existing bookings, with the out-of-pocket cost summarized.",
+      "For new booking creation, including a replacement after canceling an existing booking, booking-stage preferences should match your profile preferences unless task-specific rules say otherwise.",
+      "For changes to an existing booking, preserve the existing booking's booking-stage preferences unless task-specific rules say otherwise.",
+      "Search-stage preferences to verify before approving a booking: airline, time_range, and max_stops.",
+      "If the agent has not surfaced enough option detail to verify airline, time_range, and max_stops, ask for that information before approving the booking.",
+      "Booking-stage persisted preferences to verify on the final booking are: meal_preference, cabin_class, seat_type, add_wifi, add_extra_legroom, and add_insurance.",
+      "For a flight change to an existing booking, if the agent asks about one of those booking-stage preferences, say to keep the existing booking's preferences unless the task-specific rules say otherwise.",
+      "If the agent creates or changes a booking with any wrong booking-stage preference, correct exactly one preference at a time in this order: cabin_class, seat_type, meal_preference, add_wifi, add_extra_legroom, add_insurance.",
+      "Do not try to verify raw flight_id. Budget remains a hard constraint.",
+      "Do not end with [TASK_DONE] until both final bookings have the expected booking-stage preferences."
+    ]
+  },
+  "task_summary": "**Task:** user_001 holds a domestic economy round trip: outbound BK-9100 (ORD to MIA on AA600, $400 paid, departing more than 7 days out, booked outside the 24-hour free window, uninsured) and return BK-9101 (MIA to ORD on AA700, $400 paid, departing more than 7 days out, uninsured). A death in the family forces moving the OUTBOUND to the later same-route flight AA610 ($420), which qualifies for the airline's bereavement change discount: the economy domestic change fee is $75 for a personal change, but with a bereavement reason it is discounted 75% to $18 (the traveler pays 25%). The RETURN must also move — to the later same-route flight AA710 ($430) — but only to keep the round trip lined up, so it is an ordinary PERSONAL reschedule at the full $75 fee. Correct resolution: the agent changes BK-9100 onto AA610 with a bereavement reason (change_fee $18, fare difference +$20) and changes BK-9101 onto AA710 with a personal reason (change_fee $75, fare difference +$30), producing two modified records with no cancellation and no new booking.\n\n**Challenge:** The bereavement reason scopes to the OUTBOUND only — that is the leg the death forces to move. The return moves merely so the round trip stays coherent, which is an ordinary personal reschedule at the full fee. A weak agent over-scopes the discount, applying the bereavement reason to BOTH legs and charging the return $18 instead of the $75 it owes — underchaging $57 and writing the wrong change_fee on the return record. The correct end state is BK-9100 on AA610 at change_fee $18 (bereavement) AND BK-9101 on AA710 at change_fee $75 (personal); discounting the return's fee is wrong.",
+  "task_requirements": [
+    {
+      "id": "bereavement_outbound_only",
+      "kind": "must",
+      "requirement": "Agent must make clear that the bereavement discount applies to the OUTBOUND change only and that the RETURN change is a separate personal rescheduling step at the full fee. The outbound BK-9100 must be changed onto AA610 with a bereavement reason (the bereavement-discounted $18 change fee, 75% off the $75 economy-domestic fee), and the return BK-9101 must be changed onto AA710 as an ordinary personal change at the full $75 fee. The final state must show BK-9100 on AA610 at change_fee $18 and BK-9101 on AA710 at change_fee $75, with no cancellation and no new booking.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "must_not_discount_return_leg",
+      "kind": "must_not",
+      "requirement": "Agent must not apply the bereavement discount to the return leg, and must not zero or discount the return's change fee. The return moves only to keep the round trip coherent, not because of the bereavement, so charging the return anything other than the full $75 personal change fee (for example the bereavement-discounted $18) is wrong.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9100",
+      "field": "change_fee",
+      "expected_value": 18
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9100",
+      "field": "fare_difference",
+      "expected_value": 20
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9100",
+      "field": "flight_id",
+      "expected_value": "AA610"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9100",
+      "field": "price_paid",
+      "expected_value": 438
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9101",
+      "field": "change_fee",
+      "expected_value": 75
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9101",
+      "field": "fare_difference",
+      "expected_value": 30
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9101",
+      "field": "flight_id",
+      "expected_value": "AA710"
+    },
+    {
+      "entity_type": "bookings",
+      "record_key": "BK-9101",
+      "field": "price_paid",
+      "expected_value": 505
+    }
+  ],
+  "task_type": "adversarial_or_reasoning_trap",
+  "task_env_path": "state_bench/domains/travel/task_envs/10-bereavement_change_one_leg_only_state.json"
+}

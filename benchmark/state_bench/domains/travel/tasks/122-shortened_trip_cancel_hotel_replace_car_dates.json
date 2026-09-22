@@ -1,0 +1,107 @@
+{
+  "task_id": "122-shortened_trip_cancel_hotel_replace_car_dates",
+  "user_id": "user_001",
+  "now": "2026-06-15T10:00:00",
+  "opening_message": "My Seattle trip now ends on 2026-09-12, so please cancel hotel HR-184 for the final night. My user ID is user_001.",
+  "user_simulator": {
+    "personality": "Organized traveler shortening a trip; expects related dates to stay coherent.",
+    "user_sim_context": "You shortened the trip by one night. You remember the final-night hotel reservation, and you expect the agent to catch any related date cleanup.",
+    "known_info": [
+      "Cancel hotel HR-184 because the trip now ends on 2026-09-12."
+    ],
+    "unknown_info": [
+      "Whether any car rental still runs through the old 2026-09-13 trip end date, including any car rental ID."
+    ],
+    "task_rules": [
+      "Open by asking to cancel hotel HR-184 because the trip now ends on 2026-09-12. The agent already has your opening message.",
+      "Do not bring up the car rental yourself. If the agent finds the car still runs through 2026-09-13, approve canceling it and booking the replacement car that ends on 2026-09-12.",
+      "Do not ask to change flights.",
+      "If the agent says the hotel cancellation is done and does not mention checking related reservations, accept that and end with [TASK_DONE].",
+      "If the agent discovers the mismatched car dates, end only after the hotel cancellation and car-date fix are complete; then use [TASK_DONE]."
+    ]
+  },
+  "task_summary": "User shortened a Seattle trip and asks to cancel hotel HR-184 for the final night. A car rental CR-184 still runs through the old checkout date, so after canceling the hotel the agent should fix the car by canceling CR-184 and booking CAR-SEA-184-SHORT for the shorter dates. Correct end state: HR-184 and CR-184 cancelled; replacement car rental booked for 2026-09-10 to 2026-09-12.",
+  "task_requirements": [
+    {
+      "id": "cancel_final_night_hotel",
+      "kind": "must",
+      "requirement": "Agent must cancel hotel reservation HR-184 for the dropped final night.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "cascade_fix_car_dates",
+      "kind": "must",
+      "requirement": "Agent must discover that CR-184 still runs through the old trip end date, cancel it, and book CAR-SEA-184-SHORT ending on 2026-09-12.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-184",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-184",
+      "field": "refund_amount",
+      "expected_value": 210
+    },
+    {
+      "entity_type": "car_rentals",
+      "record_key": "CR-184",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-184",
+      "field": "cancellation_fee",
+      "expected_value": 0
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-184",
+      "field": "refund_amount",
+      "expected_value": 190
+    },
+    {
+      "entity_type": "hotels",
+      "record_key": "HR-184",
+      "field": "status",
+      "expected_value": "cancelled"
+    },
+    {
+      "entity_type": "car_rentals",
+      "match_fields": {
+        "user_id": "user_001",
+        "car_id": "CAR-SEA-184-SHORT",
+        "pickup_date": "2026-09-10",
+        "dropoff_date": "2026-09-12",
+        "status": "confirmed",
+        "car_class": "midsize"
+      },
+      "expected_fields": {
+        "booked_at": "2026-06-15T10:00:00",
+        "cancellation_fee": null,
+        "car_class": "midsize",
+        "car_id": "CAR-SEA-184-SHORT",
+        "company": "Enterprise",
+        "daily_rate": 70,
+        "dropoff_date": "2026-09-12",
+        "dropoff_location": "SEA",
+        "insurance_included": false,
+        "pickup_date": "2026-09-10",
+        "pickup_location": "SEA",
+        "refund_amount": null,
+        "rental_id": "CR-0185",
+        "status": "confirmed",
+        "total_price": 140,
+        "user_id": "user_001"
+      }
+    }
+  ],
+  "task_type": "multi_booking_trip_coordination",
+  "task_env_path": "state_bench/domains/travel/task_envs/122-shortened_trip_cancel_hotel_replace_car_dates.json"
+}

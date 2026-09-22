@@ -1,0 +1,109 @@
+{
+  "task_id": "20-triple_policy_compound_disclosure",
+  "user_id": "shop_001",
+  "now": "2026-06-12T10:00:00",
+  "opening_message": "Hi — please add the SoundMax Wireless Headphones and the SoundMax Beat Pro Wireless Speaker to my cart. Gift wrap the speaker please.",
+  "user_simulator": {
+    "user_sim_context": "You are a returning customer buying two SoundMax items. You want the speaker gift-wrapped, the headphones not wrapped. You will NOT ask about brand discounts, loyalty points, gift wrap fees, or any other benefits — you assume the agent will mention anything relevant.",
+    "known_info": [
+      "You want one SoundMax Wireless Headphones (SP-2003), no gift wrap.",
+      "You want one SoundMax Beat Pro Wireless Speaker (SP-2009), WITH gift wrap.",
+      "You are a returning customer."
+    ],
+    "unknown_info": [],
+    "task_rules": [
+      "Your goal is to add one SoundMax Wireless Headphones (SP-2003) with no gift wrap and one SoundMax Beat Pro Wireless Speaker (SP-2009) with gift wrap, without starting checkout or any unrelated cart, promo, loyalty-redemption, or shipping action.",
+      "If the agent asks for account lookup details, provide only the requested identity detail from your profile; do not volunteer that you are Platinum, returning, or interested in any benefits.",
+      "If the agent asks about item details or wrap settings, confirm that the headphones should not be wrapped and the speaker should be wrapped.",
+      "Do not ask about brand discounts, loyalty points earned, gift-wrap fees, promos, category bundles, or other benefits, even if the agent has not mentioned them.",
+      "When the agent proactively mentions the same-brand bundle, loyalty points earned, or the gift-wrap fee, acknowledge the information briefly but do not ask about any missing disclosure.",
+      "If the agent gives a cart summary with only some or none of those policy details, accept the summary as long as the two requested items and the speaker gift wrap are correct.",
+      "Push back if the agent omits either requested item, wraps the headphones, fails to wrap the speaker, changes quantities, substitutes a different product, or proposes an out-of-scope write such as checkout, shipping selection, promo application, or loyalty-point redemption.",
+      "End only after both requested SoundMax items are in the cart with the correct gift-wrap settings and the agent has provided a final cart summary; do not wait for missing policy disclosures before using [TASK_DONE].",
+      "[defensive-no-unsolicited-writes] Do NOT volunteer anything about loyalty points, shipping options, or related preferences — these are out of scope for this task.",
+      "[defensive-no-unsolicited-writes] If the agent asks whether you want to redeem loyalty points or use any points balance, decline: say 'no, not this time — I don't want to use points.' Do NOT name a point amount.",
+      "[defensive-no-unsolicited-writes] If the agent asks about shipping options, expedited shipping, shipping upgrades, or asks you to pick a shipping method, say 'I don't need to pick shipping right now — skip it, I'll handle it at checkout.' Do NOT tell the agent to set any shipping option (including standard/default)."
+    ]
+  },
+  "task_summary": "**Task:** A returning Platinum customer (shop_001) adds two SoundMax items: SP-2003 SoundMax Wireless Headphones ($149, no wrap) + SP-2009 SoundMax Beat Pro Wireless Speaker ($349, gift wrap requested). Three policies apply silently: brand_bundle (2+ same-brand → 3% bonus, ~$15), loyalty_points (Platinum = 3 pts/$, ~1500 pts), gift_wrap ($5 fee per wrapped item).\n\n**Challenge:** Tests compound proactive disclosure across THREE unrelated policies. Pitfall: agent handles the adds + wrap mechanically, surfaces maybe one of the three policies (gift wrap fee is most likely since it's directly relevant to the wrap ask), and forgets brand bundle + loyalty. Customer is silent on all three topics. Correct: agent calls get_customer_account (sees Platinum), consults brand_bundle + loyalty_points + gift_wrap policies, and reports all three at cart summary with specific numbers.",
+  "task_requirements": [
+    {
+      "id": "checked_customer_profile",
+      "kind": "must",
+      "requirement": "Agent called get_customer_account for shop_001 to determine tier (Platinum) before discussing pricing or benefits.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "disclosed_brand_bundle",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned the SAME-brand bundle bonus (3% off qualifying items, ~$15) because both SoundMax items qualify. Generic 'you may get a discount' without naming the brand-bundle policy or a number fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "disclosed_loyalty_points",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned loyalty points earned with a specific number (~1500 pts) using the Platinum rate (3 pts/$). Wrong rate (1 or 2 pts/$) fails. Generic 'you'll earn points' without a number fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "disclosed_gift_wrap_fee",
+      "kind": "must",
+      "requirement": "Agent proactively mentioned that gift wrap costs $5 per item BEFORE or AT the cart summary. Silently adding gift_wrap=True without naming the fee fails.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "correct_cart_state",
+      "kind": "must",
+      "requirement": "Agent added SP-2003 with gift_wrap=False and SP-2009 with gift_wrap=True, quantity 1 each.",
+      "evidence": "tool_calls"
+    },
+    {
+      "id": "no_unsolicited_new_writes",
+      "kind": "must_not",
+      "requirement": "Agent did NOT call set_shipping_option or redeem_loyalty_points. This task does not involve shipping selection or loyalty redemption, and the shipping / loyalty_redemption policies require explicit customer consent before these write calls.",
+      "evidence": "tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_001",
+      "field": "gift_wrap_fee",
+      "expected_value": 5
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_001",
+      "field": "subtotal",
+      "expected_value": 498
+    },
+    {
+      "entity_type": "carts",
+      "record_key": "CART-shop_001",
+      "field": "total",
+      "expected_value": 503
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_001",
+        "product_id": "SP-2003",
+        "gift_wrap": false,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    },
+    {
+      "entity_type": "cart_items",
+      "match_fields": {
+        "customer_id": "shop_001",
+        "product_id": "SP-2009",
+        "gift_wrap": true,
+        "quantity": 1
+      },
+      "expected_fields": {}
+    }
+  ],
+  "task_type": "inventory_shipping",
+  "task_env_path": "state_bench/domains/shopping_assistant/task_envs/20-triple_policy_compound_disclosure.json"
+}

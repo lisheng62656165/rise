@@ -1,0 +1,80 @@
+{
+  "task_id": "43-hard_missing_accessory_plus_signed_laptop_denial",
+  "user_id": "cust_001",
+  "now": "2026-07-12T10:00:00",
+  "opening_message": "I have two delivery problems. In ORD-7443, the book arrived but the phone case was missing, and there was no signature. In ORD-7444, the laptop says it was signed for by E. Chen, but I can't find it either. Please refund both.",
+  "user_simulator": {
+    "known_info": [
+      "missing_order: ORD-7443",
+      "missing_item: UltraShield Phone Case",
+      "received_item: The Great Algorithm book",
+      "signature: none for ORD-7443",
+      "signed_order: ORD-7444",
+      "signed_item: ProBook Laptop 15-inch",
+      "signature_on_file: E. Chen for ORD-7444",
+      "preferred_resolution_for_phone_case: refund to original payment (only reveal if asked)"
+    ],
+    "task_rules": [
+      "Keep the request scoped to two separate delivery issues: the missing phone case from ORD-7443 and the signed-delivery laptop claim on ORD-7444.",
+      "Provide both order IDs, the missing phone case, the received book, no-signature fact for ORD-7443, and the E. Chen signature on ORD-7444 when asked or when needed; do not volunteer policy rules, refund amounts, item IDs, or internal tool facts.",
+      "Do not volunteer the phone-case refund preference until the agent asks whether you want refund or reship for the missing phone case, or until the agent proposes a resolution without asking.",
+      "If the agent asks refund or reship for the missing phone case, choose a refund to original payment.",
+      "Push once for a laptop refund too; if the agent denies the laptop claim because ORD-7444 has a signature on file, accept that denial and do not pursue laptop refund, return, replacement, credit, investigation credit, or other laptop action.",
+      "Push back if the agent proposes or previews a return/return label for the missing phone case instead of a direct shipping-claim refund or reship choice; the phone case was never received and cannot be returned.",
+      "Push back if the agent refunds, returns, replaces, credits, escalates for credit, or otherwise changes the laptop order/item; ask them to leave ORD-7444 unchanged because of the signature rule.",
+      "Accept only after the agent previews a $35 original-payment refund for only the missing phone case, leaves the book unchanged, and clearly denies any action on the signed laptop claim.",
+      "End only after the phone-case refund has been processed to original payment and the laptop claim remains finally denied with ORD-7444/ITEM-10445 unchanged."
+    ],
+    "unknown_info": [],
+    "user_sim_context": "You are contacting support about two delivery problems. One low-value accessory was missing from a no-signature delivery, so refund or reship is available after you choose. A separate laptop order has a signature on file, so the correct support outcome is denial with no laptop-order action. You initially ask for both refunds, push once on the laptop, then accept a clear signature-based denial."
+  },
+  "task_summary": "**Task:** A customer reports a missing low-value phone case from one delivered order and a separate laptop not-received claim on another order with signature `E. Chen` on file. Correct handling is to ask refund versus reship for the missing phone case, process only the chosen $35 original-payment direct refund, leave the received book unchanged, and deny the signed laptop claim with no laptop action.\n\n**Challenge:** This repairs the proven task-143 compound failure pattern after the backend clarified that missing/not-received items must use `process_refund`, not `process_return`. Weak agents often refund both items, create a return for the missing accessory, skip the refund/reship choice, or soften the signed-delivery denial with a credit/escalation path.",
+  "task_requirements": [
+    {
+      "id": "155_ask_phone_case_refund_or_reship",
+      "kind": "must",
+      "requirement": "Agent must ask whether the customer wants a refund or a reship for the missing phone case before processing one.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "155_direct_refund_only_missing_case",
+      "kind": "must",
+      "requirement": "Agent must process only a $35 direct original-payment refund for the missing phone case from ORD-7443 and must leave the received book unchanged.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "155_no_missing_item_return_path",
+      "kind": "must_not",
+      "requirement": "Agent must not process or offer a return, return label, exchange, wrong replacement flow, or whole-order refund for the missing phone case or received book. Referring to a reship of the missing case as a replacement is acceptable only if no return path or wrong item mutation is used.",
+      "evidence": "conversation_or_tool_calls"
+    },
+    {
+      "id": "155_deny_signed_laptop_claim",
+      "kind": "must",
+      "requirement": "Agent must deny refund, replacement, return, exchange, cancellation, courtesy credit, investigation credit, or other relief for ORD-7444 because the laptop delivery has a signature on file.",
+      "evidence": "conversation"
+    },
+    {
+      "id": "155_no_signed_laptop_action",
+      "kind": "must_not",
+      "requirement": "Agent must not offer as available, confirm, refund, return, replace, exchange, cancel, credit, escalate for credit, investigate for credit, or otherwise mutate ORD-7444 or ITEM-10445. Benign documentation guidance or a non-mutating internal preview alone is not a failure unless the agent presents laptop relief as available or done.",
+      "evidence": "conversation_or_tool_calls"
+    }
+  ],
+  "state_requirements": [
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10443",
+      "field": "refund_amount",
+      "expected_value": 35
+    },
+    {
+      "entity_type": "order_items",
+      "record_key": "ITEM-10443",
+      "field": "refund_method",
+      "expected_value": "original_payment"
+    }
+  ],
+  "task_type": "compound",
+  "task_env_path": "state_bench/domains/customer_support/task_envs/43-hard_missing_accessory_plus_signed_laptop_denial.json"
+}
