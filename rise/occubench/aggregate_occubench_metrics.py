@@ -114,14 +114,15 @@ def main() -> None:
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     md = ["| Method | Avg | " + " | ".join(CATEGORY_ORDER) + " |",
           "|---|" + "---:|" * (len(CATEGORY_ORDER) + 1)]
+    display_names = {"Vanilla-A": "Vanilla"}
     for name in methods:
         item = report[name]
         cells = [f'{item["passed"]}/{item["valid"]} ({100 * item["pass_at_1"]:.2f}%)'
                  if item["valid"] else "N/A"]
         cells += [fmt(item["by_category"][category]) for category in CATEGORY_ORDER]
-        md.append("| " + name + " | " + " | ".join(cells) + " |")
+        md.append("| " + display_names.get(name, name) + " | " + " | ".join(cells) + " |")
     md.append("")
-    md.append("Invalid verifier rows are excluded; the released Vanilla-A snapshot has complete labels for all 382 tasks.")
+    md.append("Invalid verifier rows are excluded. Pass@1 uses valid labels only; check the valid count against the task total before treating a method as complete.")
     (args.out.with_suffix(".md")).write_text("\n".join(md) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
 

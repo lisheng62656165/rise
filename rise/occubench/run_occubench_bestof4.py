@@ -142,6 +142,8 @@ def main():
     p.add_argument('--active-requests', type=int, default=8)
     p.add_argument('--adaptive-requests', action='store_true')
     p.add_argument('--seed', type=int, default=53403)
+    p.add_argument('--selector-seed', type=int, default=None,
+                   help='Fixed OAgents API seed, unchanged on format retries.')
     p.add_argument('--count', type=int, default=30)
     p.add_argument('--extend-from', type=Path)
     p.add_argument('--match-source-config', action='store_true')
@@ -187,6 +189,8 @@ def main():
         existing_manifest = json.loads(manifest.read_text(encoding='utf-8'))
         if existing_manifest.get('selector_policy', 'custom') != ns.selector_policy:
             raise ValueError('Output directory belongs to a different selector')
+        if existing_manifest.get('selector_seed') != ns.selector_seed:
+            raise ValueError('Output directory belongs to a different selector seed')
         ids = existing_manifest['task_ids']
         if len(ids) != ns.count or not set(retained) <= set(ids):
             raise ValueError('Existing cohort does not match requested extension')
@@ -199,7 +203,7 @@ def main():
         if len(ids) != ns.count or not set(ids) <= set(source_ids):
             raise ValueError('Candidate cohort mismatch')
         save(manifest, dict(task_ids=ids, sampling='random sample of sorted task IDs, no scores',
-                            seed=ns.seed, model=MODEL, candidate_count=4,
+                            seed=ns.seed, selector_seed=ns.selector_seed, model=MODEL, candidate_count=4,
                             anchor='existing Vanilla A, not regenerated',
                             new_agent=dict(extra_body=agent_extra, max_tokens=generation['max_tokens']),
                             world_extra=world_extra, selector_extra=selector_extra,
@@ -337,9 +341,11 @@ def main():
                         model=MODEL,
                         messages=(official.format_retry_messages(selector_messages) if attempt else selector_messages),
                         temperature=0, max_tokens=2048, stream=False,
+                        **({'seed': ns.selector_seed} if ns.selector_seed is not None else {}),
                         **({'response_format': {'type': 'json_object'}} if attempt else {}))
                     save(out / f'selector_attempt_{request_batch}_{attempt + 1}.json', response.model_dump())
                     decision = official.parse(response)
+                    decision['selector_seed'] = ns.selector_seed
                     decision['format_retry'] = bool(attempt)
                     decision['raw_response_file'] = f'selector_attempt_{request_batch}_{attempt + 1}.json'
                     save(choice_path, decision)
