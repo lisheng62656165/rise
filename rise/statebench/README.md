@@ -8,15 +8,15 @@
 
 引用本 README 后可以说：
 
-> 按 README 使用我的 OpenAI-compatible API 模型运行 StateBench。模型 ID 为 gpt-4.1，密钥已配置到 OPENAI_API_KEY。先安装依赖并跑三任务 smoke，再跑完整 Test，使用 seeds 42 142 242 342 442、workers 10。比较 Vanilla、Paper-aligned StateTrace-EDS-ECA 和 OAgents 官方 ORM Best-of-4，汇总 pass^5、pass@1 和 UX。不要改变算法，不要输出密钥；成功任务不重跑。
+> 按 README 使用我的 OpenAI-compatible API 模型运行 StateBench。参考结果配置使用 deepseek-v4.1-flash；密钥已配置到 OPENAI_API_KEY，服务 base URL 已配置到 MIMO_BASE_URL。先安装依赖并跑三任务 smoke，再跑完整 Test，使用 generation seeds 20260921 20260925 20260929 20261003 20261007、selector seeds 77121 77122 77123 77124 77125、judge seeds 88021 88022 88023 88024 88025；完整运行 workers 100、selector-workers 100、score-workers 40。比较 Vanilla、修改后的官方 ORM Best-of-4 和 Paper-aligned StateTrace-EDS-ECA，汇总 Task Completion pass@1、pass^5 和 UX。不要改变算法，不要输出密钥；成功任务不重跑。
 
-本包支持 ChatGPT/OpenAI API 以及其他 **OpenAI-compatible Chat Completions API**。请提供确切的 API 模型 ID，而不只是“ChatGPT”；ChatGPT 网页订阅不代替 API 额度。模型需要支持 Chat Completions、工具调用和足够长的上下文；本包不保证任意模型都支持同一组请求参数。
+本包支持 ChatGPT/OpenAI API 以及其他 **OpenAI-compatible Chat Completions API**。历史参考表使用 `deepseek-v4.1-flash`；报告中的原服务 endpoint 未公开，精确 endpoint replay 需要原实验 provider 配置。其他模型也可以运行同一流程，但会产生新实验结果，不能当作复现下方 DeepSeek 结果。请提供确切的 API 模型 ID，而不只是“ChatGPT”；ChatGPT 网页订阅不代替 API 额度。模型需要支持 Chat Completions、工具调用和足够长的上下文；本包不保证任意模型都支持同一组请求参数。
 
 ### Codex 执行约定
 
 如果用户只说“用 ChatGPT 模型跑 StateBench”，Codex 应读取本 README 和 `AGENTS.md`，然后执行以下流程：
 
-1. 确认确切的 API 模型 ID 和密钥来源；已有配置则复用，缺少时只询问缺失项，不猜测模型，不让用户把密钥粘贴进对话。确认所用服务地址，不沿用其他实验的私有代理或旧密钥。
+1. 确认确切的 API 模型 ID、密钥来源和 base URL；已有配置则复用，缺少时只询问缺失项，不猜测模型，不让用户把密钥粘贴进对话。历史 endpoint 不在公开包中，不能据此推断用户的服务地址。
 2. 在本目录建立 Python 3.12 虚拟环境，并安装 `requirements.txt`。**不要 git clone、下载数据集、下载模型权重或引用原作者的实验目录**；所需 StateBench 数据、代码、prompt 和评分器都在本目录。Python 和 pip 软件依赖不是随包的二进制运行环境，首次安装仍需要网络或本机已有的软件包缓存。
 3. 按上面的用户授权范围运行：需要 `pass^5` 时使用五个不同 seed 的完整 Test；若用户只要求一组，只跑一组并将 `pass^5` 标为 N/A。不要因为要统计该指标就擅自追加付费批次。
 4. 先在独立目录运行三题真实 API smoke；成功后执行下面对应的完整命令。完整 Test 不使用 `--tasks-per-domain 1`，不缩减150题，不改成 Train/Dev，不把模拟 API 测试结果当成真实模型结果。
@@ -33,6 +33,12 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 $env:OPENAI_API_KEY = "YOUR_API_KEY"
+$env:MIMO_BASE_URL = "YOUR_PROVIDER_BASE_URL"
+$env:MIMO_TEMPERATURE = "0"
+$env:MIMO_MAX_TOKENS = "8192"
+$env:MIMO_SELECTOR_MAX_TOKENS = "8192"
+$env:MIMO_STREAMING = "1"
+$env:MIMO_ORM_SELECTOR_STREAMING = "0"
 ```
 
 若系统没有 `py` 启动器，但 `python --version` 已是 3.12，则第一行改用 `python -m venv .venv`。PowerShell 禁止激活脚本时，不必改系统策略：直接以 `.\.venv\Scripts\python.exe` 替代后续命令中的 `python`。
@@ -44,13 +50,19 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 export OPENAI_API_KEY="YOUR_API_KEY"
+export MIMO_BASE_URL="YOUR_PROVIDER_BASE_URL"
+export MIMO_TEMPERATURE="0"
+export MIMO_MAX_TOKENS="8192"
+export MIMO_SELECTOR_MAX_TOKENS="8192"
+export MIMO_STREAMING="1"
+export MIMO_ORM_SELECTOR_STREAMING="0"
 ```
 
 密钥仅放环境变量或仓库外的私有文件，不要提交到 GitHub。`.env.example` 是变量说明，程序**不会自动加载** `.env`。如果同时存在 `MIMO_API_KEY`，它优先于 `OPENAI_API_KEY`；切换服务商时需清理旧变量。
 
 ## 一条命令运行 / Reproduce
 
-以下命令在两种终端都可使用，模型和 URL 换成你实际有权限的服务。基址填到 `/v1`，不要填 `/chat/completions`。
+以下命令展示历史参考配置。PowerShell 与 bash 的续行语法不同；README 给出 bash 兼容的单行命令。将 `MIMO_BASE_URL` 设置为你获准使用的 OpenAI-compatible 服务根地址，路径应止于 `/v1`，不要填 `/chat/completions`。
 
 ```bash
 # 无付费 API 的本地测试：真实环境 + 本地模拟模型响应（含完整150题流程）
@@ -58,18 +70,27 @@ python -X utf8 -B -m pytest -q
 python -X utf8 -B verify_release.py
 
 # 三任务真实 API smoke：每领域 1 个，不是正式 Test
-python -X utf8 run_experiment.py --model gpt-4.1 --base-url https://api.openai.com/v1 --seeds 42 --tasks-per-domain 1 --workers 3 --output-dir outputs/smoke
+python -X utf8 run_experiment.py --model deepseek-v4.1-flash --base-url "$MIMO_BASE_URL" --seeds 20260921 --selector-seeds 77121 --judge-seeds 88021 --tasks-per-domain 1 --workers 3 --selector-workers 3 --score-workers 3 --output-dir outputs/smoke
 
-# 完整 Test：每种方法完整覆盖 150 个 Test 任务，单次结果 pass^5=N/A
-python -X utf8 run_experiment.py --model gpt-4.1 --base-url https://api.openai.com/v1 --seeds 42 --workers 10 --output-dir outputs/test_one
-
-# 五次完整 Test：每种方法 5 x 150 个任务，自动统计 pass@1、pass^5、UX
-python -X utf8 run_experiment.py --model gpt-4.1 --base-url https://api.openai.com/v1 --seeds 42 142 242 342 442 --workers 10 --output-dir outputs/test_five
+# 五次完整 Test：与历史 DeepSeek 结果相同的 seed 配置，自动统计三项指标
+python -X utf8 run_experiment.py --model deepseek-v4.1-flash --base-url "$MIMO_BASE_URL" --seeds 20260921 20260925 20260929 20261003 20261007 --selector-seeds 77121 77122 77123 77124 77125 --judge-seeds 88021 88022 88023 88024 88025 --workers 100 --selector-workers 100 --score-workers 40 --output-dir outputs/test_five
 ```
 
-单次与五次示例是两种选择，不必都跑；示例目录独立，不会自动从另一输出目录借用结果。`--workers 20` 可以提高并发，但受服务商额度和 HTTP 并发上限约束。默认按 seed 顺序执行，每个阶段内部并发；不是同时启动五批。
+需要单次运行时传入任一 generation/selector/judge seed，`pass^5` 会标为 N/A。`--selector-seeds` 和 `--judge-seeds` 如使用，必须与 `--seeds` 一一对应；不传时分别复用 scalar seed。示例目录独立，不会自动从另一输出目录借用结果。请求预算为 generation/EDS selector 8192 tokens、ORM selector 2048 tokens、StateBench Task/UX judge 各 16384 tokens（由随包评分器显式设置）；Generation/EDS 用流式响应，ORM selector/评分用非流式响应。历史并发为生成/选择 100、评分 40；如果 provider 限额不足，应调低 `--workers`、`--selector-workers`、`--score-workers`，这会改变吞吐，云模型仍可能有输出差异。默认按 seed 顺序执行每一轮，每个阶段内部并发；不是同时启动五批。
 
 程序依次执行：共享 Vanilla A → EDS-ECA → Best-of-4 → 三种方法离线评分 → 汇总。重复**相同命令和输出目录**可续跑；成功轨迹、阶段 checkpoint、评分不会重复请求。修改模型、seed 或评分设置请用新目录，不要同时向同一目录启动多个进程。失败会以非零状态退出；修好连接后再执行原命令。
+
+### 历史参考结果
+
+以下为五轮 `deepseek-v4.1-flash` Test 的已测结果。ORM 行来自对已有相同四候选池执行官方 ORM prompt 的重选；不是旧的自定义 Best-of-4 selector 数字。
+
+| 方法 | Task Completion pass@1 | pass^5 | 平均 UX |
+| --- | ---: | ---: | ---: |
+| Vanilla | 489/750 = 65.20% | 58/150 = 38.67% | 3.9709 |
+| 修改后的官方 ORM Best-of-4 | 541/750 = 72.13% | 70/150 = 46.67% | 4.1428 |
+| Paper-aligned StateTrace-EDS-ECA | 545/750 = 72.67% | 73/150 = 48.67% | 4.1499 |
+
+Generation seeds 为 `20260921, 20260925, 20260929, 20261003, 20261007`；selector seeds 为 `77121–77125`；judge seeds 为 `88021–88025`。这些是历史观察值，不是测试夹具输出，也不保证云端模型重跑逐位相同。报告未公开原服务 endpoint；换模型、judge 或 provider 后应作为新实验报告。
 
 ## 数据与算法
 

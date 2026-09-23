@@ -219,6 +219,7 @@ def main() -> None:
         selection_jobs.append((key, rows, task_ordinals[key]))
 
     selection_results: list[dict[str, Any]] = []
+    os.environ["MIMO_STREAMING"] = os.environ.get("MIMO_ORM_SELECTOR_STREAMING", "0")
     with ThreadPoolExecutor(max_workers=args.selector_workers) as executor:
         futures = {
             executor.submit(select_one, args, key, rows, ordinal): (key, rows)

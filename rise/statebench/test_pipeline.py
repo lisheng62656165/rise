@@ -49,11 +49,13 @@ def test_all_bundled_tasks_load():
 
 @pytest.mark.parametrize('tasks_per_domain,seeds', [
     (1, [42]), (0, [42]), (0, [42, 142, 242, 342, 442]),
-], ids=['smoke3', 'full150', 'full150-five-runs'])
+    (1, [42, 142, 242, 342, 442]),
+], ids=['smoke3', 'full150', 'full150-five-runs', 'smoke3-five-run-seed-arrays'])
 def test_cli_pipeline_and_resume(tmp_path, tasks_per_domain, seeds):
     calls = []
     selectors = []
     orm_requests = []
+    score_requests = []
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -88,6 +90,7 @@ def test_cli_pipeline_and_resume(tmp_path, tasks_per_domain, seeds):
                     assert messages[0]['content'] == load_prompt()
                     assert messages[-1]['content'].count('---Trajectory - ') == 4
                     assert request['temperature'] == 0 and request['max_tokens'] == 2048
+                    assert request.get('stream') is not True
                     assert 'state_diff' not in messages[-1]['content']
                     assert 'task_completion_pass' not in messages[-1]['content']
                     orm_requests.append(request)
@@ -95,8 +98,11 @@ def test_cli_pipeline_and_resume(tmp_path, tasks_per_domain, seeds):
                 elif 'respond as the customer' in messages[-1]['content'].lower():
                     message['content'] = '[TASK_DONE]'
                 elif 'user experience (ux)' in system:
+                    score_requests.append(request)
                     message['content'] = json.dumps(dict(user_control=4, user_effort=4, response_density=4))
                 else:
+                    if 'evaluation_guidelines:' in system:
+                        score_requests.append(request)
                     message['content'] = json.dumps({'details': []})
             payload = json.dumps({'id': 'fixture', 'object': 'chat.completion', 'created': 0,
                                   'model': 'fixture', 'choices': [{'index': 0, 'finish_reason': 'stop', 'message': message}],
@@ -116,10 +122,27 @@ def test_cli_pipeline_and_resume(tmp_path, tasks_per_domain, seeds):
     command = [sys.executable, '-X', 'utf8', str(ROOT / 'run_experiment.py'), '--output-dir', str(tmp_path / 'run'),
                '--model', 'fixture', '--base-url', f'http://127.0.0.1:{server.server_port}/v1',
                '--tasks-per-domain', str(tasks_per_domain), '--workers', '10', '--seeds', *map(str, seeds)]
+    if len(seeds) == 5:
+        selector_seeds = [77121, 77122, 77123, 77124, 77125]
+        judge_seeds = [88021, 88022, 88023, 88024, 88025]
+        command.extend(['--selector-seeds', *map(str, selector_seeds),
+                        '--judge-seeds', *map(str, judge_seeds)])
     try:
         result = subprocess.run(command, env=env, cwd=tmp_path, capture_output=True, text=True, encoding='utf-8', timeout=600)
         assert result.returncode == 0, result.stdout[-3000:] + result.stderr[-3000:]
         report = json.loads((tmp_path / 'run/comparison.json').read_text())
+        comparison = (tmp_path / 'run/comparison.md').read_text(encoding='utf-8')
+        assert '| Method | Task Completion pass@1 | pass^5 | Mean UX |' in comparison
+        assert comparison.index('| Vanilla |') < comparison.index('| Modified official ORM Best-of-4 |')
+        assert comparison.index('| Modified official ORM Best-of-4 |') < comparison.index('| Paper-aligned StateTrace-EDS-ECA |')
+        config = json.loads((tmp_path / 'run/config.json').read_text())
+        assert config['orm_selector_max_tokens'] == 2048
+        assert config['task_judge_max_tokens'] == 16384
+        assert config['ux_judge_max_tokens'] == 16384
+        assert config['judge_streaming'] is False
+        if len(seeds) == 5:
+            assert config['selector_seeds'] == selector_seeds
+            assert config['judge_seeds'] == judge_seeds
         expected_per_run = 3 if tasks_per_domain else 150
         expected = expected_per_run * len(seeds)
         assert all(r['num_scored_rows'] == expected and r['partial'] == bool(tasks_per_domain) for r in report.values())
@@ -139,6 +162,8 @@ def test_cli_pipeline_and_resume(tmp_path, tasks_per_domain, seeds):
                 assert metrics['pass_power_5'] is None
         assert {len(p['candidates']) for p in selectors} == {2}
         assert len(orm_requests) == expected
+        assert score_requests
+        assert all(r['max_tokens'] == 16384 and r.get('stream') is not True for r in score_requests), score_requests
         before = len(calls)
         result = subprocess.run(command, env=env, cwd=tmp_path, capture_output=True, text=True, encoding='utf-8', timeout=120)
         assert result.returncode == 0, result.stderr
