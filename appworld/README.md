@@ -43,13 +43,16 @@ export MODEL_NAME='gpt-4.1'
 export MAX_COMPLETION_TOKENS=4096
 export REQUEST_TIMEOUT=180
 export MAX_RPM=6
+export PYTHONHASHSEED=0
 ```
 
 Use any OpenAI-compatible model ID; gpt-4.1 is only an example. Actor and
 selector use the same model and endpoint. NVIDIA-compatible and other
 OpenAI-compatible endpoints work by changing OPENAI_BASE_URL and MODEL_NAME.
 For reasoning models, the client uses max_completion_tokens and removes
-unsupported sampling/seed fields. Set OPENAI_REASONING=1 if needed. Never
+unsupported sampling/seed fields. Each actor/selector request receives the
+recorded per-stage seed when the provider supports seeds; local candidate
+ordering also uses a derived seed. Set OPENAI_REASONING=1 if needed. Never
 inherit another experiment's .env.
 
 ## Full test run
@@ -177,6 +180,10 @@ Test-N 168/168 tasks and 56/56 scenarios; Test-C 417/417 tasks and 139/139
 scenarios. Deltas use unrounded ratios. It also prints all three pairwise
 deltas. When a run is incomplete, every method is scored only on the common
 completed task IDs, and missing scenarios are omitted from SGC.
+
+For a complete run, `metrics.md` is the report to copy into the paper table;
+it contains exactly these four columns for Vanilla, Faithful v3, and OAgents
+parallel Best-of-4 (shared A), followed by the three pairwise delta rows.
 
 ## Reproducibility and release rules
 

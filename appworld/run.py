@@ -54,7 +54,7 @@ def main():
     args = parser.parse_args()
     config = {}
     if args.config:
-        config_path = args.config if args.config.is_absolute() else Path.cwd() / args.config
+        config_path = args.config if args.config.is_absolute() else ROOT / args.config
         config = json.loads(config_path.resolve().read_text(encoding='utf-8'))
         args.split = args.split if args.split != 'both' else config.get('split', args.split)
         args.model = args.model or config.get('model')

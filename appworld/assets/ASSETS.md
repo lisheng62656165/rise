@@ -10,6 +10,8 @@
   retains its own license, not the research-code license.
 
 Keep these files when distributing the self-contained artifact. The wheels
-target modern glibc Linux (2.28 or newer), not Alpine/musl or ARM. Other platforms
-use automatic online dependency installation. Python/OS and API access are not
-bundled. The extracted protected data is local-only; see ../NOTICE.md.
+target modern glibc Linux (2.28 or newer), not Alpine/musl or ARM. The bundled
+bootstrap is validated only on Linux x86_64 / CPython 3.12 and deliberately
+refuses external dependency downloads on other platforms. Python/OS and API
+access are not bundled. The extracted protected data is local-only; see
+../NOTICE.md.
