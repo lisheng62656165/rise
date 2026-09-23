@@ -98,3 +98,44 @@ def test_shared_vanilla_mismatch_detected(tmp_path):
     (b / 't/candidate_a.json').write_text('{"value":2}')
     with pytest.raises(RuntimeError):
         share_a(a, b, ['t'])
+
+
+def test_main_experiment_seed_defaults_match_challenge_record(tmp_path, monkeypatch):
+    import run as driver
+    import sys
+    from types import ModuleType
+
+    config_path = Path(__file__).resolve().parents[1] / 'configs' / 'test_challenge_main.json'
+    monkeypatch.setattr('sys.argv', [
+        'run.py', '--config', str(config_path), '--output', str(tmp_path / 'out'), '--method', 'faithful-v3'
+    ])
+    monkeypatch.setenv('OPENAI_API_KEY', 'test-only')
+    monkeypatch.setenv('MODEL_NAME', 'deepseek-v4.1-flash')
+    monkeypatch.setenv('OPENAI_BASE_URL', 'https://example.invalid/v1')
+
+    commands = []
+
+    def fake_execute(script, arguments):
+        commands.append((script, arguments))
+        output_dir = Path(arguments[arguments.index('--output-dir') + 1])
+        (output_dir / 'task_1').mkdir(parents=True, exist_ok=True)
+        (output_dir / 'task_1' / 'final.json').write_text(
+            json.dumps({'selected_success': True, 'vanilla_success': True})
+        )
+
+    monkeypatch.setattr(driver, 'execute', fake_execute)
+    monkeypatch.setattr(driver.subprocess, 'run', lambda *args, **kwargs: None)
+
+    fake_appworld = ModuleType('appworld')
+    fake_appworld.load_task_ids = lambda split: ['task_1']
+    monkeypatch.setitem(sys.modules, 'appworld', fake_appworld)
+    monkeypatch.setattr('src.config.get_settings', lambda: Settings(
+        'https://example.invalid/v1', 'test-only', 'deepseek-v4.1-flash'))
+    driver.main()
+
+    record = json.loads((tmp_path / 'out/test_challenge/experiment.json').read_text())
+    assert record['seed_a'] == 53403
+    assert record['proposal_seeds'] == [64639, 64640, 64641]
+    assert record['faithful_selector_seed'] == 77113
+    assert record['oagents_selector_seed'] == 53403
+    assert record['config_name'] == 'appworld-test-challenge-deepseek-main'
