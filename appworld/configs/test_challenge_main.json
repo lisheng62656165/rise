@@ -1,0 +1,26 @@
+{
+  "name": "appworld-test-challenge-deepseek-main",
+  "split": "test_challenge",
+  "task_count": 417,
+  "scenario_count": 139,
+  "model": "deepseek-v4.1-flash",
+  "base_url": "https://hgapi.dieqiyun.top/v1",
+  "max_steps": 50,
+  "selector_max_completion_tokens": 2048,
+  "seeds": {
+    "vanilla_anchor_and_oagents_A": 53403,
+    "faithful_proposals_BCD": [64639, 64640, 64641],
+    "faithful_selector_base": 77113,
+    "oagents_candidate_seeds_A_to_D": [53403, 64639, 64640, 64641],
+    "oagents_selector_base": 53403,
+    "per_task_derivation": "selector_api_seed = selector_base + official test_challenge task ordinal"
+  },
+  "results": {
+    "Vanilla": {"tgc": "366/417", "tgc_percent": 87.8, "sgc": "105/139", "sgc_percent": 75.5},
+    "OAgents parallel Best-of-4 (shared A)": {"tgc": "367/417", "tgc_percent": 88.0, "sgc": "108/139", "sgc_percent": 77.7},
+    "Faithful v3": {"tgc": "374/417", "tgc_percent": 89.7, "sgc": "114/139", "sgc_percent": 82.0}
+  },
+  "result_source_thread": "01a0c4ab-cd33-7aa0-ae88-c01056189e8d",
+  "result_source_note": "User-provided full test_challenge main result; do not treat as a result newly reproduced by this release package.",
+  "seed_policy": "These values are defaults for the reported main experiment. Runners accept explicit seed overrides for independent replications."
+}

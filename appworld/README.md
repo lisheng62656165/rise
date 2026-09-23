@@ -43,13 +43,16 @@ export MODEL_NAME='gpt-4.1'
 export MAX_COMPLETION_TOKENS=4096
 export REQUEST_TIMEOUT=180
 export MAX_RPM=6
+export PYTHONHASHSEED=0
 ```
 
 Use any OpenAI-compatible model ID; gpt-4.1 is only an example. Actor and
 selector use the same model and endpoint. NVIDIA-compatible and other
 OpenAI-compatible endpoints work by changing OPENAI_BASE_URL and MODEL_NAME.
 For reasoning models, the client uses max_completion_tokens and removes
-unsupported sampling/seed fields. Set OPENAI_REASONING=1 if needed. Never
+unsupported sampling/seed fields. Each actor/selector request receives the
+recorded per-stage seed when the provider supports seeds; local candidate
+ordering also uses a derived seed. Set OPENAI_REASONING=1 if needed. Never
 inherit another experiment's .env.
 
 ## Full test run
@@ -64,8 +67,70 @@ API with one real task:
 Then run both official test splits and both methods:
 
 ```bash
-.venv/bin/python run.py --method both --split both --workers 4 --output outputs/full-comparison
+.venv/bin/python run.py \
+  --config configs/appworld_main.json \
+  --method both \
+  --workers 4 \
+  --output outputs/full-comparison
 ```
+
+`configs/appworld_main.json` is the shared basic configuration for both
+`test_normal` and `test_challenge`. The two splits use the same model,
+endpoint, max steps, selector budget, candidate seeds, selector seeds, method
+definitions, and evaluator protocol; only the official task/scenario list
+changes. The command produces both split reports and the four requested
+columns: Test-N TGC, Test-N SGC, Test-C TGC, and Test-C SGC.
+
+### Test-C main configuration
+
+The reported APPWorld `test_challenge` main experiment is recorded in
+`configs/test_challenge_main.json`. It uses DeepSeek Flash through the
+OpenAI-compatible endpoint, `max_steps=50`, selector budget 2048, and these
+default seeds:
+
+This is the Test-C view of the same shared basic configuration. It is kept as
+a separate file because it also stores the supplied historical Test-C result
+table.
+
+```text
+shared Vanilla Candidate A / OAgents A: 53403
+Faithful proposal candidates B/C/D: 64639, 64640, 64641
+Faithful selector base: 77113
+OAgents selector base: 53403
+```
+
+Reproduce the same protocol with a fresh output directory:
+
+```bash
+.venv/bin/python run.py \
+  --config configs/test_challenge_main.json \
+  --method both \
+  --workers 4 \
+  --output outputs/test_challenge_main
+```
+
+The command performs a fresh run and does not promise bit-for-bit reproduction
+of the historical table. The table below is the recorded full-coverage
+reference result from the source experiment; it is not silently recomputed or
+claimed as a new run by this release package. The protocol keeps Vanilla A
+shared between Faithful v3 and OAgents Best-of-4, while OAgents B/C/D remain
+independent fresh candidates.
+
+| Method | Test-C TGC | Test-C SGC |
+|---|---:|---:|
+| Vanilla (Faithful Candidate A) | 366/417 = 87.8% | 105/139 = 75.5% |
+| OAgents parallel Best-of-4 (shared A; selector=53403) | 367/417 = 88.0% | 108/139 = 77.7% |
+| Faithful v3 | 374/417 = 89.7% | 114/139 = 82.0% |
+| Faithful v3 - Vanilla | +1.9pp | +6.5pp |
+| OAgents Best-of-4 - Vanilla | +0.2pp | +2.2pp |
+| Faithful v3 - OAgents Best-of-4 | +1.7pp | +4.3pp |
+
+The reference result covers all 417 Test-C tasks and all 139 scenarios. The
+values are supplied by the experiment record associated with source thread
+`01a0c4ab-cd33-7aa0-ae88-c01056189e8d`; credentials and raw trajectories are
+not part of this release. Any runner may override the seeds with
+`--seed-a`, `--proposal-seeds`, `--faithful-selector-seed`, and
+`--oagents-selector-seed`.
 
 This runs 168 Test-N tasks and 417 Test-C tasks. Omit `--limit` for the full
 run. The same command resumes incomplete tasks by reusing candidates and
@@ -131,12 +196,17 @@ scenarios. Deltas use unrounded ratios. It also prints all three pairwise
 deltas. When a run is incomplete, every method is scored only on the common
 completed task IDs, and missing scenarios are omitted from SGC.
 
+For a complete run, `metrics.md` is the report to copy into the paper table;
+it contains exactly these four columns for Vanilla, Faithful v3, and OAgents
+parallel Best-of-4 (shared A), followed by the three pairwise delta rows.
+
 ## Reproducibility and release rules
 
-Default seeds are A=53403, proposals=64639,64640,64641, selector=77113;
-max steps=50 and selector budget=2048. The manifest records model, endpoint,
-seed and task IDs but never the API key. Changing model, seeds or budget
-requires a new output directory. The benchmark order is the official order;
-OAgents display order is derived from the recorded selector seed.
+The main Test-C defaults are A=53403, proposals=64639,64640,64641,
+Faithful selector=77113, OAgents selector=53403; max steps=50 and selector
+budget=2048. The manifest records model, endpoint, seed and task IDs but never
+the API key. Changing model, seeds or budget requires a new output directory.
+The benchmark order is the official order; OAgents display order is derived
+from its recorded selector seed.
 
 APPWORLD data is distributed as an encrypted bundle under its additional sharing requirement. Do not publish runtime/, extracted app source, task descriptions, raw trajectories, .env, .venv, outputs or keys. Keep the encrypted bundle and wheel. See NOTICE.md and VALIDATION.md.

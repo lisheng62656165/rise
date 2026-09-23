@@ -1,0 +1,13 @@
+results/
+outputs/
+scores/
+*.log
+*.tmp
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+api_key*.txt
+key*.txt
+api_*.txt

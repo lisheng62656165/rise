@@ -1,13 +1,27 @@
 # RISE
 
-RISE is organized by benchmark. The current release contains a complete,
-self-contained StateBench implementation:
+RISE is organized by benchmark. Current releases include self-contained
+StateBench and OccuBench implementations:
 
 ```text
 rise/
   statebench/    # StateTrace-EDS-ECA, official ORM Best-of-4, and Vanilla
+  occubench/     # StateBench-EDS-ECA, OAgents Best-of-4, and Vanilla
   <future-dataset>/
 ```
+
+## Run OccuBench from Codex
+
+For OccuBench, reference this README and
+[`rise/occubench/README.md`](rise/occubench/README.md), then run the commands
+from `rise/occubench`. The folder includes the complete 382-task dataset,
+world-model configurations, verifier, methods, scoring utilities, and offline
+Python wheels for Windows/Linux x86_64 with Python 3.12. No separate OccuBench
+checkout or dataset download is required. A Python 3.12 interpreter and access
+to a model API endpoint/key are still required; a ChatGPT web subscription by
+itself is not API access. The OccuBench README documents
+the full EDS-ECA, OAgents Best-of-4, and Vanilla comparison and reports the
+`Avg, Agri, Biz, Comm, Edu, Hlth, Ind, Pub, Sci, Tech, Trans` metrics.
 
 ## Run StateBench from Codex
 

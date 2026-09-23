@@ -1,0 +1,1359 @@
+"""
+Custom Agent implementation - Framework-independent
+
+Uses universal LLM calling for multiple providers
+"""
+
+import hashlib
+import json
+import os
+import re
+import sys
+import time
+import uuid
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+from threading import Lock
+
+try:
+    from .call_llm import call_llm
+except ImportError:
+    from call_llm import call_llm
+
+
+
+
+class ShoppingFnAgent:
+    """
+    Lightweight function-calling Agent (shopping scenario):
+    - Loads shopping_tool_schema.json as OpenAI Chat Completions tools
+    - Dynamically loads tool classes (BaseShoppingTool subclasses) from shopping_tools directory
+    - Iteratively calls LLM and executes tool_calls until final answer
+    """
+
+    def __init__(self,
+                 model: str | None = None,
+                 tool_schema_path: str | None = None,
+                 base_url: str | None = None,
+                 api_key: str | None = None,
+                 sample_id: str | None = None,
+                 database_base_path: str | None = None) -> None:
+        """
+        Initialize Agent
+        
+        Args:
+            model: Model name (must exist in models_config.json)
+            tool_schema_path: Path to tool schema JSON file
+            base_url: Base URL for API (deprecated, loaded from models_config.json)
+            api_key: API key (deprecated, loaded from models_config.json)
+            sample_id: Sample ID for database path resolution
+            database_base_path: Base path to database directory
+        """
+        self._load_env_from_dotenv()
+
+        self.model = model or os.getenv("TOOLS_AGENT_MODEL", "qwen-plus")
+        default_schema = Path(__file__).resolve().parent / 'tools' / 'shopping_tool_schema.json'
+        self.tool_schema_path = tool_schema_path or os.getenv("SHOPPING_SCHEMA_PATH", str(default_schema))
+
+        self.sample_id = sample_id
+        if database_base_path:
+            self.database_base_path = Path(database_base_path)
+        else:
+            # Default path: ShoppingBench/database
+            project_root = Path(__file__).resolve().parent
+            self.database_base_path = project_root / 'database'
+
+        self.tool_config = self._build_tool_config()
+        self.tools_schema = self._load_tool_schemas()
+        self.openai_tools = self._build_openai_tools(self.tools_schema)
+        self.tool_instances = self._load_tool_instances()
+
+        if not Path(self.tool_schema_path).exists():
+            raise FileNotFoundError(f"Tool schema not found: {self.tool_schema_path}")
+
+    def _build_tool_config(self) -> Dict[str, Any]:
+        """
+        Build tool configuration with database path.
+        All shopping tools use the same products.jsonl file, simplifying the logic.
+        """
+        cfg = {}
+        if self.sample_id is not None:
+            # Shopping scenario database path structure: database/case_{sample_id}/products.jsonl
+            db_path = self.database_base_path / f'case_{self.sample_id}'
+            
+            if db_path.exists():
+                cfg['database_path'] = str(db_path)
+            else:
+                if os.getenv('DEBUG_TOOLS') == '1':
+                    print(f"[ShoppingFnAgent] WARN: Database not found for case {self.sample_id}: {db_path}")
+        return cfg
+    
+    def _load_tool_instances(self) -> Dict[str, Any]:
+        """
+        Dynamically load tool instances from TOOL_REGISTRY.
+        
+        Tool registration mechanism:
+        1. Tool classes use the @register_tool('tool_name') decorator
+        2. The decorator executes at class definition time, registering the tool class to base_shopping_tool.TOOL_REGISTRY
+        3. When importing the tools package, __init__.py imports all tool modules, triggering decorator execution
+        4. Retrieve registered tool classes from TOOL_REGISTRY and instantiate them
+        """
+        instances: Dict[str, Any] = {}
+
+        tools_dir = Path(__file__).resolve().parent.parent / 'tools'
+        # Add tools_dir to sys.path to enable 'from base_shopping_tool import ...' in tool files
+        sys.path.insert(0, str(tools_dir))
+        sys.path.insert(0, str(tools_dir.parent))
+
+        # Import tools package to trigger @register_tool decorator execution for all tool modules
+        # tools/__init__.py imports all tool modules, and decorators register tool classes to TOOL_REGISTRY
+        try:
+            import tools  # noqa: F401
+        except Exception as e:
+            if os.getenv('DEBUG_TOOLS') == '1':
+                print(f"[ShoppingFnAgent] WARN: import tools failed: {e}")
+            return instances
+
+        # Get TOOL_REGISTRY from base_shopping_tool module
+        try:
+            import base_shopping_tool  # type: ignore
+            tool_registry = getattr(base_shopping_tool, 'TOOL_REGISTRY', None)
+            if tool_registry is None:
+                if os.getenv('DEBUG_TOOLS') == '1':
+                    print("[ShoppingFnAgent] WARN: TOOL_REGISTRY not found in base_shopping_tool")
+                return instances
+        except Exception as e:
+            if os.getenv('DEBUG_TOOLS') == '1':
+                print(f"[ShoppingFnAgent] WARN: import base_shopping_tool failed: {e}")
+            return instances
+
+        if not tool_registry:
+            print("[ShoppingFnAgent] WARN: TOOL_REGISTRY is empty. No tools were registered.")
+            return instances
+
+        # Create tool instances from TOOL_REGISTRY
+        tool_cfg = self.tool_config
+        for tool_name, tool_cls in tool_registry.items():
+            try:
+                inst = tool_cls(cfg=tool_cfg)
+                instances[tool_name] = inst
+            except Exception as e:
+                if os.getenv('DEBUG_TOOLS') == '1':
+                    print(f"[ShoppingFnAgent] WARN: Failed to instantiate tool '{tool_name}': {e}")
+                continue
+
+        return instances
+
+    def _load_env_from_dotenv(self) -> None:
+        """
+        Load environment variables from .env file
+        
+        Searches for .env in the following order:
+        1. Domain directory (shoppingplanning/)
+        2. Project root (parent of domain)
+        """
+        try:
+            # Try domain directory first
+            domain_root = Path(__file__).resolve().parent.parent
+            domain_dotenv = domain_root / '.env'
+            
+            # Try project root
+            project_root = domain_root.parent
+            project_dotenv = project_root / '.env'
+            
+            # Use project root .env if it exists, otherwise domain .env
+            dotenv_path = project_dotenv if project_dotenv.exists() else domain_dotenv
+            
+            if not dotenv_path.exists():
+                return
+            
+            for line in dotenv_path.read_text(encoding='utf-8').splitlines():
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, val = line.split('=', 1)
+                key = key.strip()
+                val = val.strip().strip('"').strip("'")
+                if key and (key not in os.environ):
+                    os.environ[key] = val
+        except Exception:
+            pass
+
+    def _load_tool_schemas(self) -> List[Dict[str, Any]]:
+        """Load tool schemas from JSON file"""
+        with open(self.tool_schema_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
+    def _build_openai_tools(self, schemas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Build OpenAI tools format
+        - If schema is already {type:function, function:{...}}, use as-is
+        - Otherwise wrap as function definition
+        """
+        tools: List[Dict[str, Any]] = []
+        for s in schemas:
+            if isinstance(s, dict) and s.get('type') == 'function' and isinstance(s.get('function'), dict):
+                tools.append(s)
+        return tools
+
+    def _exec_tool(self, name: str, arguments_json: str) -> str:
+        """Execute tool call"""
+        inst = self.tool_instances.get(name)
+        if not inst:
+            return json.dumps({"error": f"tool '{name}' not found"}, ensure_ascii=False)
+        try:
+            res = inst.call(arguments_json)  # Pass raw JSON string
+            return res if isinstance(res, str) else json.dumps(res, ensure_ascii=False)
+        except Exception as e:
+            return json.dumps({"error": str(e)}, ensure_ascii=False)
+
+    def _call_llm(self, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None):
+        """Call LLM with unified handling for all models"""
+        return call_llm(
+            config_name=self.model,
+            messages=messages,
+            tools=tools
+        )
+
+    def _detect_tool_calls(self, assistant_message) -> List[Dict[str, Any]]:
+        """Detect and normalize tool calls"""
+        tool_calls = getattr(assistant_message, 'tool_calls', None)
+        calls: List[Dict[str, Any]] = []
+        self._last_text_tool_call_fallback = False
+        self._last_text_tool_call_raw = None
+        if not tool_calls:
+            if not self._persist_proposed_v3_enabled():
+                return calls
+            content = str(getattr(assistant_message, 'content', None) or '')
+            valid_tools = set(getattr(self, 'tool_instances', {}))
+            for block in re.findall(r'<tool_call>\s*(\{.*?\})\s*</tool_call>', content, flags=re.DOTALL):
+                try:
+                    payload = json.loads(block)
+                except Exception:
+                    continue
+                name = payload.get('name')
+                arguments = payload.get('arguments', {})
+                if name not in valid_tools or not isinstance(arguments, dict):
+                    continue
+                calls.append({
+                    'id': f"call_{uuid.uuid4().hex[:24]}",
+                    'name': name,
+                    'arguments': json.dumps(arguments, ensure_ascii=False),
+                })
+            self._last_text_tool_call_fallback = bool(calls)
+            if calls:
+                self._last_text_tool_call_raw = content
+            return calls
+        
+        for idx, tc in enumerate(tool_calls):
+            try:
+                # Generate unique ID if not provided by the model
+                tool_call_id = tc.id
+                if tool_call_id is None or not tool_call_id:
+                    tool_call_id = f"call_{uuid.uuid4().hex[:24]}"
+                
+                calls.append({
+                    'id': tool_call_id,
+                    'name': tc.function.name,
+                    'arguments': tc.function.arguments,
+                })
+            except Exception:
+                continue
+        
+        return calls
+
+    def _add_to_cart(self, history_messages: List[Any]) -> List[Any]:
+        history_messages = list(history_messages)
+        history_messages.append({
+            "role": "user",
+            "content": (
+                "Check whether the items in the shopping cart meet the requirements. "
+                "If not, add the required items to the cart. If there are multiple possible solutions, "
+                "choose the optimal one. The final result should be based on the items in the cart. "
+                "If the task is already complete, then stop."
+            )
+        })
+        return history_messages
+
+    def run(self, user_query: str, system_prompt: str | None = None, max_llm_calls: int = 100, save_messages: bool = True, messages_output_dir: str | None = None, sample_id: str | None = None) -> List[Any]:
+        """
+        Agent main loop: Call LLM → Execute tools → Repeat until final answer
+        
+        Args:
+            user_query: User query
+            system_prompt: System prompt
+            max_llm_calls: Maximum LLM calls
+            save_messages: Whether to save messages to file
+            messages_output_dir: Output directory for messages (if sample_id not provided)
+            sample_id: Sample ID for database path resolution
+            
+        Returns:
+            Complete message history
+        """
+        if save_messages:
+            # If sample_id exists, save to {database_base_path}/case_{sample_id}/messages.json
+            # Use self.database_base_path for proper isolation when running concurrent instances
+            if sample_id:
+                db_case_dir = self.database_base_path / f'case_{sample_id}'
+                db_case_dir.mkdir(parents=True, exist_ok=True)
+                messages_file = db_case_dir / 'messages.json'
+            else:
+                # Otherwise fallback to result/messages
+                msg_dir = Path(messages_output_dir or (Path(__file__).resolve().parent.parent / 'result' / 'messages'))
+                msg_dir.mkdir(parents=True, exist_ok=True)
+                ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                messages_file = msg_dir / f'messages_{ts}.json'
+
+        messages: List[Any] = ([{"role": "system", "content": system_prompt}] if system_prompt else []) + [{"role": "user", "content": user_query}]
+        persist_audit_file = messages_file.with_name('persist_audit.json') if save_messages else None
+        persist_state = self._persist_new_state(persist_audit_file)
+        self._persist_load_v5_ledger(persist_state, messages_file)
+        if save_messages:
+            self._save_messages(messages, messages_file, 0, "Initial messages")
+            self._persist_save_audit(persist_state)
+
+        for step_count in range(1, max_llm_calls + 1):
+            if self._persist_context_budget_exceeded(messages) and not self._persist_proposed_v3_enabled():
+                messages.append({"role": "assistant", "content": self._persist_context_budget_message('search')})
+                persist_state['events'].append({'type': 'intervention', 'phase': 'search', 'step': step_count, 'reason': 'shopping_context_budget_finalization'})
+                if save_messages:
+                    self._save_messages(messages, messages_file, step_count, "PERSIST context budget finalization")
+                    self._persist_save_audit(persist_state)
+                break
+            llm_messages = self._persist_messages_for_llm(persist_state, messages, 'search', step_count)
+            resp = self._call_llm(messages=llm_messages, tools=self.openai_tools)
+            msg = resp.choices[0].message
+            
+            # Convert message object to serializable dict
+            msg_dict = {
+                "role": "assistant",
+                "content": msg.content or '',
+            }
+            
+            # Preserve reasoning_content if present
+            if hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+                msg_dict['reasoning_content'] = msg.reasoning_content
+            
+            calls = self._detect_tool_calls(msg)
+            if getattr(self, '_last_text_tool_call_fallback', False):
+                persist_state['events'].append({'type': 'intervention', 'phase': 'search', 'step': step_count, 'reason': 'shopping_text_tool_call_fallback', 'recovered_calls': len(calls), 'raw_response': self._last_text_tool_call_raw})
+                msg_dict['content'] = re.sub(r'<tool_call>\s*\{.*?\}\s*</tool_call>', '', msg_dict['content'], flags=re.DOTALL).strip()
+            calls, persist_message = self._persist_prepare_tool_calls(persist_state, calls, 'search', step_count)
+            calls = self._persist_apply_current_turn_fanout_gate(persist_state, calls, 'search', step_count)
+            if persist_message:
+                msg_dict['content'] = persist_message
+            if calls:
+                msg_dict["tool_calls"] = [
+                    {
+                        'id': call['id'],
+                        'type': 'function',
+                        'function': {
+                            'name': call['name'],
+                            'arguments': call['arguments']
+                        }
+                    }
+                    for call in calls
+                ]
+            
+            messages.append(msg_dict)
+            if save_messages:
+                self._save_messages(messages, messages_file, step_count, f"LLM response - {len(calls)} tool calls")
+                self._persist_save_audit(persist_state)
+            
+            if not calls:
+                break
+
+            for call in calls:
+                tool_result = self._exec_tool(call['name'], call['arguments'])
+                self._persist_record_result(persist_state, call, tool_result, 'search', step_count)
+                messages.append({"role": "tool", "tool_call_id": call['id'], "content": tool_result})
+            if save_messages:
+                self._save_messages(messages, messages_file, step_count, f"Tool execution completed - {len(calls)} tools")
+                self._persist_save_audit(persist_state)
+
+        messages = self._add_to_cart(messages)
+        for step_count in range(1, max_llm_calls + 1):
+            if self._persist_context_budget_exceeded(messages) and not self._persist_proposed_v3_enabled():
+                messages.append({"role": "assistant", "content": self._persist_context_budget_message('cart_check')})
+                persist_state['events'].append({'type': 'intervention', 'phase': 'cart_check', 'step': step_count, 'reason': 'shopping_context_budget_finalization'})
+                if save_messages:
+                    self._save_messages(messages, messages_file, step_count, "PERSIST context budget finalization")
+                    self._persist_save_audit(persist_state)
+                return messages
+            llm_messages = self._persist_messages_for_llm(persist_state, messages, 'cart_check', step_count)
+            resp = self._call_llm(messages=llm_messages, tools=self.openai_tools)
+            msg = resp.choices[0].message
+            
+            # Convert message object to serializable dict
+            msg_dict = {
+                "role": "assistant",
+                "content": msg.content or '',
+            }
+            
+            # Preserve reasoning_content if present
+            if hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+                msg_dict['reasoning_content'] = msg.reasoning_content
+            
+            calls = self._detect_tool_calls(msg)
+            if getattr(self, '_last_text_tool_call_fallback', False):
+                persist_state['events'].append({'type': 'intervention', 'phase': 'cart_check', 'step': step_count, 'reason': 'shopping_text_tool_call_fallback', 'recovered_calls': len(calls), 'raw_response': self._last_text_tool_call_raw})
+                msg_dict['content'] = re.sub(r'<tool_call>\s*\{.*?\}\s*</tool_call>', '', msg_dict['content'], flags=re.DOTALL).strip()
+            calls, persist_message = self._persist_prepare_tool_calls(persist_state, calls, 'cart_check', step_count)
+            calls = self._persist_apply_current_turn_fanout_gate(persist_state, calls, 'cart_check', step_count)
+            if persist_message:
+                msg_dict['content'] = persist_message
+            if calls:
+                msg_dict["tool_calls"] = [
+                    {
+                        'id': call['id'],
+                        'type': 'function',
+                        'function': {
+                            'name': call['name'],
+                            'arguments': call['arguments']
+                        }
+                    }
+                    for call in calls
+                ]
+            
+            messages.append(msg_dict)
+            if save_messages:
+                self._save_messages(messages, messages_file, step_count, f"LLM response - {len(calls)} tool calls")
+                self._persist_save_audit(persist_state)
+            
+            if not calls:
+                if self._persist_should_reprompt_cart_completion(persist_state, msg_dict.get('content', '')):
+                    persist_state['cart_completion_reprompts'] = int(persist_state.get('cart_completion_reprompts', 0)) + 1
+                    messages.append({
+                        'role': 'user',
+                        'content': (
+                            '[PERSIST-ACE] shopping_cart_completion_card: your visible cart review explicitly identified '
+                            'one or more missing or non-compliant requirements. Repair only those identified gaps using '
+                            'visible product IDs and tools. Preserve supported cart items, do not invent IDs, then verify '
+                            'the cart once and finish.'
+                        ),
+                    })
+                    persist_state['events'].append({
+                        'type': 'intervention',
+                        'phase': 'cart_check',
+                        'step': step_count,
+                        'reason': 'shopping_cart_completion_reprompt',
+                        'reprompt_count': persist_state['cart_completion_reprompts'],
+                    })
+                    if save_messages:
+                        self._save_messages(messages, messages_file, step_count, 'PERSIST cart completion reprompt')
+                        self._persist_save_audit(persist_state)
+                    continue
+                return messages
+
+            for call in calls:
+                tool_result = self._exec_tool(call['name'], call['arguments'])
+                self._persist_record_result(persist_state, call, tool_result, 'cart_check', step_count)
+                messages.append({"role": "tool", "tool_call_id": call['id'], "content": tool_result})
+            if save_messages:
+                self._save_messages(messages, messages_file, step_count, f"Tool execution completed - {len(calls)} tools")
+                self._persist_save_audit(persist_state)
+
+        return messages
+    
+
+    _PERSIST_LOOKUP_TOOLS = {
+        'search_products',
+        'filter_by_brand',
+        'filter_by_color',
+        'filter_by_size',
+        'filter_by_applicable_coupons',
+        'filter_by_range',
+        'sort_products',
+        'get_product_details',
+        'calculate_transport_time',
+        'get_user_info',
+        'get_cart_info',
+    }
+    _PERSIST_ACTION_TOOLS = {
+        'add_product_to_cart',
+        'delete_product_from_cart',
+        'add_coupon_to_cart',
+        'delete_coupon_from_cart',
+    }
+
+    def _persist_guard_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return mode not in {'', '0', 'false', 'none', 'off'}
+
+    def _persist_new_state(self, audit_file: Path | None = None) -> Dict[str, Any]:
+        return {
+            'enabled': self._persist_guard_enabled(),
+            'audit_file': str(audit_file) if audit_file else None,
+            'events': [],
+            'failed_lookup_counts': {},
+            'failed_action_keys': set(),
+            'failed_action_versions': {},
+            'evidence_version': 0,
+            'failed_evidence_versions': {},
+            'no_effect_lookup_counts': {},
+            'no_effect_evidence_versions': {},
+            'visible_product_ids': set(),
+            'latest_cart_product_ids': set(),
+            'observed_evidence_signatures': set(),
+            'context_compaction_signatures': set(),
+            'context_compaction_counts': {},
+            'cart_completion_reprompts': 0,
+            'v5_shadow_pending': {},
+            'v5_requirement_ledger': None,
+            'v5_pending_ace': None,
+            'v5_ledger_prompt_count': 0,
+        }
+
+    def _persist_normalize_arguments(self, arguments_json: str) -> str:
+        try:
+            parsed = json.loads(arguments_json or '{}')
+            return json.dumps(parsed, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+        except Exception:
+            return str(arguments_json or '')
+
+    def _persist_call_key(self, call: Dict[str, Any]) -> str:
+        return f"{call.get('name')}::{self._persist_normalize_arguments(call.get('arguments', ''))}"
+
+    def _persist_result_failed(self, result: str) -> bool:
+        text = str(result or '').strip()
+        lower = text.lower()
+        if not text:
+            return True
+        if any(marker in lower for marker in ['"error"', 'traceback', 'exception', 'failed', 'not found', 'invalid', 'cannot', 'unable']):
+            return True
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            return False
+        if isinstance(parsed, dict):
+            if parsed.get('error') or parsed.get('success') is False or parsed.get('status') in {'error', 'failed', 'fail'}:
+                return True
+            if 'results' in parsed and parsed.get('results') in ([], None):
+                return True
+            if 'products' in parsed and parsed.get('products') in ([], None):
+                return True
+        if isinstance(parsed, list) and len(parsed) == 0:
+            return True
+        return False
+
+    def _persist_record_result(self, state: Dict[str, Any], call: Dict[str, Any], result: str, phase: str, step: int) -> None:
+        if not state.get('enabled'):
+            return
+        key = self._persist_call_key(call)
+        name = call.get('name')
+        failed = self._persist_result_failed(result)
+        product_ids, cart_product_ids = self._persist_extract_result_evidence(call.get('name'), result)
+        previous_products = set(state.get('visible_product_ids', set()))
+        previous_cart = set(state.get('latest_cart_product_ids', set()))
+        result_signature = hashlib.sha256(f'{name}\n{str(result or "").strip()}'.encode('utf-8')).hexdigest()
+        result_evidence_changed = not failed and result_signature not in state['observed_evidence_signatures']
+        if not failed:
+            state['observed_evidence_signatures'].add(result_signature)
+        state['visible_product_ids'].update(product_ids)
+        if cart_product_ids is not None:
+            state['latest_cart_product_ids'] = set(cart_product_ids)
+        evidence_changed = (
+            state['visible_product_ids'] != previous_products
+            or state['latest_cart_product_ids'] != previous_cart
+            or result_evidence_changed
+        )
+        if evidence_changed:
+            state['evidence_version'] = int(state.get('evidence_version', 0)) + 1
+        if failed and name in self._PERSIST_LOOKUP_TOOLS:
+            state['failed_lookup_counts'][key] = int(state['failed_lookup_counts'].get(key, 0)) + 1
+            state['failed_evidence_versions'][key] = int(state.get('evidence_version', 0))
+        if failed and name in self._PERSIST_ACTION_TOOLS:
+            state['failed_action_keys'].add(key)
+            state['failed_action_versions'][key] = int(state.get('evidence_version', 0))
+        if not failed and name in self._PERSIST_LOOKUP_TOOLS:
+            if evidence_changed:
+                state['no_effect_lookup_counts'][key] = 0
+            else:
+                state['no_effect_lookup_counts'][key] = int(state['no_effect_lookup_counts'].get(key, 0)) + 1
+                state['no_effect_evidence_versions'][key] = int(state.get('evidence_version', 0))
+        if self._persist_v5_online_enabled() and name in self._PERSIST_LOOKUP_TOOLS:
+            no_effect_count = int(state['no_effect_lookup_counts'].get(key, 0))
+            failed_count = int(state['failed_lookup_counts'].get(key, 0))
+            if no_effect_count == 2 or failed_count == 2:
+                if name == 'search_products':
+                    suggested_family = 'detail' if state.get('visible_product_ids') else 'search_change_query'
+                elif name in {'get_product_details', 'calculate_transport_time'}:
+                    suggested_family = 'search_change_query'
+                else:
+                    suggested_family = 'detail' if state.get('visible_product_ids') else 'search_change_query'
+                state['v5_pending_ace'] = {
+                    'trigger_family': 'strict_repeated_failure' if failed_count == 2 else 'strict_exact_no_effect',
+                    'tool': name,
+                    'key': key,
+                    'suggested_tool_family': suggested_family,
+                    'step': step,
+                    'phase': phase,
+                }
+        state['events'].append({
+            'type': 'tool_result',
+            'phase': phase,
+            'step': step,
+            'tool': name,
+            'key': key,
+            'failed': failed,
+            'evidence_version': int(state.get('evidence_version', 0)),
+            'new_product_ids': sorted(set(product_ids) - previous_products),
+            'cart_changed': cart_product_ids is not None and set(cart_product_ids) != previous_cart,
+            'result_evidence_changed': result_evidence_changed,
+            'no_effect_count': int(state['no_effect_lookup_counts'].get(key, 0)),
+        })
+        shadow_event = state.get('v5_shadow_pending', {}).pop(call.get('id'), None)
+        if shadow_event is not None:
+            shadow_event.update({
+                'actual_effect': {
+                    'productive': bool(evidence_changed),
+                    'failed': bool(failed),
+                    'new_product_ids': sorted(set(product_ids) - previous_products),
+                    'cart_changed': cart_product_ids is not None and set(cart_product_ids) != previous_cart,
+                    'result_evidence_changed': bool(result_evidence_changed),
+                },
+                'whether_productive': bool(evidence_changed),
+            })
+
+    def _persist_proposed_v2_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return 'proposed_v2' in mode or 'proposed_v3' in mode or 'proposed_v4' in mode or 'paper_ready' in mode or 'multicard' in mode
+
+    def _persist_proposed_v3_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return 'proposed_v3' in mode or 'proposed_v4' in mode or 'evidence_compaction' in mode
+
+    def _persist_conservative_v4_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return 'proposed_v4' in mode or 'conservative_context' in mode
+
+    def _persist_v5_shadow_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return 'proposed_v5_shadow' in mode
+
+    def _persist_v5_online_enabled(self) -> bool:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        return 'proposed_v5_minimal' in mode
+
+    def _persist_load_v5_ledger(self, state: Dict[str, Any], messages_file: Path) -> None:
+        if not self._persist_v5_online_enabled():
+            return
+        ledger_path = messages_file.with_name('requirement_ledger.json')
+        try:
+            with open(ledger_path, encoding='utf-8') as f:
+                payload = json.load(f)
+            requirements = payload.get('requirements')
+            if not isinstance(requirements, list) or not requirements:
+                raise ValueError('requirements must be a non-empty list')
+            compact = []
+            for index, requirement in enumerate(requirements, 1):
+                if not isinstance(requirement, dict):
+                    continue
+                compact.append({
+                    'requirement_id': str(requirement.get('requirement_id') or f'R{index}'),
+                    'product_description': str(requirement.get('product_description') or ''),
+                    'quantity': max(1, int(requirement.get('quantity', 1))),
+                    'hard_constraints': [str(value) for value in requirement.get('hard_constraints', [])],
+                })
+            if not compact:
+                raise ValueError('ledger contains no valid requirements')
+            state['v5_requirement_ledger'] = compact
+            state['events'].append({
+                'type': 'v5_state_persistence',
+                'reason': 'requirement_ledger_loaded',
+                'requirement_count': len(compact),
+                'ledger_path': str(ledger_path),
+            })
+        except Exception as e:
+            state['events'].append({
+                'type': 'v5_state_persistence_error',
+                'reason': 'requirement_ledger_load_failed',
+                'ledger_path': str(ledger_path),
+                'error': f'{type(e).__name__}: {e}',
+            })
+
+    def _persist_extract_result_evidence(self, tool_name: str, result: str) -> tuple[set[str], Optional[set[str]]]:
+        try:
+            parsed = json.loads(result or '{}')
+        except Exception:
+            return set(), None
+        product_ids: set[str] = set()
+
+        def collect(value: Any) -> None:
+            if isinstance(value, dict):
+                product_id = value.get('product_id')
+                if isinstance(product_id, str) and product_id:
+                    product_ids.add(product_id)
+                for key in ('product_ids', 'filtered_products_ids'):
+                    ids = value.get(key)
+                    if isinstance(ids, list):
+                        product_ids.update(str(item) for item in ids if item)
+                for child in value.values():
+                    collect(child)
+            elif isinstance(value, list):
+                for child in value:
+                    collect(child)
+
+        collect(parsed)
+        cart_product_ids: Optional[set[str]] = None
+        if tool_name in self._PERSIST_ACTION_TOOLS or tool_name == 'get_cart_info':
+            if isinstance(parsed, dict) and isinstance(parsed.get('items'), list):
+                cart_product_ids = {
+                    str(item.get('product_id'))
+                    for item in parsed['items']
+                    if isinstance(item, dict) and item.get('product_id')
+                }
+        return product_ids, cart_product_ids
+
+    def _persist_compact_product(self, product: Dict[str, Any]) -> Dict[str, Any]:
+        fields = (
+            'product_id', 'name', 'price', 'brand', 'color', 'size', 'stock_quantity',
+            'suitable_season', 'target_demographic', 'sales_volume', 'rating',
+            'shipping_info', 'applicable_coupons',
+        )
+        return {field: product[field] for field in fields if field in product}
+
+    def _persist_build_evidence_summary(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
+        products: Dict[str, Dict[str, Any]] = {}
+        candidate_ids: set[str] = set()
+        latest_cart: Optional[Dict[str, Any]] = None
+        errors: Counter = Counter()
+        recent_calls: List[Dict[str, Any]] = []
+        for message in messages:
+            if message.get('role') == 'assistant' and message.get('tool_calls'):
+                for call in message['tool_calls']:
+                    function = call.get('function', call) if isinstance(call, dict) else {}
+                    if not isinstance(function, dict) or not function.get('name'):
+                        continue
+                    recent_calls.append({
+                        'name': function.get('name'),
+                        'arguments': self._persist_normalize_arguments(function.get('arguments', '')),
+                    })
+            if message.get('role') != 'tool':
+                continue
+            content = str(message.get('content') or '')
+            try:
+                parsed = json.loads(content)
+            except Exception:
+                if content:
+                    errors[content[:240]] += 1
+                continue
+            if isinstance(parsed, dict):
+                for key in ('product_ids', 'filtered_products_ids'):
+                    ids = parsed.get(key)
+                    if isinstance(ids, list):
+                        candidate_ids.update(str(item) for item in ids if item)
+                if isinstance(parsed.get('products'), list):
+                    for product in parsed['products']:
+                        if not isinstance(product, dict) or not product.get('product_id'):
+                            continue
+                        product_id = str(product['product_id'])
+                        candidate_ids.add(product_id)
+                        products[product_id] = self._persist_compact_product(product)
+                if isinstance(parsed.get('items'), list) and 'summary' in parsed:
+                    latest_cart = {
+                        'items': [self._persist_compact_product(item) for item in parsed['items'] if isinstance(item, dict)],
+                        'used_coupons': parsed.get('used_coupons', []),
+                        'summary': parsed.get('summary', {}),
+                    }
+                if parsed.get('error'):
+                    errors[str(parsed['error'])[:240]] += 1
+        selected_ids = list(products)[:40]
+        remaining_ids = sorted(candidate_ids - set(selected_ids))
+        return {
+            'candidate_product_ids': (selected_ids + remaining_ids)[:80],
+            'product_evidence': [products[product_id] for product_id in selected_ids],
+            'latest_cart': latest_cart or {'items': [], 'used_coupons': [], 'summary': {}},
+            'repeated_errors': [{'message': message, 'count': count} for message, count in errors.most_common(8)],
+            'recent_tool_calls': recent_calls[-24:],
+        }
+
+    def _persist_messages_for_llm(self, state: Dict[str, Any], messages: List[Dict[str, Any]], phase: str, step: int) -> List[Dict[str, Any]]:
+        if state.get('enabled') and self._persist_v5_online_enabled():
+            ledger = state.get('v5_requirement_ledger')
+            if not ledger:
+                return messages
+            pending = state.get('v5_pending_ace')
+            if not pending:
+                return messages
+            persisted = list(messages)
+            persisted.append({
+                'role': 'system',
+                'content': (
+                    '[PERSIST-v5 state] Use this parser ledger as a compact checklist of requested products and constraints. '
+                    'Infer progress from the real tool history and cart. Do not invent product IDs and only use IDs returned by tools. '
+                    'Do not add searches merely because the ledger is present; finish normally when available evidence and cart work are complete. '
+                    'Ledger JSON: ' + json.dumps({'requirements': ledger}, ensure_ascii=False, separators=(',', ':'))
+                ),
+            })
+            state['v5_ledger_prompt_count'] = int(state.get('v5_ledger_prompt_count', 0)) + 1
+            state['events'].append({
+                'type': 'v5_state_prompt',
+                'phase': phase,
+                'step': step,
+                'reason': 'strict_no_effect_recovery',
+                'requirement_count': len(ledger),
+            })
+            if pending:
+                persisted.append({
+                    'role': 'system',
+                    'content': (
+                        '[PERSIST-v5 ACE] The exact lookup below produced no functional state/evidence change twice. '
+                        'Do not repeat the same tool and arguments on this turn. Continue only genuinely unresolved requirements, '
+                        f"but switch to tool family `{pending['suggested_tool_family']}`. Do not finalize or stop merely "
+                        'because this lookup stalled; if all requirements are already satisfied, complete the normal cart/final response. '
+                        'Trigger JSON: ' + json.dumps(pending, ensure_ascii=False, separators=(',', ':'))
+                    ),
+                })
+                state['events'].append({
+                    'type': 'v5_online_intervention',
+                    'phase': phase,
+                    'step': step,
+                    **pending,
+                    'decision': 'prompt_next_turn_family_switch_without_dropping_current_call',
+                })
+                state['v5_pending_ace'] = None
+            return persisted
+        if not state.get('enabled') or not self._persist_proposed_v3_enabled():
+            return messages
+        limit = int(os.getenv('SHOPPING_PERSIST_COMPACTION_CHAR_BUDGET', '70000'))
+        before_chars = self._persist_estimate_history_chars(messages)
+        if before_chars < limit:
+            return messages
+        summary = self._persist_build_evidence_summary(messages)
+        compacted: List[Dict[str, Any]] = []
+        system_message = next((message for message in messages if message.get('role') == 'system'), None)
+        user_messages = [message for message in messages if message.get('role') == 'user']
+        summary_card = (
+            '[PERSIST-ACE] shopping_evidence_compaction_card. The JSON below is a deterministic summary '
+            'of visible tool evidence. Use only listed product/coupon IDs; do not invent IDs. If supported '
+            'candidates are missing from the cart, prioritize cart completion before further retrieval. '
+            'Preserve current cart items that remain supported by visible evidence; only delete an item when '
+            'the evidence clearly shows that it violates a stated requirement. Do not repeat a recent tool call '
+            'unless its arguments or the visible evidence have materially changed.\n'
+            + json.dumps(summary, ensure_ascii=False, separators=(',', ':'))
+        )
+        compacted.append({
+            'role': 'system',
+            'content': ((system_message or {}).get('content') or '') + '\n\n' + summary_card,
+        })
+        if user_messages:
+            compacted.append(user_messages[0])
+        if phase == 'cart_check' and len(user_messages) > 1:
+            compacted.append(user_messages[-1])
+        after_chars = self._persist_estimate_history_chars(compacted)
+        signature = f'{phase}:{step}:{before_chars}:{after_chars}'
+        state['context_compaction_counts'][phase] = int(state['context_compaction_counts'].get(phase, 0)) + 1
+        if signature not in state['context_compaction_signatures']:
+            state['context_compaction_signatures'].add(signature)
+            state['events'].append({
+                'type': 'intervention',
+                'phase': phase,
+                'step': step,
+                'reason': 'shopping_evidence_compaction_card',
+                'before_chars': before_chars,
+                'after_chars': after_chars,
+                'candidate_count': len(summary['candidate_product_ids']),
+                'cart_item_count': len(summary['latest_cart'].get('items', [])),
+            })
+        return compacted
+
+    def _persist_should_reprompt_cart_completion(self, state: Dict[str, Any], content: str) -> bool:
+        if not state.get('enabled') or not self._persist_proposed_v3_enabled():
+            return False
+        if self._persist_conservative_v4_enabled():
+            return False
+        if int(state.get('cart_completion_reprompts', 0)) >= 1:
+            return False
+        normalized = str(content or '').lower()
+        completed_markers = ('all requirements are met', 'fully meets all requirements', 'task is already complete')
+        if any(marker in normalized for marker in completed_markers):
+            return False
+        repair_markers = (
+            'missing from the cart',
+            'cart is missing',
+            'required item is missing',
+        )
+        return any(marker in normalized for marker in repair_markers)
+
+    def _persist_estimate_history_chars(self, messages: List[Dict[str, Any]]) -> int:
+        try:
+            return len(json.dumps(messages, ensure_ascii=False))
+        except Exception:
+            return sum(len(str(message)) for message in messages)
+
+    def _persist_context_budget_exceeded(self, messages: List[Dict[str, Any]]) -> bool:
+        if not self._persist_proposed_v2_enabled():
+            return False
+        limit = int(os.getenv('SHOPPING_PERSIST_CONTEXT_CHAR_BUDGET', '90000'))
+        return self._persist_estimate_history_chars(messages) >= limit
+
+    def _persist_context_budget_message(self, phase: str) -> str:
+        return (
+            '[PERSIST-ACE] shopping_context_budget_finalization card: visible tool evidence is already large enough '
+            'that another model call is likely to overflow the service context. Do not request more tools. '
+            'Use the current cart and visible product/coupon evidence as the final state; if requirements remain unsupported, '
+            'stop with the least harmful partial cart rather than repeating retrieval.'
+        )
+
+    def _persist_apply_current_turn_fanout_gate(self, state: Dict[str, Any], calls: List[Dict[str, Any]], phase: str, step: int) -> List[Dict[str, Any]]:
+        if not state.get('enabled') or not self._persist_proposed_v2_enabled() or not calls:
+            return calls
+        default_max_calls = '12' if self._persist_proposed_v3_enabled() else '8'
+        max_calls = int(os.getenv('SHOPPING_PERSIST_MAX_TOOL_CALLS_PER_TURN', default_max_calls))
+        if len(calls) <= max_calls:
+            return calls
+        if self._persist_conservative_v4_enabled() and int(state.get('context_compaction_counts', {}).get(phase, 0)) == 0:
+            return calls
+        if self._persist_proposed_v3_enabled():
+            families = {
+                'action': [index for index, call in enumerate(calls) if call.get('name') in self._PERSIST_ACTION_TOOLS],
+                'detail': [index for index, call in enumerate(calls) if call.get('name') in {'get_product_details', 'calculate_transport_time', 'get_cart_info'}],
+                'retrieval': [index for index, call in enumerate(calls) if call.get('name') in self._PERSIST_LOOKUP_TOOLS and call.get('name') not in {'get_product_details', 'calculate_transport_time', 'get_cart_info'}],
+            }
+            assigned = set().union(*[set(indexes) for indexes in families.values()])
+            families['other'] = [index for index in range(len(calls)) if index not in assigned]
+            quotas = {'action': 6, 'detail': 3, 'retrieval': 4, 'other': 2}
+
+            def spread(indexes: List[int], count: int) -> List[int]:
+                if count <= 0 or not indexes:
+                    return []
+                if len(indexes) <= count:
+                    return indexes
+                if count <= 1:
+                    return [indexes[0]]
+                positions = {round(offset * (len(indexes) - 1) / (count - 1)) for offset in range(count)}
+                return [indexes[position] for position in sorted(positions)]
+
+            selected: set[int] = set()
+            for family in ('action', 'detail', 'retrieval', 'other'):
+                selected.update(spread(families[family], min(quotas[family], max_calls - len(selected))))
+                if len(selected) >= max_calls:
+                    break
+            if len(selected) < max_calls:
+                remaining = [index for index in range(len(calls)) if index not in selected]
+                selected.update(spread(remaining, max_calls - len(selected)))
+            kept_indexes = sorted(selected)[:max_calls]
+            kept = [calls[index] for index in kept_indexes]
+            dropped = [call for index, call in enumerate(calls) if index not in selected]
+        else:
+            kept = calls[:max_calls]
+            dropped = calls[max_calls:]
+        state['events'].append({
+            'type': 'fanout_truncated',
+            'phase': phase,
+            'step': step,
+            'kept': len(kept),
+            'dropped': len(dropped),
+            'reason': 'shopping_current_turn_tool_fanout_budget',
+            'kept_tools': [call.get('name') for call in kept],
+            'dropped_tools': [call.get('name') for call in dropped],
+        })
+        return kept
+
+    def _persist_prepare_tool_calls(self, state: Dict[str, Any], calls: List[Dict[str, Any]], phase: str, step: int) -> tuple[List[Dict[str, Any]], Optional[str]]:
+        if not state.get('enabled') or not calls:
+            return calls, None
+        if self._persist_v5_shadow_enabled():
+            for call in calls:
+                name = call.get('name')
+                key = self._persist_call_key(call)
+                no_effect_count = int(state['no_effect_lookup_counts'].get(key, 0))
+                failed_count = int(state['failed_lookup_counts'].get(key, 0))
+                would_trigger = bool(
+                    name in self._PERSIST_LOOKUP_TOOLS
+                    and (no_effect_count >= 2 or failed_count >= 2)
+                )
+                trigger_family = None
+                suggested_family = None
+                if would_trigger:
+                    trigger_family = (
+                        'strict_repeated_failure' if failed_count >= 2 else 'strict_exact_no_effect'
+                    )
+                    if name == 'search_products':
+                        suggested_family = 'detail' if state.get('visible_product_ids') else 'search_change_query'
+                    elif name in {'get_product_details', 'calculate_transport_time'}:
+                        suggested_family = 'search_change_query'
+                    else:
+                        suggested_family = 'detail' if state.get('visible_product_ids') else 'search_change_query'
+                event = {
+                    'type': 'v5_shadow_decision',
+                    'phase': phase,
+                    'step': step,
+                    'tool_call_id': call.get('id'),
+                    'would_trigger': would_trigger,
+                    'trigger_family': trigger_family,
+                    'suggested_tool_family': suggested_family,
+                    'actual_next_action': {
+                        'tool': name,
+                        'arguments': self._persist_normalize_arguments(call.get('arguments', '')),
+                    },
+                    'strict_no_effect_count': no_effect_count,
+                    'strict_failure_count': failed_count,
+                    'decision': 'observe_only_execute_original_call',
+                }
+                state['events'].append(event)
+                state['v5_shadow_pending'][call.get('id')] = event
+            return calls, None
+        if self._persist_v5_online_enabled():
+            return calls, None
+        if self._persist_proposed_v3_enabled():
+            return self._persist_prepare_tool_calls_v3(state, calls, phase, step)
+        for call in calls:
+            name = call.get('name')
+            key = self._persist_call_key(call)
+            if name in self._PERSIST_ACTION_TOOLS and key in state['failed_action_keys']:
+                if self._persist_proposed_v3_enabled() and int(state.get('evidence_version', 0)) > int(state['failed_action_versions'].get(key, 0)):
+                    state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'productive_action_retry_after_evidence_delta'})
+                    continue
+                reason = 'stop_repeated_failed_domain_action'
+                state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': reason})
+                return [], self._persist_intervention_message(reason, name)
+            if name in self._PERSIST_LOOKUP_TOOLS:
+                failed_count = int(state['failed_lookup_counts'].get(key, 0))
+                if failed_count >= 2:
+                    if self._persist_proposed_v3_enabled() and int(state.get('evidence_version', 0)) > int(state['failed_evidence_versions'].get(key, 0)):
+                        state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'productive_lookup_retry_after_evidence_delta', 'failed_count': failed_count})
+                        continue
+                    reason = 'stop_repeated_failed_domain_lookup'
+                    state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': reason, 'failed_count': failed_count})
+                    return [], self._persist_intervention_message(reason, name)
+                if failed_count == 1:
+                    state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'first_failed_lookup_repeat_allowed'})
+        return calls, None
+
+    def _persist_prepare_tool_calls_v3(self, state: Dict[str, Any], calls: List[Dict[str, Any]], phase: str, step: int) -> tuple[List[Dict[str, Any]], Optional[str]]:
+        compaction_count = int(state.get('context_compaction_counts', {}).get(phase, 0))
+        if self._persist_conservative_v4_enabled() and compaction_count == 0:
+            return calls, None
+        if compaction_count >= 4:
+            action_calls = [call for call in calls if call.get('name') in self._PERSIST_ACTION_TOOLS]
+            if action_calls:
+                state['events'].append({
+                    'type': 'intervention',
+                    'phase': phase,
+                    'step': step,
+                    'reason': 'shopping_context_budget_router_action_only',
+                    'compaction_count': compaction_count,
+                    'kept_tools': [call.get('name') for call in action_calls],
+                    'dropped_tools': [call.get('name') for call in calls if call not in action_calls],
+                })
+                calls = action_calls
+            else:
+                reason = 'shopping_context_budget_router_to_cart' if phase == 'search' else 'shopping_context_budget_router_safe_stop'
+                state['events'].append({
+                    'type': 'intervention',
+                    'phase': phase,
+                    'step': step,
+                    'reason': reason,
+                    'compaction_count': compaction_count,
+                    'dropped_tools': [call.get('name') for call in calls],
+                })
+                return [], self._persist_context_router_message(phase)
+        prepared: List[Dict[str, Any]] = []
+        blocked_reasons: List[tuple[str, str]] = []
+        for call in calls:
+            name = call.get('name')
+            key = self._persist_call_key(call)
+            if name in self._PERSIST_ACTION_TOOLS and key in state['failed_action_keys']:
+                if int(state.get('evidence_version', 0)) > int(state['failed_action_versions'].get(key, 0)):
+                    state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'productive_action_retry_after_evidence_delta'})
+                    prepared.append(call)
+                    continue
+                reason = 'stop_repeated_failed_domain_action'
+                state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': reason, 'decision': 'drop_only_failed_action_keep_other_calls'})
+                blocked_reasons.append((reason, name))
+                continue
+            if name in self._PERSIST_LOOKUP_TOOLS:
+                no_effect_count = int(state['no_effect_lookup_counts'].get(key, 0))
+                if no_effect_count >= 1:
+                    if int(state.get('evidence_version', 0)) > int(state['no_effect_evidence_versions'].get(key, 0)):
+                        state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'productive_lookup_retry_after_evidence_delta', 'no_effect_count': no_effect_count})
+                    else:
+                        reason = 'stop_repeated_no_effect_lookup'
+                        state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': reason, 'no_effect_count': no_effect_count, 'decision': 'drop_only_no_effect_lookup_keep_other_calls'})
+                        blocked_reasons.append((reason, name))
+                        continue
+                failed_count = int(state['failed_lookup_counts'].get(key, 0))
+                if failed_count == 1:
+                    state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'first_failed_lookup_repeat_allowed'})
+                if failed_count >= 2:
+                    if int(state.get('evidence_version', 0)) > int(state['failed_evidence_versions'].get(key, 0)):
+                        state['events'].append({'type': 'retry_protected', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'productive_lookup_retry_after_evidence_delta', 'failed_count': failed_count})
+                        prepared.append(call)
+                        continue
+                    repair = self._persist_failed_lookup_repair_call(call)
+                    if repair is not None:
+                        state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': 'shopping_failed_filter_to_details_repair', 'failed_count': failed_count, 'repair_tool': repair.get('name')})
+                        prepared.append(repair)
+                        continue
+                    reason = 'stop_repeated_failed_domain_lookup'
+                    state['events'].append({'type': 'intervention', 'phase': phase, 'step': step, 'tool': name, 'key': key, 'reason': reason, 'failed_count': failed_count, 'decision': 'drop_only_failed_lookup_keep_other_calls'})
+                    blocked_reasons.append((reason, name))
+                    continue
+            prepared.append(call)
+        unique: List[Dict[str, Any]] = []
+        seen: set[str] = set()
+        for call in prepared:
+            key = self._persist_call_key(call)
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(call)
+        if unique:
+            return unique, None
+        if blocked_reasons:
+            reason, tool_name = blocked_reasons[0]
+            return [], self._persist_intervention_message(reason, tool_name)
+        return [], None
+
+    def _persist_context_router_message(self, phase: str) -> str:
+        if phase == 'search':
+            return (
+                '[PERSIST-ACE] shopping_context_budget_router: the compacted evidence has already received three '
+                'recovery decisions without a cart action. Stop further retrieval and proceed to cart completion '
+                'using only supported visible product and coupon IDs.'
+            )
+        return (
+            '[PERSIST-ACE] shopping_context_budget_router: repeated compacted cart checks produced no further cart '
+            'action. Preserve the supported current cart and stop rather than continuing a no-effect loop.'
+        )
+
+    def _persist_failed_lookup_repair_call(self, call: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        if call.get('name') not in {'filter_by_range', 'filter_by_brand', 'filter_by_color', 'filter_by_size', 'sort_products'}:
+            return None
+        try:
+            arguments = json.loads(call.get('arguments') or '{}')
+        except Exception:
+            return None
+        product_ids = arguments.get('product_ids')
+        if not isinstance(product_ids, list) or not product_ids:
+            return None
+        return {
+            'id': call.get('id') or f'persist-repair-{uuid.uuid4().hex}',
+            'name': 'get_product_details',
+            'arguments': json.dumps({'product_ids': product_ids[:20]}, ensure_ascii=False),
+        }
+
+    def _persist_intervention_message(self, reason: str, tool_name: str) -> str:
+        mode = os.getenv('SHOPPING_PERSIST_GUARD', '').strip().lower()
+        if 'ace' in mode:
+            if 'lookup' in reason:
+                return (
+                    f"[PERSIST-ACE] shopping_lookup_repair_or_safe_stop card ({reason}): "
+                    f"the exact `{tool_name}` call has already failed repeatedly. Do not repeat the same arguments. "
+                    "Use only the visible task requirements, previous observations, and cart state. If enough product evidence exists, "
+                    "choose a supported alternative and proceed to cart checking; otherwise change one necessary search/filter parameter once. "
+                    "If the blocker cannot be repaired from visible evidence, stop with a clear caveat."
+                )
+            return (
+                f"[PERSIST-ACE] shopping_cart_action_repair_or_safe_stop card ({reason}): "
+                f"the exact `{tool_name}` action has already failed. Do not repeat the same action. "
+                "Inspect the visible cart/product evidence, repair the missing prerequisite once if possible, choose a safe alternative item/coupon, "
+                "or stop with a clear caveat if no supported repair exists."
+            )
+        if 'cost' in mode:
+            return (
+                f"[PERSIST-CostGuard] conservative no-progress guard ({reason}): "
+                f"the requested `{tool_name}` path is repeatedly consuming calls without useful new evidence. "
+                "Stop spending turns on the same path; use gathered evidence, repair one necessary parameter, switch strategy once, "
+                "or report the blocker with a caveat."
+            )
+        return (
+            f"[PERSIST-Guard] strict repeated-failure guard ({reason}): the requested repeated tool call `{tool_name}` "
+            "has already failed without adding useful information. Do not repeat the same call. "
+            "Use a different search/filter/cart strategy if possible, or provide the final answer based on the current cart state."
+        )
+
+    def _persist_save_audit(self, state: Dict[str, Any]) -> None:
+        audit_file = state.get('audit_file')
+        if not state.get('enabled') or not audit_file:
+            return
+        serializable = {
+            'guard': os.getenv('SHOPPING_PERSIST_GUARD', ''),
+            'sample_id': self.sample_id,
+            'model': self.model,
+            'events': state.get('events', []),
+        }
+        try:
+            with open(audit_file, 'w', encoding='utf-8') as f:
+                json.dump(serializable, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            thread_info = threading.current_thread().name
+            print(f"  ⚠️  [{thread_info}] Failed to save PERSIST audit: {e}")
+
+    def _save_messages(self, messages: List[Any], filepath: Path, step: int, description: str):
+        """Save messages to file"""
+        serializable_messages = [m.model_dump() if hasattr(m, 'model_dump') else m for m in messages]
+        save_data = {"step": step, "description": description, "messages": serializable_messages}
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(save_data, f, ensure_ascii=False, indent=2)
+            thread_info = threading.current_thread().name
+            print(f"  💾 [{thread_info}] Step {step}: {description} - Saved {len(messages)} messages")
+        except Exception as e:
+            thread_info = threading.current_thread().name
+            print(f"  ⚠️  [{thread_info}] Failed to save messages: {e}")
+
+
+def run_agent_inference(
+    model: str,
+    test_data_path: Path,
+    database_dir: Path,
+    tool_schema_path: Path,
+    system_prompt: str,
+    workers: int = 10,
+    max_llm_calls: int = 100,
+    rerun_ids: Optional[List[int]] = None,
+) -> Dict[str, Any]:
+    """
+    Run agent inference (batch processing)
+    
+    Args:
+        model: Configuration name from models_config.json
+        test_data_path: Path to test data JSON file
+        database_dir: Base path to database directory
+        tool_schema_path: Path to tool schema JSON file
+        system_prompt: System prompt for the agent
+        workers: Number of parallel workers
+        max_llm_calls: Maximum LLM calls per sample
+        rerun_ids: Optional list of specific IDs to rerun. If None, run all samples.
+    
+    Returns:
+        Results summary dict
+    """
+    with open(test_data_path, 'r', encoding='utf-8') as f:
+        test_data = json.load(f)
+    
+    # Filter samples if rerun_ids is specified
+    if rerun_ids is not None:
+        rerun_ids_set = set(str(id) for id in rerun_ids)  # Convert to strings for comparison
+        original_count = len(test_data)
+        test_data = [s for s in test_data if str(s.get('id')) in rerun_ids_set]
+        print(f"  🔄 Filtered {original_count} samples to {len(test_data)} samples for rerun")
+        
+        if len(test_data) == 0:
+            print(f"  ⚠️  Warning: No samples found matching the specified IDs")
+            return {
+                'total': 0,
+                'success': 0,
+                'failed': 0,
+                'elapsed_time': 0,
+                'results': []
+            }
+    
+    print(f"\n{'='*80}")
+    print(f"Agent Inference")
+    print(f"{'='*80}")
+    print(f"Model: {model}")
+    print(f"Samples: {len(test_data)}")
+    print(f"Workers: {workers}")
+    print(f"{'='*80}\n")
+    
+    print_lock = Lock()
+    results = []
+    
+    def process_sample(sample):
+        sample_id = sample.get('id', 'unknown')
+        query = sample.get('query', '')
+        
+        try:
+            
+            agent = ShoppingFnAgent(
+                model=model,
+                sample_id=str(sample_id),
+                database_base_path=str(database_dir),
+                tool_schema_path=str(tool_schema_path)
+            )
+            
+            start_time = time.time()
+            
+            messages = agent.run(
+                user_query=query,
+                system_prompt=system_prompt,
+                save_messages=True,
+                sample_id=str(sample_id),
+                max_llm_calls=max_llm_calls
+            )
+            
+            elapsed = time.time() - start_time
+            
+            result = {
+                'id': sample_id,
+                'query': query,
+                'model': model,
+                'messages': messages,
+                'elapsed_time': elapsed,
+                'success': True,
+            }
+            
+            with print_lock:
+                print(f"✅ Sample {sample_id} completed in {elapsed:.2f}s")
+            
+            return result
+            
+        except Exception as e:
+            with print_lock:
+                print(f"❌ Sample {sample_id} failed: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            return {
+                'id': sample_id,
+                'query': query,
+                'success': False,
+                'error': str(e),
+            }
+    
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(process_sample, sample) for sample in test_data]
+        for future in as_completed(futures):
+            result = future.result()
+            results.append(result)
+    
+    success_count = sum(1 for r in results if r['success'])
+    
+    return {
+        'total': len(results),
+        'success': success_count,
+        'failed': len(results) - success_count,
+        'results': results
+    }
+
+
+if __name__ == '__main__':
+    """Simple test"""
+    import argparse
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', default='qwen-plus', help='Configuration name from models_config.json')
+    parser.add_argument('--level', type=int, default=1, choices=[1, 2, 3], help='Shopping level: 1, 2, or 3')
+    args = parser.parse_args()
+    
+    base_dir = Path(__file__).resolve().parent.parent
+    test_output_dir = base_dir / 'results' / 'test'
+    
+    # Get system prompt for the specified level
+    try:
+        from .prompts import prompt_lib
+    except ImportError:
+        from prompts import prompt_lib
+    
+    system_prompt = getattr(prompt_lib, f'SYSTEM_PROMPT_level{args.level}', None)
+    if system_prompt is None:
+        raise ValueError(f"System prompt for level {args.level} not found")
+    
+    result = run_agent_inference(
+        model=args.model,
+        test_data_path=base_dir / 'data' / f'level_{args.level}_query_meta.json',
+        database_dir=base_dir / 'database',
+        tool_schema_path=base_dir / 'tools' / 'shopping_tool_schema.json',
+        system_prompt=system_prompt,
+        workers=2,
+        max_llm_calls=100,
+    )
+    print(f"\nTest completed: {result['success']}/{result['total']} succeeded")

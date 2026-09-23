@@ -1,0 +1,11 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "seed": 53403,
+  "selector_seed": 77113,
+  "oagents_selector_seed": 53403,
+  "max_steps": 200,
+  "max_tokens": 16384,
+  "limit": 382,
+  "workers": 8,
+  "selector_workers": 8
+}

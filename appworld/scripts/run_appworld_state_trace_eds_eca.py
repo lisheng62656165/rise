@@ -4,6 +4,7 @@ import argparse
 import copy
 import json
 import os
+import random
 import sys
 import time
 import traceback
@@ -42,6 +43,7 @@ def read_json(path: Path) -> Any:
 
 
 def settings(seed: int):
+    random.seed(seed)
     return replace(get_settings(), seed=seed)
 
 

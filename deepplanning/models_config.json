@@ -1,0 +1,47 @@
+{
+  "models": {
+    "mimo-v2.5-pro": {
+      "model_name": "mimo-v2.5-pro",
+      "model_type": "openai",
+      "base_url": "https://api.xiaomimimo.com/v1",
+      "api_key_env": "MIMO_API_KEY",
+      "temperature": 0.0,
+      "max_tokens": 12288,
+      "tool_choice": "auto",
+      "max_retries": 8,
+      "backoff": 2.0
+    },
+    "nemotron-3.5-lightning-30b-a3b": {
+      "model_name": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "model_type": "openai",
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "api_key_env": "NVIDIA_API_KEY",
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "max_tokens": 16384,
+      "stream": true,
+      "tool_choice": "auto",
+      "extra_body": {
+        "chat_template_kwargs": {"enable_thinking": true},
+      "reasoning_budget": 16384
+      },
+      "request_timeout": 600,
+      "max_retries": 8,
+      "backoff": 2.0
+    },
+    "deepseek-v4.1-flash": {
+      "model_name": "deepseek-v4.1-flash",
+      "model_type": "openai",
+      "base_url": "https://hgapi.dieqiyun.top/v1",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "temperature": 0.7,
+      "top_p": 0.95,
+      "max_tokens": 16384,
+      "stream": true,
+      "tool_choice": "auto",
+      "request_timeout": 300,
+      "max_retries": 3,
+      "backoff": 2.0
+    }
+  }
+}

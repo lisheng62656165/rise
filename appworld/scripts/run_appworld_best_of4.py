@@ -41,6 +41,7 @@ Use one to three event IDs belonging to the selected candidate."""
 
 
 def settings(seed: int):
+    random.seed(seed)
     return replace(get_settings(), seed=seed)
 
 
