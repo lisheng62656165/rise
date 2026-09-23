@@ -60,7 +60,10 @@ that is the only external service required for a live evaluation. Python 3.12
 itself must already be installed because an application folder cannot include
 the Python interpreter. No benchmark, world-model data, verifier code, or
 Python package download is needed for the supported Windows/Linux Python 3.12
-setups.
+setups. A ChatGPT web subscription alone is not an API credential: use a model
+ID enabled for API access, its API endpoint, and a valid API key. Other
+OpenAI-compatible providers can be used by supplying their model ID and `/v1`
+base URL.
 
 ## Setup
 

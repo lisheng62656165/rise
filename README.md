@@ -18,7 +18,8 @@ from `rise/occubench`. The folder includes the complete 382-task dataset,
 world-model configurations, verifier, methods, scoring utilities, and offline
 Python wheels for Windows/Linux x86_64 with Python 3.12. No separate OccuBench
 checkout or dataset download is required. A Python 3.12 interpreter and access
-to a model endpoint/API key are still required. The OccuBench README documents
+to a model API endpoint/key are still required; a ChatGPT web subscription by
+itself is not API access. The OccuBench README documents
 the full EDS-ECA, OAgents Best-of-4, and Vanilla comparison and reports the
 `Avg, Agri, Biz, Comm, Edu, Hlth, Ind, Pub, Sci, Tech, Trans` metrics.
 
