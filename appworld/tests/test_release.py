@@ -139,3 +139,15 @@ def test_main_experiment_seed_defaults_match_challenge_record(tmp_path, monkeypa
     assert record['faithful_selector_seed'] == 77113
     assert record['oagents_selector_seed'] == 53403
     assert record['config_name'] == 'appworld-test-challenge-deepseek-main'
+
+
+def test_normal_and_challenge_share_main_config():
+    config = json.loads((Path(__file__).resolve().parents[1] / 'configs' / 'appworld_main.json').read_text())
+    assert config['split'] == 'both'
+    assert config['task_counts'] == {'test_normal': 168, 'test_challenge': 417}
+    assert config['scenario_counts'] == {'test_normal': 56, 'test_challenge': 139}
+    assert config['seeds']['vanilla_anchor_and_oagents_A'] == 53403
+    assert config['seeds']['faithful_proposals_BCD'] == [64639, 64640, 64641]
+    assert config['seeds']['faithful_selector_base'] == 77113
+    assert config['seeds']['oagents_selector_base'] == 53403
+    assert config['metric_columns'] == ['Test-N TGC', 'Test-N SGC', 'Test-C TGC', 'Test-C SGC']

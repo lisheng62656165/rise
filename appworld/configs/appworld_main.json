@@ -1,0 +1,36 @@
+{
+  "name": "appworld-test-main-shared-config",
+  "split": "both",
+  "task_counts": {
+    "test_normal": 168,
+    "test_challenge": 417
+  },
+  "scenario_counts": {
+    "test_normal": 56,
+    "test_challenge": 139
+  },
+  "model": "deepseek-v4.1-flash",
+  "base_url": "https://hgapi.dieqiyun.top/v1",
+  "max_steps": 50,
+  "selector_max_completion_tokens": 2048,
+  "seeds": {
+    "vanilla_anchor_and_oagents_A": 53403,
+    "faithful_proposals_BCD": [64639, 64640, 64641],
+    "faithful_selector_base": 77113,
+    "oagents_candidate_seeds_A_to_D": [53403, 64639, 64640, 64641],
+    "oagents_selector_base": 53403,
+    "per_task_derivation": "selector_api_seed = selector_base + official task ordinal"
+  },
+  "methods": [
+    "Vanilla",
+    "OAgents parallel Best-of-4 (shared A)",
+    "Faithful v3"
+  ],
+  "metric_columns": [
+    "Test-N TGC",
+    "Test-N SGC",
+    "Test-C TGC",
+    "Test-C SGC"
+  ],
+  "result_policy": "The supplied Test-C table is the reference result for this shared protocol; Test-N is evaluated by the same configuration and is not inferred from Test-C."
+}

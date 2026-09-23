@@ -67,8 +67,19 @@ API with one real task:
 Then run both official test splits and both methods:
 
 ```bash
-.venv/bin/python run.py --method both --split both --workers 4 --output outputs/full-comparison
+.venv/bin/python run.py \
+  --config configs/appworld_main.json \
+  --method both \
+  --workers 4 \
+  --output outputs/full-comparison
 ```
+
+`configs/appworld_main.json` is the shared basic configuration for both
+`test_normal` and `test_challenge`. The two splits use the same model,
+endpoint, max steps, selector budget, candidate seeds, selector seeds, method
+definitions, and evaluator protocol; only the official task/scenario list
+changes. The command produces both split reports and the four requested
+columns: Test-N TGC, Test-N SGC, Test-C TGC, and Test-C SGC.
 
 ### Test-C main configuration
 
@@ -76,6 +87,10 @@ The reported APPWorld `test_challenge` main experiment is recorded in
 `configs/test_challenge_main.json`. It uses DeepSeek Flash through the
 OpenAI-compatible endpoint, `max_steps=50`, selector budget 2048, and these
 default seeds:
+
+This is the Test-C view of the same shared basic configuration. It is kept as
+a separate file because it also stores the supplied historical Test-C result
+table.
 
 ```text
 shared Vanilla Candidate A / OAgents A: 53403
