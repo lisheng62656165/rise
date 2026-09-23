@@ -19,9 +19,11 @@ export DEEPPLANNING_OPENAI_BASE_URL=https://hgapi.dieqiyun.top/v1
 export DEEPPLANNING_REQUEST_TIMEOUT=300
 export DEEPPLANNING_MAX_RETRIES=3
 export DEEPPLANNING_RETRY_BACKOFF=2
-export HTTP_PROXY=http://127.0.0.1:17897
-export HTTPS_PROXY="$HTTP_PROXY"
-export ALL_PROXY="$HTTP_PROXY"
+if [[ -n "${DEEPPLANNING_HTTP_PROXY:-}" ]]; then
+  export HTTP_PROXY="$DEEPPLANNING_HTTP_PROXY"
+  export HTTPS_PROXY="$DEEPPLANNING_HTTP_PROXY"
+  export ALL_PROXY="$DEEPPLANNING_HTTP_PROXY"
+fi
 export PYTHONUNBUFFERED=1
 
 run_cohort() {
@@ -32,7 +34,7 @@ run_cohort() {
   PYTHONPATH="$ROOT:$ROOT/$domain" "$PY" "$ROOT/run_deepplanning_eds_eca.py" \
     --root "$ROOT" --output "$OUT" --cohort "$cohort" --workers "$workers" \
     --max-llm-calls 400 --proposal-seed 64639 --selector-seed 77113 \
-    --anchor-tag "$ANCHOR_TAG" "${extra[@]}" \
+    --anchor-tag "$ANCHOR_TAG" --anchor-model-slug "$MODEL" "${extra[@]}" \
     >"$OUT/logs/${cohort}.log" 2>&1
 }
 
